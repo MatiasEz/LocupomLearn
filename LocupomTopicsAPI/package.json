@@ -1,0 +1,14 @@
+{
+  "name": "locupom-topics-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local curriculum API for Locupom language-learning topics.",
+  "type": "commonjs",
+  "scripts": {
+    "build:data": "python3 scripts/build_pdf_curriculum.py",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
