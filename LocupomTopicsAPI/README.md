@@ -26,6 +26,23 @@ Default port: `8787`.
 PORT=9090 node LocupomTopicsAPI/server.js
 ```
 
+## Public Deploy
+
+Current public API:
+
+```txt
+https://locupom-topics-api.vercel.app
+```
+
+Deploy to Vercel Hobby:
+
+```bash
+cd LocupomTopicsAPI
+vercel --prod
+```
+
+Vercel local project metadata lives in `.vercel/` and is intentionally ignored.
+
 ## Rebuild Data From PDFs
 
 ```bash
@@ -62,8 +79,52 @@ GET /topics?level=B2&category=grammar
 GET /topics?level=A1&includeAll=true
 GET /topics/passive_voice
 GET /topics/:id/source
+GET /readings?level=B1
+GET /readings?level=B2&topic=technology
 GET /roadmap?level=C1
 GET /search?q=reported
+```
+
+## Levelled Readings
+
+`GET /readings` returns one English reading passage calibrated to a CEFR level.
+It uses the Locupom free CEFR library, so it does not require a paid API key,
+external provider, billing account, or per-call payment.
+The endpoint serves the latest long morning-brief reading when available, then
+falls back to the Locupom free CEFR library. Every returned reading is formatted
+as at least 30 paragraphs.
+
+Response shape:
+
+```json
+{
+  "provider": "locupom-free",
+  "providerConfigured": true,
+  "cost": "free",
+  "reading": {
+    "id": "b1-music-standard",
+    "title": "Music: Learning through real interests",
+    "level": "B1",
+    "cefrLevel": "B1",
+    "topic": "music",
+    "estimatedMinutes": 5,
+    "source": "Locupom free CEFR library",
+    "variant": "2-4",
+    "wordCount": 900,
+    "paragraphCount": 32,
+    "summary": "A B1 reading text about music.",
+    "content": "...",
+    "questions": [
+      {
+        "id": "main-idea",
+        "prompt": "...",
+        "options": ["...", "...", "..."],
+        "answer": "...",
+        "explanation": "..."
+      }
+    ]
+  }
+}
 ```
 
 ## Topic Shape

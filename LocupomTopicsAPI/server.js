@@ -1,4 +1,5 @@
 const http = require("http");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
@@ -6,6 +7,7 @@ const PORT = Number(process.env.PORT || 8787);
 const ROOT_DIR = __dirname;
 const DATA_DIR = path.join(ROOT_DIR, "data");
 const PDF_DIR = path.join(ROOT_DIR, "pdfs");
+const MORNING_BRIEF_CONTENT_PATH = path.join(DATA_DIR, "morning-brief-content.json");
 
 function loadJSON(filePath, fallback) {
   try {
@@ -119,6 +121,378 @@ const sourceBasis = [
   "LanguageTool API for writing correction",
   "Locupom original summaries, examples and practice prompts"
 ];
+
+const morningBriefContent = loadJSON(MORNING_BRIEF_CONTENT_PATH, {
+  generatedAt: null,
+  runId: null,
+  readings: [],
+  speakingPrompts: [],
+  exercises: [],
+  vocabulary: [],
+  metadata: {}
+});
+
+const readingTopicsByLevel = {
+  "Pre-A1": ["family", "colors", "school", "food"],
+  A1: ["daily routines", "music", "friends", "home"],
+  A2: ["travel plans", "weekend activities", "food markets", "healthy habits"],
+  B1: ["community gardens", "city life", "local radio", "neighbourhood festivals"],
+  B2: ["museum access", "cultural habits", "public transport", "environmental choices"],
+  C1: ["urban memory", "creative discipline", "digital communities", "sustainable cities"],
+  C2: ["public communication", "cultural nuance", "ethical technology", "institutional accountability"]
+};
+
+const localReadingTemplates = {
+  "Pre-A1": [
+    {
+      title: "The blue notebook",
+      estimatedMinutes: 2,
+      content: "I have a blue notebook. I write one English word. I draw a picture. My teacher says the word. I say it too. Then I show the page to my friend.",
+      question: {
+        prompt: "What does the learner write?",
+        options: ["One English word", "A long story", "A phone number"],
+        answer: "One English word",
+        explanation: "The text says the learner writes one English word."
+      }
+    },
+    {
+      title: "At the table",
+      estimatedMinutes: 2,
+      content: "There is a book on the table. There is a red pen next to the book. Ana opens the book. She points to a picture and says, 'apple'. Her brother smiles.",
+      question: {
+        prompt: "Where is the book?",
+        options: ["On the table", "Under the bed", "In a bag"],
+        answer: "On the table",
+        explanation: "The first sentence says the book is on the table."
+      }
+    },
+    {
+      title: "My first song",
+      estimatedMinutes: 2,
+      content: "Tom likes one English song. The song is slow. He hears 'hello' and 'day'. He sings the words in the car. His mother sings with him.",
+      question: {
+        prompt: "Why can Tom sing the song?",
+        options: ["It is slow.", "It is very old.", "It is in Spanish."],
+        answer: "It is slow.",
+        explanation: "The song is slow, so Tom can hear and sing some words."
+      }
+    }
+  ],
+  A1: [
+    {
+      title: "A simple study routine",
+      estimatedMinutes: 3,
+      content: "Mia studies English every morning. First, she listens to one short song. Then she writes five new words in her notebook. After that, she reads a small text and answers one question. She likes this routine because it is easy to repeat.",
+      question: {
+        prompt: "What does Mia do first?",
+        options: ["She listens to a song.", "She watches a film.", "She calls a friend."],
+        answer: "She listens to a song.",
+        explanation: "The first step in her routine is listening to one short song."
+      }
+    },
+    {
+      title: "A quiet bus ride",
+      estimatedMinutes: 3,
+      content: "Leo studies on the bus because his ride to school takes twenty minutes. He does not use a big book. He opens a small app, reads three sentences, and repeats them quietly. At night, he checks the same sentences again. The practice is short, but he does it every day.",
+      question: {
+        prompt: "Why does Leo study on the bus?",
+        options: ["His ride takes twenty minutes.", "He is a bus driver.", "His teacher is on the bus."],
+        answer: "His ride takes twenty minutes.",
+        explanation: "The text says his ride to school takes twenty minutes."
+      }
+    },
+    {
+      title: "A message from a friend",
+      estimatedMinutes: 3,
+      content: "Sofia gets a message from her friend Emma. The message is in English, but it is not difficult. Emma says she has a new guitar and wants to play a song on Saturday. Sofia understands the day, the instrument, and the plan. She answers with one short sentence: 'Great, see you Saturday!'",
+      question: {
+        prompt: "What does Emma want to do?",
+        options: ["Play a song on Saturday.", "Buy a phone.", "Study for an exam."],
+        answer: "Play a song on Saturday.",
+        explanation: "Emma says she wants to play a song on Saturday."
+      }
+    }
+  ],
+  A2: [
+    {
+      title: "A weekend plan",
+      estimatedMinutes: 4,
+      content: "Lucas wants to improve his English this weekend, but he does not want to sit at a desk all day. On Saturday morning, he is going to read a short article about music. In the afternoon, he will meet a friend and describe the article in English. On Sunday, he plans to review the difficult words and write a short message about what he learned.",
+      question: {
+        prompt: "What will Lucas do with his friend?",
+        options: ["Describe the article in English.", "Buy concert tickets.", "Study grammar for three hours."],
+        answer: "Describe the article in English.",
+        explanation: "The text says he will meet a friend and describe the article in English."
+      }
+    },
+    {
+      title: "The playlist experiment",
+      estimatedMinutes: 4,
+      content: "Nina usually listens to music while she cooks, but last week she tried something different. She chose three songs in English and wrote down words she could hear clearly. Some words were easy, such as 'home' and 'night'. Others were harder because the singer spoke quickly. After dinner, Nina looked up the difficult words and listened again. The second time, the songs felt less confusing.",
+      question: {
+        prompt: "What changed after Nina looked up the words?",
+        options: ["The songs felt less confusing.", "The singer changed the lyrics.", "She stopped cooking."],
+        answer: "The songs felt less confusing.",
+        explanation: "After looking up the difficult words, she listened again and understood more."
+      }
+    },
+    {
+      title: "A new route to class",
+      estimatedMinutes: 4,
+      content: "Martin started walking to his English class instead of taking the train. The walk is longer, but he uses the time well. He listens to short dialogues and repeats useful phrases. At first, people in the street made him nervous, so he spoke very quietly. Now he feels more comfortable. He still makes mistakes, but he arrives at class already thinking in English.",
+      question: {
+        prompt: "Why does Martin walk to class?",
+        options: ["He uses the time to practise English.", "The train is closed forever.", "His class is in a park."],
+        answer: "He uses the time to practise English.",
+        explanation: "The walk gives him time to listen and repeat phrases."
+      }
+    }
+  ],
+  B1: [
+    {
+      title: "Why real interests change the habit",
+      estimatedMinutes: 6,
+      content: "When Clara started learning English, she used only coursebooks. They gave her structure, but after a few weeks she noticed a problem: she could complete exercises without feeling that the language belonged to her. Later, she began reading short texts about artists, interviews, and the stories behind songs. The vocabulary was sometimes difficult, yet the context helped her guess meaning before checking a dictionary.\n\nThis changed the way she studied. Instead of memorising isolated expressions, she connected them to a situation, a voice, and a reason for speaking. She still used grammar notes, but she used them after reading, not before. That order made the grammar feel less abstract. For Clara, the most useful material was not the easiest material; it was material that gave her a reason to keep paying attention.",
+      question: {
+        prompt: "What helped Clara remember expressions more effectively?",
+        options: ["Connecting them to meaningful situations.", "Avoiding grammar completely.", "Choosing only very easy texts."],
+        answer: "Connecting them to meaningful situations.",
+        explanation: "The text says context, situations and voices helped the expressions become memorable."
+      }
+    },
+    {
+      title: "The problem with perfect notes",
+      estimatedMinutes: 6,
+      content: "Javier kept a beautiful English notebook. Every page had colours, tables, and carefully copied rules. However, when he tried to speak, the notes did not help as much as he expected. He knew the rule for the present perfect, but he could not decide quickly whether a sentence needed it. His teacher suggested a small change: after every new rule, Javier had to find the same pattern in a song, a video, or a short article.\n\nAt first, this felt slower than simply copying examples. After two weeks, though, he began to notice patterns without looking for them. He heard 'I've never seen...' in an interview and understood why the speaker was talking about experience, not a finished moment. The notebook was still useful, but it became a map rather than the whole journey.",
+      question: {
+        prompt: "What was the teacher's main suggestion?",
+        options: ["Find grammar patterns in real input.", "Stop writing notes forever.", "Study only long academic texts."],
+        answer: "Find grammar patterns in real input.",
+        explanation: "The teacher wanted Javier to connect rules with real examples from songs, videos or articles."
+      }
+    },
+    {
+      title: "A text that was almost too hard",
+      estimatedMinutes: 6,
+      content: "Emma chose an article about how musicians prepare for live performances. The first paragraph was easy, but the second included words she did not know: rehearsal, pressure, audience, and confidence. She almost closed the page. Then she tried a different strategy. First, she read the paragraph without stopping. Next, she underlined only the words that changed the main idea. Finally, she wrote a one-sentence summary in simple English.\n\nThe article did not suddenly become easy, but it became manageable. Emma realised that understanding a text does not always mean understanding every word immediately. Sometimes it means building enough meaning to continue. By the end, she had learned new vocabulary, but more importantly, she had learned a method for staying calm when a text becomes challenging.",
+      question: {
+        prompt: "What did Emma learn from the difficult article?",
+        options: ["A method for continuing when a text is challenging.", "That difficult words should always be ignored.", "That summaries are never useful."],
+        answer: "A method for continuing when a text is challenging.",
+        explanation: "The passage focuses on Emma's strategy for managing difficulty."
+      }
+    },
+    {
+      title: "From translation to explanation",
+      estimatedMinutes: 6,
+      content: "For a long time, Tomas believed he understood English only if he could translate every sentence into Spanish. This made reading slow and tiring. One day, while reading about learning with music, he tried a new task: instead of translating the paragraph, he explained it in simpler English. His first explanation was not perfect, but it showed that he had understood the main point.\n\nThe new habit changed his confidence. Translation was still useful for checking details, but it was no longer the only goal. When Tomas explained ideas in English, he practised vocabulary, grammar, and organisation at the same time. He also noticed gaps in his knowledge more clearly. If he could not explain an idea simply, he returned to the text and read it again with a more specific purpose.",
+      question: {
+        prompt: "Why did explaining in English help Tomas?",
+        options: ["It trained several skills at the same time.", "It made every text shorter.", "It removed the need to reread."],
+        answer: "It trained several skills at the same time.",
+        explanation: "The text says explanation practised vocabulary, grammar and organisation together."
+      }
+    }
+  ],
+  B2: [
+    {
+      title: "Choosing useful difficulty",
+      estimatedMinutes: 7,
+      content: "A common mistake in language learning is choosing material that is either too easy or far too difficult. Easy texts can build fluency, but they may not introduce enough new language. Very difficult texts can be motivating at first, yet they often become frustrating because the learner spends more time decoding than understanding.\n\nUseful difficulty sits between those extremes. A good reading text contains enough familiar language to keep meaning clear and enough unfamiliar language to stretch the learner's ability. This balance matters because attention is limited. If every sentence requires heavy effort, the learner has no energy left to notice tone, argument, or structure. If nothing requires effort, the learner finishes quickly but gains little. The best material creates productive tension: the reader can follow the message, but must still make intelligent decisions.",
+      question: {
+        prompt: "What does the passage mean by useful difficulty?",
+        options: ["A balance between clarity and challenge.", "Texts with no unfamiliar language.", "Material that is intentionally confusing."],
+        answer: "A balance between clarity and challenge.",
+        explanation: "The passage argues for texts that are understandable but still stretch the learner."
+      }
+    },
+    {
+      title: "When technology becomes invisible",
+      estimatedMinutes: 7,
+      content: "The most effective learning technology is not always the most impressive one. A tool may have advanced features, colourful dashboards, and instant feedback, but still fail if it interrupts the learner's attention. In contrast, a simpler tool can be powerful when it helps the learner make one clear decision: what to read next, what to review, or what mistake to correct.\n\nThis is especially true for independent learners. They do not need constant novelty; they need continuity. If an app can remember their level, suggest material that is slightly above their comfort zone, and provide a reason to return tomorrow, it becomes part of a routine. The technology is successful precisely when it becomes less visible than the habit it supports.",
+      question: {
+        prompt: "According to the passage, when is learning technology most successful?",
+        options: ["When it supports a clear learning habit.", "When it constantly shows new features.", "When it replaces learner attention."],
+        answer: "When it supports a clear learning habit.",
+        explanation: "The passage values technology that quietly supports continuity and useful decisions."
+      }
+    },
+    {
+      title: "The hidden value of partial understanding",
+      estimatedMinutes: 7,
+      content: "Many learners underestimate partial understanding. They read a paragraph, miss several words, and conclude that they have failed. In reality, partial understanding can be a productive stage, especially at B2. At this level, the learner is beginning to deal with texts that contain implication, contrast, and less predictable vocabulary. The goal is not to remove uncertainty immediately, but to manage it intelligently.\n\nA strong reader asks different questions while reading: Which words are essential? Which examples support the main claim? Which sentence changes the direction of the argument? These questions prevent the learner from treating every unknown word as equally important. Over time, the learner becomes more tolerant of ambiguity, which is a necessary skill for authentic reading.",
+      question: {
+        prompt: "What skill does the passage connect with partial understanding?",
+        options: ["Managing ambiguity intelligently.", "Avoiding authentic texts.", "Memorising every unknown word first."],
+        answer: "Managing ambiguity intelligently.",
+        explanation: "The passage says uncertainty can be useful when the learner manages it with good reading questions."
+      }
+    },
+    {
+      title: "Why routines need variation",
+      estimatedMinutes: 7,
+      content: "A routine helps learners continue when motivation is low, but a routine that never changes can become mechanical. The challenge is to preserve the habit while varying the task. For example, a learner might read about music on Monday, technology on Tuesday, and personal goals on Wednesday. The structure remains stable: read, notice, summarise, review. The content changes enough to keep attention active.\n\nThis kind of variation matters because language is flexible. A phrase learned in one context may not sound natural in another. When learners meet similar grammar across different topics, they begin to understand not only what a structure means, but also where it belongs. Variation turns repetition from memorisation into transfer.",
+      question: {
+        prompt: "Why does the passage recommend variation inside a routine?",
+        options: ["It helps learners transfer language across contexts.", "It removes the need for repetition.", "It makes grammar less important."],
+        answer: "It helps learners transfer language across contexts.",
+        explanation: "The passage says varied contexts help learners understand where language belongs."
+      }
+    }
+  ],
+  C1: [
+    {
+      title: "Attention as a learning strategy",
+      estimatedMinutes: 8,
+      content: "Advanced learners often assume that progress depends on collecting more sophisticated vocabulary. Vocabulary matters, of course, but progress also depends on attention: noticing how a writer builds contrast, how a speaker softens disagreement, or how a phrase changes tone in a particular context. This kind of attention turns ordinary input into evidence.\n\nInstead of simply understanding the message, the learner begins to observe the choices that make the message effective. A short article can reveal how an argument is staged; an interview can show how hesitation protects politeness; a song lyric can demonstrate how repetition creates emotional weight. At C1, improvement is less about adding more language and more about perceiving what the language is doing.",
+      question: {
+        prompt: "What does the passage suggest C1 learners should pay attention to?",
+        options: ["How language choices create effects.", "Only rare vocabulary.", "Only the literal message."],
+        answer: "How language choices create effects.",
+        explanation: "The passage focuses on contrast, tone, politeness, argument and emotional weight."
+      }
+    },
+    {
+      title: "The discipline of nuance",
+      estimatedMinutes: 8,
+      content: "At an advanced level, the difference between two acceptable sentences can be subtle but meaningful. One sentence may sound direct and efficient; another may sound cautious, diplomatic, or distant. Learners who want to sound natural need to move beyond correctness and ask what a sentence does socially. Does it invite agreement? Does it challenge the listener? Does it hide uncertainty behind formal language?\n\nThis attention to nuance can feel slow at first because it requires interpretation rather than simple rule application. However, it also gives learners more control. They begin to choose language according to relationship, purpose, and context. In that sense, advanced reading is not passive. It is a rehearsal space for more precise speaking and writing.",
+      question: {
+        prompt: "What is the main claim of the passage?",
+        options: ["Advanced learners need social and contextual control of language.", "Correct grammar is impossible to learn.", "Formal language is always the safest choice."],
+        answer: "Advanced learners need social and contextual control of language.",
+        explanation: "The passage argues that advanced control depends on purpose, relationship and nuance."
+      }
+    },
+    {
+      title: "Reading beyond agreement",
+      estimatedMinutes: 8,
+      content: "One sign of mature reading is the ability to understand a text without immediately agreeing or disagreeing with it. Less experienced readers often react too quickly: they accept a point because it sounds familiar, or reject it because it feels uncomfortable. Advanced readers delay that reaction. They ask how the argument has been built, what evidence has been selected, and which assumptions remain hidden.\n\nThis does not make reading cold or detached. On the contrary, it creates a more thoughtful form of engagement. The reader can admire a writer's technique while questioning the conclusion, or disagree with a claim while recognising the strength of its structure. Such reading develops intellectual flexibility, a skill that reaches far beyond language learning.",
+      question: {
+        prompt: "What does the passage describe as mature reading?",
+        options: ["Delaying reaction to examine how an argument works.", "Agreeing with familiar ideas quickly.", "Rejecting difficult ideas immediately."],
+        answer: "Delaying reaction to examine how an argument works.",
+        explanation: "The passage says mature readers examine evidence, assumptions and structure before reacting."
+      }
+    }
+  ],
+  C2: [
+    {
+      title: "Precision beyond correctness",
+      estimatedMinutes: 9,
+      content: "At the highest levels of proficiency, correctness is no longer the whole story. A sentence may be grammatically flawless and still sound heavy, evasive, overly casual, or strangely theatrical. Expert users of English make constant micro-decisions about emphasis, rhythm, implication and register. They know when a plain verb is stronger than an ornate phrase, when understatement is more persuasive than intensity, and when a small shift in wording can change the social meaning of an entire exchange.\n\nThis is why C2 reading requires sensitivity to more than information. The reader must notice what is foregrounded, what is softened, and what is left unsaid. The best evidence of proficiency is not the ability to decorate language, but the ability to choose the least noisy form that still carries the intended force.",
+      question: {
+        prompt: "What does the passage argue about high-level English?",
+        options: ["It requires control of nuance, rhythm and register.", "It depends mainly on decorative vocabulary.", "It is only about avoiding grammar mistakes."],
+        answer: "It requires control of nuance, rhythm and register.",
+        explanation: "The passage contrasts mere correctness with precise control of tone and social meaning."
+      }
+    },
+    {
+      title: "The ethics of eloquence",
+      estimatedMinutes: 9,
+      content: "Fluent language can clarify, but it can also conceal. A polished sentence may make a weak argument appear stronger than it is, especially when abstract nouns replace visible actions. For this reason, advanced readers should treat eloquence with both appreciation and suspicion. Style is not an ornament placed on top of meaning; it is one of the ways meaning is produced.\n\nA careful reader asks what the language makes easy to see and what it makes easy to ignore. Who is responsible for the action? Which terms are emotionally loaded? Where does the writer move from evidence to interpretation? These questions do not diminish the pleasure of reading. They deepen it by making the reader aware of the power that fluent language can exercise.",
+      question: {
+        prompt: "Why should advanced readers be cautious with eloquent language?",
+        options: ["It can clarify ideas but also hide weak reasoning.", "It is always dishonest.", "It has no effect on meaning."],
+        answer: "It can clarify ideas but also hide weak reasoning.",
+        explanation: "The passage says polished language can make weak arguments appear stronger."
+      }
+    },
+    {
+      title: "Silence inside a sentence",
+      estimatedMinutes: 9,
+      content: "Sophisticated communication often depends on what is not said. A speaker may avoid naming a problem directly in order to preserve dignity, maintain ambiguity, or invite the listener to infer a conclusion. In writing, the same effect can be created through omission, passive structures, or strategically modest wording. These choices are not accidental gaps; they are part of the message.\n\nFor C2 learners, the challenge is to detect these silences without inventing meanings irresponsibly. The reader must distinguish between an implication supported by the text and a projection brought from outside it. That distinction is delicate, but it is central to advanced comprehension. The unsaid is not empty; it is a space where language, context and judgement meet.",
+      question: {
+        prompt: "What challenge does the passage identify for C2 learners?",
+        options: ["Interpreting implication without projecting unsupported meanings.", "Avoiding all implied meaning.", "Replacing subtle language with direct commands."],
+        answer: "Interpreting implication without projecting unsupported meanings.",
+        explanation: "The passage says readers must distinguish textual implication from outside projection."
+      }
+    }
+  ]
+};
+
+const readingVariationNotes = {
+  "Pre-A1": [
+    (topic) => `Today the word is about ${topic}.`,
+    () => "The learner says the words again at home.",
+    () => "The page is small, but the practice is good."
+  ],
+  A1: [
+    (topic) => `This small habit helps with ${topic}.`,
+    () => "The important part is doing a little every day.",
+    () => "After a week, the learner can remember more words."
+  ],
+  A2: [
+    (topic) => `This plan works because ${topic} becomes part of a real day, not only a classroom task.`,
+    () => "The learner does not understand everything immediately, but the second reading is always clearer.",
+    () => "A short review at the end helps turn new words into useful language."
+  ],
+  B1: [
+    (topic) => `This is why ${topic} can be more than entertainment: it gives the learner a reason to notice language carefully. The topic creates memory hooks, so new expressions are connected to people, actions and emotions instead of floating alone on a list.`,
+    () => "The method is simple, but it requires patience: first understand the general message, then return for the details. Learners who accept that order often read more confidently because they stop expecting perfect understanding from the first attempt.",
+    () => "Progress appears when the learner stops treating mistakes as failure and starts treating them as information. A wrong guess can still show what the learner noticed, what they ignored, and which clue they should use next time.",
+    () => "The key change is not speed. It is the ability to continue reading even when every sentence is not perfectly clear. That ability makes longer texts less intimidating and helps learners build independence."
+  ],
+  B2: [
+    (topic) => `In a topic such as ${topic}, this balance is especially useful because the learner must follow ideas, examples and implications at the same time. The text should therefore create pressure without forcing the reader to abandon the main line of meaning.`,
+    () => "The deeper skill is learning how to decide which difficulty deserves attention and which difficulty can wait. This is not laziness; it is strategic reading, because not every unknown word has the same importance.",
+    () => "This kind of reading trains judgement: the learner must separate the central argument from supporting detail. Once that distinction becomes clearer, new vocabulary is easier to place inside the writer's purpose.",
+    () => "The text becomes a controlled challenge, not because it is easy, but because it offers enough clues to keep interpretation moving. That movement is what prevents difficulty from turning into pure frustration."
+  ],
+  C1: [
+    (topic) => `For a C1 reader, ${topic} is useful when it becomes a field for noticing stance, register and implied evaluation.`,
+    () => "The learner's task is to notice how meaning is shaped, not merely to collect impressive phrases.",
+    () => "At this level, comprehension includes the ability to explain why a writer chose one formulation instead of another.",
+    () => "The reading is successful when it changes the learner's attention, not only the learner's vocabulary list."
+  ],
+  C2: [
+    (topic) => `At C2, ${topic} is not just content; it is a lens through which precision, implication and rhetorical control can be examined.`,
+    () => "The most advanced question is often not 'What does this mean?' but 'What does this wording allow the writer to do?'",
+    () => "Such reading rewards restraint: the learner must interpret boldly enough to notice implication, yet carefully enough not to invent it.",
+    () => "The value of the passage lies in the pressure it places on judgement, nuance and stylistic awareness."
+  ]
+};
+
+const readingBridgeParagraphs = {
+  "Pre-A1": [
+    (topic) => `The teacher asks one more question about ${topic}. The learner listens, points, and answers with a short word.`,
+    () => "Then the learner closes the book. The words are still small, but they are easier to remember after saying them aloud."
+  ],
+  A1: [
+    (topic) => `The topic is ${topic}, so the learner can connect the new words to a normal day. This makes the text easier to remember.`,
+    () => "The learner reads the text again in the evening. Some words are still new, but the general meaning is clear."
+  ],
+  A2: [
+    (topic) => `Because the text is about ${topic}, the learner can imagine a real situation and not only a grammar exercise. That context makes the new vocabulary more useful.`,
+    () => "The second reading is slower and more careful. This time, the learner looks for the reason behind each action, not only the new words."
+  ],
+  B1: [
+    (topic) => `The topic of ${topic} gives the learner more than vocabulary. It creates a context where grammar, meaning and personal interest work together, so the text feels connected instead of random.`,
+    () => "A useful reading habit has two moments: first, follow the message without stopping too much; later, return to the parts that carried the most meaning."
+  ],
+  B2: [
+    (topic) => `In a B2 text about ${topic}, the reader is expected to follow contrast, cause and consequence. The challenge is not only to understand facts, but to see how the writer connects them.`,
+    () => "At this level, a paragraph often contains more than one job: it may give an example, limit a claim, and prepare the next idea at the same time."
+  ],
+  C1: [
+    (topic) => `A C1 reader can use ${topic} as a lens for analysing stance and emphasis. The point is not merely to understand the text, but to notice how the writer guides interpretation.`,
+    () => "The middle of the text is where subtle control often appears: a concession, a shift in register, or a carefully placed example can change the force of the whole argument."
+  ],
+  C2: [
+    (topic) => `At C2, a text about ${topic} should invite close attention to what is explicit, what is implied, and what remains deliberately unresolved.`,
+    () => "The reader's task is interpretive as much as linguistic: every choice of wording may affect responsibility, emphasis, distance or persuasion."
+  ]
+};
+
+const readingMinimumWords = {
+  B1: 160,
+  B2: 190,
+  C1: 190,
+  C2: 190
+};
+
+const recentReadingSelections = new Map();
 
 const plans = [
   {
@@ -1429,6 +1803,373 @@ function normalizeLevel(value) {
   return found ? found.label : null;
 }
 
+function readingCefrLevel(level) {
+  return level === "Pre-A1" ? "A1" : level;
+}
+
+function normalizeTopic(value, level) {
+  const cleanTopic = value?.trim();
+  if (cleanTopic) return cleanTopic.slice(0, 80);
+  const choices = readingTopicsByLevel[level] || readingTopicsByLevel.B1;
+  return choices[0];
+}
+
+function slugifyReading(value) {
+  return slugify(value || "reading").slice(0, 72);
+}
+
+function readingQuestion(id, question) {
+  return {
+    id,
+    prompt: question.prompt,
+    options: question.options,
+    answer: question.answer,
+    explanation: question.explanation
+  };
+}
+
+function randomIndex(length) {
+  if (length <= 1) return 0;
+  return crypto.randomInt(0, length);
+}
+
+function chooseReadingSelection(level, topic) {
+  const templates = localReadingTemplates[level] || localReadingTemplates.B1;
+  const notes = readingVariationNotes[level] || readingVariationNotes.B1;
+  const recentKey = `${level}:${topic.toLowerCase()}`;
+  const previous = recentReadingSelections.get(recentKey);
+  let templateIndex = randomIndex(templates.length);
+  let noteIndex = randomIndex(notes.length);
+
+  if (templates.length * notes.length > 1) {
+    let guard = 0;
+    while (`${templateIndex}:${noteIndex}` === previous && guard < 8) {
+      templateIndex = randomIndex(templates.length);
+      noteIndex = randomIndex(notes.length);
+      guard += 1;
+    }
+  }
+
+  recentReadingSelections.set(recentKey, `${templateIndex}:${noteIndex}`);
+
+  return {
+    template: templates[templateIndex],
+    note: notes[noteIndex](topic),
+    templateIndex,
+    noteIndex
+  };
+}
+
+function splitParagraphs(text) {
+  return text
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
+function chooseBridgeParagraph(level, topic, variantSeed) {
+  const bridges = readingBridgeParagraphs[level] || readingBridgeParagraphs.B1;
+  const bridge = bridges[variantSeed % bridges.length];
+  return bridge(topic);
+}
+
+function buildReadingContent(templateContent, level, topic, note, variantSeed) {
+  const paragraphs = splitParagraphs(templateContent);
+
+  while (paragraphs.length < 2) {
+    paragraphs.push(chooseBridgeParagraph(level, topic, variantSeed + paragraphs.length));
+  }
+
+  paragraphs.push(note);
+
+  const minimumWords = readingMinimumWords[level] || 0;
+  let guard = 0;
+  while (minimumWords > 0 && wordCount(paragraphs.join(" ")) < minimumWords && guard < 3) {
+    paragraphs.splice(
+      Math.max(paragraphs.length - 1, 1),
+      0,
+      chooseBridgeParagraph(level, topic, variantSeed + paragraphs.length + guard)
+    );
+    guard += 1;
+  }
+
+  return paragraphs.join("\n\n");
+}
+
+function wordCount(text) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+const longReadingFallbackDetails = {
+  "Pre-A1": {
+    title: "The Small Note",
+    protagonist: "Mina",
+    helper: "her uncle",
+    setting: "a small train station",
+    time: "early in the day",
+    weather: "the floor was bright with morning sun",
+    object: "a small note on a wooden bench",
+    ordinaryTask: "a short trip across town",
+    conflict: "the note had a name but no address",
+    clue: "a blue stamp on the corner",
+    discovery: "the note belonged to the station flower seller",
+    resolution: "Mina returned the note before the next train arrived",
+    finalImage: "the note sat safely beside a vase of yellow flowers"
+  },
+  A1: {
+    title: "The Closed Street",
+    protagonist: "Alex",
+    helper: "a newspaper seller",
+    setting: "a quiet city corner",
+    time: "before lunch",
+    weather: "light rain made the signs shine",
+    object: "a paper sign on a closed street",
+    ordinaryTask: "finding a small bookshop",
+    conflict: "the normal route was blocked",
+    clue: "an arrow drawn beside the sign",
+    discovery: "a narrow passage led to the back of the bookshop",
+    resolution: "Alex found the shop and helped another visitor find it too",
+    finalImage: "the wet sign moved gently in the rain"
+  },
+  A2: {
+    title: "The Market List",
+    protagonist: "Irene",
+    helper: "a fruit seller",
+    setting: "the old market hall",
+    time: "on a busy Saturday",
+    weather: "warm air carried the smell of bread",
+    object: "a shopping list written in green ink",
+    ordinaryTask: "buying fruit for dinner",
+    conflict: "half the stalls had moved to a temporary street",
+    clue: "the list named a stall that was not on the map",
+    discovery: "the missing stall had moved behind the bakery",
+    resolution: "Irene found everything and brought news of the new layout home",
+    finalImage: "the green list rested beside a bowl of oranges"
+  },
+  B1: {
+    title: "The Notice on the Gate",
+    protagonist: "Paula",
+    helper: "her neighbour Daniel",
+    setting: "a shared courtyard",
+    time: "late in the afternoon",
+    weather: "dry leaves moved against the gate",
+    object: "a notice taped to the iron bars",
+    ordinaryTask: "taking out the recycling",
+    conflict: "the courtyard would be locked unless residents repaired the broken lights",
+    clue: "the notice listed an old phone number nobody recognized",
+    discovery: "the number belonged to the first residents' committee",
+    resolution: "the neighbours found the old repair fund and reopened the courtyard",
+    finalImage: "new lights came on above the gate just after sunset"
+  },
+  B2: {
+    title: "The Timetable Error",
+    protagonist: "Leon",
+    helper: "a bus inspector named Marta",
+    setting: "a crowded transfer stop",
+    time: "during the evening rush",
+    weather: "cold wind pushed paper cups along the pavement",
+    object: "a timetable with one line printed twice",
+    ordinaryTask: "getting across the city before a meeting",
+    conflict: "passengers blamed drivers for delays caused by the printed error",
+    clue: "two routes were shown leaving from the same bay at the same minute",
+    discovery: "the error had redirected people to the wrong side of the avenue",
+    resolution: "the transport office corrected the signs and added a temporary guide",
+    finalImage: "the corrected timetable looked boring, which was exactly what people needed"
+  },
+  C1: {
+    title: "The River Under the Square",
+    protagonist: "Elena",
+    helper: "a surveyor named Bruno",
+    setting: "a municipal records office",
+    time: "on a bright winter morning",
+    weather: "pale sun fell across rolled maps",
+    object: "a drainage map with a missing blue line",
+    ordinaryTask: "checking old plans for a renovation proposal",
+    conflict: "official records ignored a buried stream that still shaped the neighbourhood",
+    clue: "several streets curved around a space that no current map explained",
+    discovery: "the buried stream matched years of unexplained flooding",
+    resolution: "the proposal was rewritten to include the hidden watercourse",
+    finalImage: "the blue line returned to the plan like a recovered memory"
+  },
+  C2: {
+    title: "The Sentence Without an Actor",
+    protagonist: "Nora",
+    helper: "a legal editor named Farid",
+    setting: "a committee room with high windows",
+    time: "near the end of a long hearing",
+    weather: "humid air made the papers curl at the edges",
+    object: "a public statement full of passive verbs",
+    ordinaryTask: "reviewing the final paragraph before release",
+    conflict: "the statement sounded balanced while concealing who had made each decision",
+    clue: "every controversial action had been turned into an abstract noun",
+    discovery: "the document's grammar was protecting the institution from its own facts",
+    resolution: "the paragraph was rewritten with clearer agents and fewer evasions",
+    finalImage: "the final sentence was shorter, less elegant, and much harder to misunderstand"
+  }
+};
+
+function buildLongFallbackParagraphs(spec) {
+  return [
+    `${spec.time}, ${spec.protagonist} arrived at ${spec.setting}, where ${spec.weather}.`,
+    `${spec.protagonist} had come because of ${spec.topic}, but the day immediately became more specific than that broad subject.`,
+    `The first thing that drew attention was ${spec.object}. It seemed minor, yet it interrupted the normal order of the place.`,
+    `${spec.protagonist} paused before touching it. Some objects are ordinary only until someone asks why they are there.`,
+    `${spec.helper} noticed the hesitation and came closer, not with an answer, but with a better question.`,
+    `The practical problem was clear: ${spec.conflict}. The less visible problem was deciding which details deserved trust.`,
+    `At first, the setting offered too many explanations. Each one sounded possible until it was compared with the actual evidence.`,
+    `Then ${spec.protagonist} saw ${spec.clue}. The clue was small, but it made several careless explanations fall apart.`,
+    `${spec.helper} suggested checking the surrounding details before deciding anything. That advice slowed the moment down in a useful way.`,
+    `They began with the most obvious places and found nothing. The absence mattered because it narrowed the search.`,
+    `A passer-by offered a quick story about what had happened. It was confident, tidy, and probably wrong.`,
+    `${spec.protagonist} returned to the object and looked at it as part of the place, not as a separate puzzle.`,
+    `The topic of ${spec.topic} no longer felt abstract. It had become visible through a bench, a sign, a map, a room, or a sentence.`,
+    `A second clue appeared only after the first one had changed the question. This is often how small investigations move forward.`,
+    `${spec.helper} compared the new clue with the old one. The connection was not dramatic, but it was stable.`,
+    `The room seemed to become quieter around the evidence. Even ordinary noises felt like interruptions.`,
+    `${spec.protagonist} made one careful guess, then tested it against what the place itself allowed.`,
+    `That guess led to the discovery: ${spec.discovery}. It explained more than the object; it explained why the object had been easy to overlook.`,
+    `For a moment, nobody said much. The discovery needed a little silence around it before it could become useful.`,
+    `The next task was not to make the story prettier. The next task was to make it accurate.`,
+    `${spec.helper} checked the detail again, because a useful answer can still be damaged by careless certainty.`,
+    `Other people began to understand what had changed. The facts had not become louder, but they had become better arranged.`,
+    `${spec.protagonist} noticed that the solution required practical work as well as interpretation.`,
+    `The resolution followed from that work: ${spec.resolution}. It was modest, but it changed what people could do next.`,
+    `Afterward, the setting looked almost unchanged. The difference was in what people now knew how to notice.`,
+    `The original object no longer seemed random. It had become a record of a pressure, a habit, or a forgotten decision.`,
+    `That was the strongest part of the day: nothing magical had happened, yet the ordinary world had become less flat.`,
+    `${spec.protagonist} left with a clearer sense of how small evidence can alter a larger story.`,
+    `${spec.helper} returned to routine work, but even routine work now carried a trace of the discovery.`,
+    `The topic remained open, as real topics usually do. One resolved detail had revealed several better questions.`,
+    `By the end, ${spec.finalImage}.`,
+    `The day had started with ${spec.ordinaryTask}; it ended with a place that could no longer be read in quite the same way.`
+  ];
+}
+
+function buildLongFallbackQuestions(spec) {
+  return [
+    readingQuestion("main-idea", {
+      prompt: "What is the central problem in the text?",
+      options: [
+        spec.conflict,
+        spec.ordinaryTask,
+        spec.finalImage
+      ],
+      answer: spec.conflict,
+      explanation: `The text presents the central problem as: ${spec.conflict}.`
+    }),
+    readingQuestion("detail", {
+      prompt: "Which clue changes the investigation?",
+      options: [
+        spec.clue,
+        spec.weather,
+        spec.ordinaryTask
+      ],
+      answer: spec.clue,
+      explanation: `The important clue is ${spec.clue}.`
+    }),
+    readingQuestion("outcome", {
+      prompt: "What is the practical outcome?",
+      options: [
+        spec.resolution,
+        spec.object,
+        spec.setting
+      ],
+      answer: spec.resolution,
+      explanation: `The final practical result is that ${spec.resolution}.`
+    })
+  ];
+}
+
+function buildLocalReading({ level, topic, length }) {
+  const normalizedLevel = normalizeLevel(level) || "B1";
+  const normalizedTopic = normalizeTopic(topic, normalizedLevel);
+  const fallback = longReadingFallbackDetails[normalizedLevel] || longReadingFallbackDetails.B1;
+  const spec = { ...fallback, topic: normalizedTopic };
+  const paragraphs = buildLongFallbackParagraphs(spec);
+  const content = paragraphs.join("\n\n");
+  const paragraphCount = splitParagraphs(content).length;
+  const displayTopic = normalizedTopic.charAt(0).toUpperCase() + normalizedTopic.slice(1);
+  const title = `${displayTopic}: ${fallback.title}`;
+  const variantId = `long-${paragraphCount}`;
+
+  return {
+    id: `${normalizedLevel.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${slugifyReading(normalizedTopic)}-${length || "standard"}-${variantId}-${crypto.randomUUID().slice(0, 8)}`,
+    title,
+    level: normalizedLevel,
+    cefrLevel: readingCefrLevel(normalizedLevel),
+    topic: normalizedTopic,
+    estimatedMinutes: Math.max(12, Math.ceil(wordCount(content) / 130)),
+    source: "Locupom free long reading library",
+    provider: "locupom-free",
+    variant: variantId,
+    wordCount: wordCount(content),
+    paragraphCount,
+    summary: `A long original reading about ${normalizedTopic}, with ${paragraphCount} paragraphs.`,
+    content,
+    questions: buildLongFallbackQuestions(spec)
+  };
+}
+
+function normalizeMorningBriefReading(item) {
+  const content = Array.isArray(item.paragraphs) ? item.paragraphs.join("\n\n") : item.content || "";
+  return {
+    id: item.id,
+    title: item.title,
+    level: item.level,
+    cefrLevel: readingCefrLevel(item.level),
+    topic: item.topic,
+    estimatedMinutes: item.estimatedMinutes,
+    source: item.source || "Locupom weekday morning brief",
+    provider: "locupom-morning-brief",
+    variant: morningBriefContent.runId || "morning-brief",
+    wordCount: wordCount(content),
+    paragraphCount: splitParagraphs(content).length,
+    summary: item.summary,
+    content,
+    questions: item.questions || []
+  };
+}
+
+function morningBriefItems(kind, searchParams) {
+  const level = normalizeLevel(searchParams.get("level"));
+  const collection = morningBriefContent[kind] || [];
+  return collection.filter((item) => !level || item.level === level);
+}
+
+function morningBriefReading(searchParams) {
+  const level = normalizeLevel(searchParams.get("level")) || "B1";
+  const topic = searchParams.get("topic")?.trim().toLowerCase();
+  const candidates = (morningBriefContent.readings || [])
+    .filter((item) => item.level === level)
+    .filter((item) => !topic || item.topic?.toLowerCase().includes(topic));
+
+  if (candidates.length === 0) return null;
+  return normalizeMorningBriefReading(candidates[0]);
+}
+
+async function getLevelledReading(searchParams) {
+  const briefReading = morningBriefReading(searchParams);
+  if (briefReading && searchParams.get("fallback") !== "library") {
+    return {
+      provider: "locupom-morning-brief",
+      providerConfigured: true,
+      cost: "free",
+      reading: briefReading
+    };
+  }
+
+  const level = normalizeLevel(searchParams.get("level")) || "B1";
+  const topic = normalizeTopic(searchParams.get("topic"), level);
+  const length = searchParams.get("length") || "standard";
+
+  return {
+    provider: "locupom-free",
+    providerConfigured: true,
+    cost: "free",
+    reading: buildLocalReading({ level, topic, length })
+  };
+}
+
 function send(res, status, payload) {
   const body = JSON.stringify(payload, null, 2);
   res.writeHead(status, {
@@ -1462,6 +2203,20 @@ function sendFile(res, status, filePath, contentType) {
 
 function notFound(res, message = "Not found") {
   send(res, 404, { error: message });
+}
+
+function handler(req, res) {
+  return Promise.resolve(route(req, res)).catch((error) => {
+    if (!res.headersSent) {
+      res.writeHead(500, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-store"
+      });
+    }
+
+    res.end(JSON.stringify({ error: error.message || "Unexpected server error" }));
+  });
 }
 
 function listTopics(searchParams) {
@@ -1499,7 +2254,7 @@ function groupRoadmap(levelLabel) {
   return Object.values(grouped);
 }
 
-function route(req, res) {
+async function route(req, res) {
   if (req.method === "OPTIONS") return send(res, 204, {});
   if (req.method !== "GET") return send(res, 405, { error: "Only GET is supported" });
 
@@ -1527,10 +2282,11 @@ function route(req, res) {
   <main class="card">
     <h1>Locupom Topics API</h1>
     <p>Status: <strong>running</strong>. Serving <strong>${topics.length}</strong> learning topics from <strong>${sourceDocuments.length}</strong> PDF guides.</p>
-    <p>Useful endpoints: <code>/health</code>, <code>/sources</code>, <code>/topics?level=A1</code>, <code>/roadmap?level=B1</code>.</p>
+    <p>Useful endpoints: <code>/health</code>, <code>/sources</code>, <code>/topics?level=A1</code>, <code>/readings?level=B1</code>, <code>/roadmap?level=B1</code>.</p>
     <a href="/health">Health</a>
     <a href="/sources">PDF Sources</a>
     <a href="/topics?level=A1">A1 Topics</a>
+    <a href="/readings?level=B1">B1 Reading</a>
     <a href="/roadmap?level=B1">B1 Roadmap</a>
   </main>
 </body>
@@ -1554,6 +2310,11 @@ function route(req, res) {
         "/topics",
         "/topics/:id",
         "/topics/:id/source",
+        "/readings?level=B1&topic=music",
+        "/morning-brief",
+        "/speaking?level=B1",
+        "/exercises?level=B1",
+        "/vocabulary",
         "/roadmap?level=B1",
         "/search?q=passive"
       ]
@@ -1595,6 +2356,54 @@ function route(req, res) {
     return send(res, 200, { count: result.length, topics: result });
   }
 
+  if (pathname === "/readings") {
+    return send(res, 200, await getLevelledReading(url.searchParams));
+  }
+
+  if (pathname === "/morning-brief") {
+    return send(res, 200, {
+      generatedAt: morningBriefContent.generatedAt,
+      runId: morningBriefContent.runId,
+      metadata: morningBriefContent.metadata || {},
+      counts: {
+        readings: (morningBriefContent.readings || []).length,
+        speakingPrompts: (morningBriefContent.speakingPrompts || []).length,
+        exercises: (morningBriefContent.exercises || []).length,
+        vocabulary: (morningBriefContent.vocabulary || []).length
+      },
+      readings: (morningBriefContent.readings || []).map(normalizeMorningBriefReading),
+      speakingPrompts: morningBriefContent.speakingPrompts || [],
+      exercises: morningBriefContent.exercises || [],
+      vocabulary: morningBriefContent.vocabulary || []
+    });
+  }
+
+  if (pathname === "/speaking") {
+    const items = morningBriefItems("speakingPrompts", url.searchParams);
+    return send(res, 200, {
+      generatedAt: morningBriefContent.generatedAt,
+      count: items.length,
+      speakingPrompts: items
+    });
+  }
+
+  if (pathname === "/exercises") {
+    const items = morningBriefItems("exercises", url.searchParams);
+    return send(res, 200, {
+      generatedAt: morningBriefContent.generatedAt,
+      count: items.length,
+      exercises: items
+    });
+  }
+
+  if (pathname === "/vocabulary") {
+    return send(res, 200, {
+      generatedAt: morningBriefContent.generatedAt,
+      count: (morningBriefContent.vocabulary || []).length,
+      vocabulary: morningBriefContent.vocabulary || []
+    });
+  }
+
   if (pathname.startsWith("/topics/")) {
     const parts = pathname.split("/").filter(Boolean);
     const id = decodeURIComponent(parts[1] || "");
@@ -1623,9 +2432,16 @@ function route(req, res) {
 }
 
 if (require.main === module) {
-  http.createServer(route).listen(PORT, () => {
+  http.createServer(handler).listen(PORT, () => {
     console.log(`Locupom Topics API running at http://localhost:${PORT}`);
   });
 }
 
-module.exports = { topics, sourceDocuments, generatedCurriculum, levelMeta, categoryMeta, route };
+handler.topics = topics;
+handler.sourceDocuments = sourceDocuments;
+handler.generatedCurriculum = generatedCurriculum;
+handler.levelMeta = levelMeta;
+handler.categoryMeta = categoryMeta;
+handler.route = route;
+
+module.exports = handler;

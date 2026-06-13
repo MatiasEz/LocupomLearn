@@ -1,0 +1,2443 @@
+{
+  "generatedAt": "2026-06-13T13:31:40.640Z",
+  "runId": "weekday-2026-06-12-1906-ar",
+  "metadata": {
+    "levelsCovered": [
+      "Pre-A1",
+      "A1",
+      "A2",
+      "B1",
+      "B2",
+      "C1",
+      "C2"
+    ],
+    "focus": "Long natural readings, speaking prompts, levelled exercises, and tricky vocabulary for the weekday automation.",
+    "dedupeNote": "Replaced all stored reading texts with original long readings of at least 30 paragraphs.",
+    "latestRunAdds": {
+      "readings": 21,
+      "speakingPrompts": 7,
+      "exercises": 7,
+      "vocabulary": 10
+    },
+    "retainedPreviousItems": true,
+    "latestRunId": "weekday-2026-06-12-1906-ar",
+    "readingRequirement": "All stored readings contain at least 30 paragraphs."
+  },
+  "readings": [
+    {
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-yellow-key",
+      "title": "The Yellow Key in the Art Room",
+      "level": "Pre-A1",
+      "topic": "school objects, colours, and a small mystery",
+      "estimatedMinutes": 12,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about school objects, colours, and a small mystery, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "early in the morning, Lina arrived at the old art room, where soft light came through the high windows.",
+        "Lina had come for a box of clean brushes, a small task that should have taken only a few minutes.",
+        "Near the entrance, Lina noticed a yellow key with a paper tag. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Lina picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Mr. Vale appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a yellow key with a paper tag. Mr. Vale did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: nobody knew which small door the key opened. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Lina noticed a tiny paint mark on the tag. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Lina and Mr. Vale checked every cupboard slowly. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Lina returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Mr. Vale said very little, but the silence was useful. It gave Lina space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Lina followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: a narrow drawer behind the paper shelf. It did not feel loud; it felt exact.",
+        "Lina understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Mr. Vale checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Lina chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the drawer held old postcards for the school exhibition. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Lina felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Mr. Vale returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Lina left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the yellow key rested beside a row of bright postcards."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Lina notice first?",
+          "options": [
+            "a yellow key with a paper tag",
+            "a box of clean brushes",
+            "the yellow key rested beside a row of bright postcards"
+          ],
+          "answer": "a yellow key with a paper tag",
+          "explanation": "The text says Lina notices a yellow key with a paper tag."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "nobody knew which small door the key opened",
+            "the drawer held old postcards for the school exhibition",
+            "soft light came through the high windows"
+          ],
+          "answer": "nobody knew which small door the key opened",
+          "explanation": "The central problem is that nobody knew which small door the key opened."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the drawer held old postcards for the school exhibition",
+            "a tiny paint mark on the tag",
+            "a box of clean brushes"
+          ],
+          "answer": "the drawer held old postcards for the school exhibition",
+          "explanation": "By the end, the drawer held old postcards for the school exhibition."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-morning-map",
+      "title": "Tom and the Morning Map",
+      "level": "A1",
+      "topic": "city places, directions, and a quiet morning errand",
+      "estimatedMinutes": 14,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about city places, directions, and a quiet morning errand, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "just after breakfast, Tom arrived at the square near the library, where the streets were clean after night rain.",
+        "Tom had come for a bag of books for the library, a small task that should have taken only a few minutes.",
+        "Near the entrance, Tom noticed a folded paper map. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Tom picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Mrs. Bell appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a folded paper map. Mrs. Bell did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the street to the library was closed. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Tom noticed a small blue line around the bakery. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Tom and Mrs. Bell followed the map past the fountain. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Tom returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Mrs. Bell said very little, but the silence was useful. It gave Tom space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Tom followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: a side door beside the children's room. It did not feel loud; it felt exact.",
+        "Tom understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Mrs. Bell checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Tom chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: he delivered the books before the library opened. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Tom felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Mrs. Bell returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Tom left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the wet map dried on the library desk."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Tom notice first?",
+          "options": [
+            "a folded paper map",
+            "a bag of books for the library",
+            "the wet map dried on the library desk"
+          ],
+          "answer": "a folded paper map",
+          "explanation": "The text says Tom notices a folded paper map."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the street to the library was closed",
+            "he delivered the books before the library opened",
+            "the streets were clean after night rain"
+          ],
+          "answer": "the street to the library was closed",
+          "explanation": "The central problem is that the street to the library was closed."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "he delivered the books before the library opened",
+            "a small blue line around the bakery",
+            "a bag of books for the library"
+          ],
+          "answer": "he delivered the books before the library opened",
+          "explanation": "By the end, he delivered the books before the library opened."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a2-rain-under-market-roof",
+      "title": "Rain Under the Market Roof",
+      "level": "A2",
+      "topic": "market life, weather, and cooperation",
+      "estimatedMinutes": 16,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about market life, weather, and cooperation, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on a grey Saturday, Mara arrived at the covered market by the river, where rain moved across the roof like small drums.",
+        "Mara had come for fresh tomatoes for dinner, a small task that should have taken only a few minutes.",
+        "Near the entrance, Mara noticed a notebook with vegetable prices. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Mara picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Omar appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a notebook with vegetable prices. Omar did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: water began to fall through a broken roof panel. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Mara noticed drops landed beside the oldest stall. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Mara and Omar moved boxes away from the water. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Mara returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Omar said very little, but the silence was useful. It gave Mara space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Mara followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: a blocked drain above the orange crates. It did not feel loud; it felt exact.",
+        "Mara understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Omar checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Mara chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the stall owners cleared the drain together. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Mara felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Omar returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Mara left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, steam rose from the food stalls while rain ran safely into the gutter."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Mara notice first?",
+          "options": [
+            "a notebook with vegetable prices",
+            "fresh tomatoes for dinner",
+            "steam rose from the food stalls while rain ran safely into the gutter"
+          ],
+          "answer": "a notebook with vegetable prices",
+          "explanation": "The text says Mara notices a notebook with vegetable prices."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "water began to fall through a broken roof panel",
+            "the stall owners cleared the drain together",
+            "rain moved across the roof like small drums"
+          ],
+          "answer": "water began to fall through a broken roof panel",
+          "explanation": "The central problem is that water began to fall through a broken roof panel."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the stall owners cleared the drain together",
+            "drops landed beside the oldest stall",
+            "fresh tomatoes for dinner"
+          ],
+          "answer": "the stall owners cleared the drain together",
+          "explanation": "By the end, the stall owners cleared the drain together."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-community-garden-message",
+      "title": "The Message in the Community Garden",
+      "level": "B1",
+      "topic": "neighbours, public space, and a hidden message",
+      "estimatedMinutes": 18,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about neighbours, public space, and a hidden message, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "late on a warm afternoon, Nadia arrived at a community garden between two apartment blocks, where dust hung in the air after several dry days.",
+        "Nadia had come for watering the herb beds, a small task that should have taken only a few minutes.",
+        "Near the entrance, Nadia noticed a message written under a loose wooden bench. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Nadia picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Elias appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a message written under a loose wooden bench. Elias did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the garden might be closed because nobody had paid attention to the repair notices. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Nadia noticed the message named a date from five years earlier. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Nadia and Elias asked the neighbours what they remembered. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Nadia returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Elias said very little, but the silence was useful. It gave Nadia space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Nadia followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the first gardeners had hidden a maintenance plan under the bench. It did not feel loud; it felt exact.",
+        "Nadia understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Elias checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Nadia chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the neighbours used the plan to save the garden. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Nadia felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Elias returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Nadia left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, new seedlings stood beside the old bench like a public promise."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Nadia notice first?",
+          "options": [
+            "a message written under a loose wooden bench",
+            "watering the herb beds",
+            "new seedlings stood beside the old bench like a public promise"
+          ],
+          "answer": "a message written under a loose wooden bench",
+          "explanation": "The text says Nadia notices a message written under a loose wooden bench."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the garden might be closed because nobody had paid attention to the repair notices",
+            "the neighbours used the plan to save the garden",
+            "dust hung in the air after several dry days"
+          ],
+          "answer": "the garden might be closed because nobody had paid attention to the repair notices",
+          "explanation": "The central problem is that the garden might be closed because nobody had paid attention to the repair notices."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the neighbours used the plan to save the garden",
+            "the message named a date from five years earlier",
+            "watering the herb beds"
+          ],
+          "answer": "the neighbours used the plan to save the garden",
+          "explanation": "By the end, the neighbours used the plan to save the garden."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-museum-audio-guide",
+      "title": "The Museum Audio Guide",
+      "level": "B2",
+      "topic": "museums, memory, and accessibility",
+      "estimatedMinutes": 20,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about museums, memory, and accessibility, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "during the first hour of opening, Iris arrived at a small city museum, where winter light made the glass cases look pale.",
+        "Iris had come for checking the new exhibition labels, a small task that should have taken only a few minutes.",
+        "Near the entrance, Iris noticed an audio guide with one extra recording. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Iris picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Mateo appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at an audio guide with one extra recording. Mateo did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: one important artist had been reduced to a footnote. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Iris noticed the extra recording mentioned a conservator's diary. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Iris and Mateo compared the recording with the printed catalogue. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Iris returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Mateo said very little, but the silence was useful. It gave Iris space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Iris followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the conservator had preserved half the collection during a flood. It did not feel loud; it felt exact.",
+        "Iris understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Mateo checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Iris chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the museum rewrote the room guide to include her work. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Iris felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Mateo returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Iris left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, visitors stopped longer at the case with the corrected label."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Iris notice first?",
+          "options": [
+            "an audio guide with one extra recording",
+            "checking the new exhibition labels",
+            "visitors stopped longer at the case with the corrected label"
+          ],
+          "answer": "an audio guide with one extra recording",
+          "explanation": "The text says Iris notices an audio guide with one extra recording."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "one important artist had been reduced to a footnote",
+            "the museum rewrote the room guide to include her work",
+            "winter light made the glass cases look pale"
+          ],
+          "answer": "one important artist had been reduced to a footnote",
+          "explanation": "The central problem is that one important artist had been reduced to a footnote."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the museum rewrote the room guide to include her work",
+            "the extra recording mentioned a conservator's diary",
+            "checking the new exhibition labels"
+          ],
+          "answer": "the museum rewrote the room guide to include her work",
+          "explanation": "By the end, the museum rewrote the room guide to include her work."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c1-silent-translation-club",
+      "title": "The Letter Without a Signature",
+      "level": "C1",
+      "topic": "translation, ambiguity, and private history",
+      "estimatedMinutes": 22,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about translation, ambiguity, and private history, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on the last Thursday of the month, Amira arrived at a quiet reading room above the municipal archive, where rain blurred the lamps reflected in the windows.",
+        "Amira had come for cataloguing donated papers, a small task that should have taken only a few minutes.",
+        "Near the entrance, Amira noticed an unsigned letter folded into a theatre programme. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Amira picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Jonas appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at an unsigned letter folded into a theatre programme. Jonas did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the letter could be read as a confession or as a warning. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Amira noticed one verb had been crossed out and replaced by a softer one. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Amira and Jonas compared the handwriting with three other documents. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Amira returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Jonas said very little, but the silence was useful. It gave Amira space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Amira followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the writer had protected someone by leaving the sentence unfinished. It did not feel loud; it felt exact.",
+        "Amira understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Jonas checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Amira chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the archive note preserved the ambiguity instead of forcing a single answer. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Amira felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Jonas returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Amira left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the unsigned letter lay open beneath a lamp, still withholding its final certainty."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Amira notice first?",
+          "options": [
+            "an unsigned letter folded into a theatre programme",
+            "cataloguing donated papers",
+            "the unsigned letter lay open beneath a lamp, still withholding its final certainty"
+          ],
+          "answer": "an unsigned letter folded into a theatre programme",
+          "explanation": "The text says Amira notices an unsigned letter folded into a theatre programme."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the letter could be read as a confession or as a warning",
+            "the archive note preserved the ambiguity instead of forcing a single answer",
+            "rain blurred the lamps reflected in the windows"
+          ],
+          "answer": "the letter could be read as a confession or as a warning",
+          "explanation": "The central problem is that the letter could be read as a confession or as a warning."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the archive note preserved the ambiguity instead of forcing a single answer",
+            "one verb had been crossed out and replaced by a softer one",
+            "cataloguing donated papers"
+          ],
+          "answer": "the archive note preserved the ambiguity instead of forcing a single answer",
+          "explanation": "By the end, the archive note preserved the ambiguity instead of forcing a single answer."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-public-apology-draft",
+      "title": "The Public Apology Draft",
+      "level": "C2",
+      "topic": "public language, responsibility, and civic repair",
+      "estimatedMinutes": 24,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about public language, responsibility, and civic repair, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "two days after the flood report, Sofia arrived at a municipal conference room, where humid air pressed against the sealed windows.",
+        "Sofia had come for editing a statement before publication, a small task that should have taken only a few minutes.",
+        "Near the entrance, Sofia noticed a draft apology with no named subject. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Sofia picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Elias appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a draft apology with no named subject. Elias did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the first draft sounded polished while avoiding responsibility. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Sofia noticed every sentence used abstract nouns instead of visible actions. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Sofia and Elias marked the places where the wording hid agency. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Sofia returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Elias said very little, but the silence was useful. It gave Sofia space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Sofia followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: several departments had failed in different but connected ways. It did not feel loud; it felt exact.",
+        "Sofia understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Elias checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Sofia chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the final statement named the failures without pretending the repair was complete. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Sofia felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Elias returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Sofia left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the published apology looked plainer, heavier, and more honest."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Sofia notice first?",
+          "options": [
+            "a draft apology with no named subject",
+            "editing a statement before publication",
+            "the published apology looked plainer, heavier, and more honest"
+          ],
+          "answer": "a draft apology with no named subject",
+          "explanation": "The text says Sofia notices a draft apology with no named subject."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the first draft sounded polished while avoiding responsibility",
+            "the final statement named the failures without pretending the repair was complete",
+            "humid air pressed against the sealed windows"
+          ],
+          "answer": "the first draft sounded polished while avoiding responsibility",
+          "explanation": "The central problem is that the first draft sounded polished while avoiding responsibility."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the final statement named the failures without pretending the repair was complete",
+            "every sentence used abstract nouns instead of visible actions",
+            "editing a statement before publication"
+          ],
+          "answer": "the final statement named the failures without pretending the repair was complete",
+          "explanation": "By the end, the final statement named the failures without pretending the repair was complete."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-pre-a1-red-cup",
+      "title": "The Red Cup on the Bus",
+      "level": "Pre-A1",
+      "topic": "transport, colours, and lost objects",
+      "estimatedMinutes": 12,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about transport, colours, and lost objects, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "at noon, Nico arrived at the last seat of a quiet bus, where sunlight moved on the bus floor.",
+        "Nico had come for a short ride to the park, a small task that should have taken only a few minutes.",
+        "Near the entrance, Nico noticed a red cup with a white lid. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Nico picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "the bus driver appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a red cup with a white lid. the bus driver did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the cup was not Nico's cup. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Nico noticed a small name was written near the lid. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Nico and the bus driver gave the cup to the bus driver. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Nico returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "the bus driver said very little, but the silence was useful. It gave Nico space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Nico followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the cup belonged to a woman waiting at the next stop. It did not feel loud; it felt exact.",
+        "Nico understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "the bus driver checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Nico chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the woman smiled and thanked Nico. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Nico felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "the bus driver returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Nico left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the red cup left the bus in two careful hands."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Nico notice first?",
+          "options": [
+            "a red cup with a white lid",
+            "a short ride to the park",
+            "the red cup left the bus in two careful hands"
+          ],
+          "answer": "a red cup with a white lid",
+          "explanation": "The text says Nico notices a red cup with a white lid."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the cup was not Nico's cup",
+            "the woman smiled and thanked Nico",
+            "sunlight moved on the bus floor"
+          ],
+          "answer": "the cup was not Nico's cup",
+          "explanation": "The central problem is that the cup was not Nico's cup."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the woman smiled and thanked Nico",
+            "a small name was written near the lid",
+            "a short ride to the park"
+          ],
+          "answer": "the woman smiled and thanked Nico",
+          "explanation": "By the end, the woman smiled and thanked Nico."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-a1-emma-shop-window",
+      "title": "Emma and the Shop Window Clock",
+      "level": "A1",
+      "topic": "shops, time, and a small town repair",
+      "estimatedMinutes": 14,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about shops, time, and a small town repair, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "before lunch, Emma arrived at a narrow street with old shops, where clear wind moved the paper signs.",
+        "Emma had come for buying a birthday card, a small task that should have taken only a few minutes.",
+        "Near the entrance, Emma noticed a clock in a shop window. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Emma picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Mr. Lane appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a clock in a shop window. Mr. Lane did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the clock showed the wrong time and confused customers. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Emma noticed the minute hand moved only when the door closed. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Emma and Mr. Lane watched the clock from outside. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Emma returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Mr. Lane said very little, but the silence was useful. It gave Emma space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Emma followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the door shook the loose clock shelf. It did not feel loud; it felt exact.",
+        "Emma understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Mr. Lane checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Emma chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: Mr. Lane fixed the shelf with two small screws. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Emma felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Mr. Lane returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Emma left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the clock ticked correctly above the new birthday cards."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Emma notice first?",
+          "options": [
+            "a clock in a shop window",
+            "buying a birthday card",
+            "the clock ticked correctly above the new birthday cards"
+          ],
+          "answer": "a clock in a shop window",
+          "explanation": "The text says Emma notices a clock in a shop window."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the clock showed the wrong time and confused customers",
+            "Mr. Lane fixed the shelf with two small screws",
+            "clear wind moved the paper signs"
+          ],
+          "answer": "the clock showed the wrong time and confused customers",
+          "explanation": "The central problem is that the clock showed the wrong time and confused customers."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "Mr. Lane fixed the shelf with two small screws",
+            "the minute hand moved only when the door closed",
+            "buying a birthday card"
+          ],
+          "answer": "Mr. Lane fixed the shelf with two small screws",
+          "explanation": "By the end, Mr. Lane fixed the shelf with two small screws."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-a2-delayed-train",
+      "title": "The Delayed Train Ledger",
+      "level": "A2",
+      "topic": "travel delays, station routines, and observation",
+      "estimatedMinutes": 16,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about travel delays, station routines, and observation, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on a Monday evening, Sofia arrived at platform four of the central station, where cold air came through the open roof.",
+        "Sofia had come for catching the train home, a small task that should have taken only a few minutes.",
+        "Near the entrance, Sofia noticed an old ledger in the station office. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Sofia picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Ravi appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at an old ledger in the station office. Ravi did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: a signal problem stopped every train for an hour. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Sofia noticed the same delay had happened three Mondays in a row. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Sofia and Ravi read the notes in the public complaint book. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Sofia returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Ravi said very little, but the silence was useful. It gave Sofia space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Sofia followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: a broken sensor failed whenever the temperature dropped. It did not feel loud; it felt exact.",
+        "Sofia understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Ravi checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Sofia chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the station manager sent a clear repair request. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Sofia felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Ravi returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Sofia left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the next train arrived late, but the problem finally had a name."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Sofia notice first?",
+          "options": [
+            "an old ledger in the station office",
+            "catching the train home",
+            "the next train arrived late, but the problem finally had a name"
+          ],
+          "answer": "an old ledger in the station office",
+          "explanation": "The text says Sofia notices an old ledger in the station office."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "a signal problem stopped every train for an hour",
+            "the station manager sent a clear repair request",
+            "cold air came through the open roof"
+          ],
+          "answer": "a signal problem stopped every train for an hour",
+          "explanation": "The central problem is that a signal problem stopped every train for an hour."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the station manager sent a clear repair request",
+            "the same delay had happened three Mondays in a row",
+            "catching the train home"
+          ],
+          "answer": "the station manager sent a clear repair request",
+          "explanation": "By the end, the station manager sent a clear repair request."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-b1-rooftop-radio",
+      "title": "The Rooftop Radio",
+      "level": "B1",
+      "topic": "blackouts, community news, and practical courage",
+      "estimatedMinutes": 18,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about blackouts, community news, and practical courage, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "after the lights went out, Tomas arrived at the roof of a tall apartment building, where the evening was hot and windless.",
+        "Tomas had come for checking the water tank, a small task that should have taken only a few minutes.",
+        "Near the entrance, Tomas noticed a battery radio wrapped in a towel. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Tomas picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Mina appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a battery radio wrapped in a towel. Mina did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the building had no power and nobody knew when help would come. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Tomas noticed the radio caught a weak local announcement. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Tomas and Mina shared the information floor by floor. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Tomas returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Mina said very little, but the silence was useful. It gave Tomas space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Tomas followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: an elderly neighbour needed medicine from the closed pharmacy. It did not feel loud; it felt exact.",
+        "Tomas understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Mina checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Tomas chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the neighbours organised a safe walk before dark. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Tomas felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Mina returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Tomas left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the radio kept speaking softly while candles appeared in windows."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Tomas notice first?",
+          "options": [
+            "a battery radio wrapped in a towel",
+            "checking the water tank",
+            "the radio kept speaking softly while candles appeared in windows"
+          ],
+          "answer": "a battery radio wrapped in a towel",
+          "explanation": "The text says Tomas notices a battery radio wrapped in a towel."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the building had no power and nobody knew when help would come",
+            "the neighbours organised a safe walk before dark",
+            "the evening was hot and windless"
+          ],
+          "answer": "the building had no power and nobody knew when help would come",
+          "explanation": "The central problem is that the building had no power and nobody knew when help would come."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the neighbours organised a safe walk before dark",
+            "the radio caught a weak local announcement",
+            "checking the water tank"
+          ],
+          "answer": "the neighbours organised a safe walk before dark",
+          "explanation": "By the end, the neighbours organised a safe walk before dark."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-b2-quiet-campaign",
+      "title": "The Quiet Campaign",
+      "level": "B2",
+      "topic": "public libraries, noise, and careful persuasion",
+      "estimatedMinutes": 20,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about public libraries, noise, and careful persuasion, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "during exam week, Leila arrived at the study room of the public library, where afternoon heat made the room feel smaller.",
+        "Leila had come for finding a desk near the reference shelves, a small task that should have taken only a few minutes.",
+        "Near the entrance, Leila noticed a chart of noise complaints. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Leila picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Carmen appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a chart of noise complaints. Carmen did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: students blamed each other for noise, but the real problem was unclear. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Leila noticed complaints rose whenever chairs were moved. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Leila and Carmen measured the room at different times of day. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Leila returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Carmen said very little, but the silence was useful. It gave Leila space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Leila followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: metal chair legs made the sharpest sound on the tile floor. It did not feel loud; it felt exact.",
+        "Leila understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Carmen checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Leila chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the library added felt pads and rearranged the group tables. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Leila felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Carmen returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Leila left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the campaign poster became smaller as the room became calmer."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Leila notice first?",
+          "options": [
+            "a chart of noise complaints",
+            "finding a desk near the reference shelves",
+            "the campaign poster became smaller as the room became calmer"
+          ],
+          "answer": "a chart of noise complaints",
+          "explanation": "The text says Leila notices a chart of noise complaints."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "students blamed each other for noise, but the real problem was unclear",
+            "the library added felt pads and rearranged the group tables",
+            "afternoon heat made the room feel smaller"
+          ],
+          "answer": "students blamed each other for noise, but the real problem was unclear",
+          "explanation": "The central problem is that students blamed each other for noise, but the real problem was unclear."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the library added felt pads and rearranged the group tables",
+            "complaints rose whenever chairs were moved",
+            "finding a desk near the reference shelves"
+          ],
+          "answer": "the library added felt pads and rearranged the group tables",
+          "explanation": "By the end, the library added felt pads and rearranged the group tables."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-c1-unfinished-map",
+      "title": "The Unfinished Map",
+      "level": "C1",
+      "topic": "urban history, erased rivers, and civic memory",
+      "estimatedMinutes": 22,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about urban history, erased rivers, and civic memory, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on a bright Tuesday morning, Clara arrived at a planning office full of rolled maps, where dust shone in the sun above the drafting table.",
+        "Clara had come for photographing documents for a neighbourhood exhibit, a small task that should have taken only a few minutes.",
+        "Near the entrance, Clara noticed an unfinished map with a missing blue line. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Clara picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Mateo appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at an unfinished map with a missing blue line. Mateo did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the map omitted a stream that older residents still remembered. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Clara noticed street names curved as if they were following invisible water. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Clara and Mateo compared the map with drainage records and family photographs. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Clara returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Mateo said very little, but the silence was useful. It gave Clara space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Clara followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the buried stream explained decades of basement floods. It did not feel loud; it felt exact.",
+        "Clara understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Mateo checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Clara chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the exhibit showed the city as something layered rather than finished. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Clara felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Mateo returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Clara left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the missing blue line returned as a question across the wall."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Clara notice first?",
+          "options": [
+            "an unfinished map with a missing blue line",
+            "photographing documents for a neighbourhood exhibit",
+            "the missing blue line returned as a question across the wall"
+          ],
+          "answer": "an unfinished map with a missing blue line",
+          "explanation": "The text says Clara notices an unfinished map with a missing blue line."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the map omitted a stream that older residents still remembered",
+            "the exhibit showed the city as something layered rather than finished",
+            "dust shone in the sun above the drafting table"
+          ],
+          "answer": "the map omitted a stream that older residents still remembered",
+          "explanation": "The central problem is that the map omitted a stream that older residents still remembered."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the exhibit showed the city as something layered rather than finished",
+            "street names curved as if they were following invisible water",
+            "photographing documents for a neighbourhood exhibit"
+          ],
+          "answer": "the exhibit showed the city as something layered rather than finished",
+          "explanation": "By the end, the exhibit showed the city as something layered rather than finished."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-c2-margin-note",
+      "title": "The Margin Note",
+      "level": "C2",
+      "topic": "archives, interpretation, and fragile evidence",
+      "estimatedMinutes": 24,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about archives, interpretation, and fragile evidence, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "near closing time, Mara arrived at the conservation room of a university library, where rain tapped faintly against the skylight.",
+        "Mara had come for checking a rare book before digitisation, a small task that should have taken only a few minutes.",
+        "Near the entrance, Mara noticed a margin note written in fading pencil. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Mara picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Elias appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a margin note written in fading pencil. Elias did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the note challenged the accepted story of who had edited the book. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Mara noticed the handwriting changed exactly where the printed argument changed tone. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Mara and Elias examined pressure marks under a low side light. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Mara returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Elias said very little, but the silence was useful. It gave Mara space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Mara followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: two people had revised the same passage at different times. It did not feel loud; it felt exact.",
+        "Mara understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Elias checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Mara chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the catalogue record was rewritten to show uncertainty rather than false precision. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Mara felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Elias returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Mara left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the pencil note stayed pale, but the book's history had become harder to simplify."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Mara notice first?",
+          "options": [
+            "a margin note written in fading pencil",
+            "checking a rare book before digitisation",
+            "the pencil note stayed pale, but the book's history had become harder to simplify"
+          ],
+          "answer": "a margin note written in fading pencil",
+          "explanation": "The text says Mara notices a margin note written in fading pencil."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the note challenged the accepted story of who had edited the book",
+            "the catalogue record was rewritten to show uncertainty rather than false precision",
+            "rain tapped faintly against the skylight"
+          ],
+          "answer": "the note challenged the accepted story of who had edited the book",
+          "explanation": "The central problem is that the note challenged the accepted story of who had edited the book."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the catalogue record was rewritten to show uncertainty rather than false precision",
+            "the handwriting changed exactly where the printed argument changed tone",
+            "checking a rare book before digitisation"
+          ],
+          "answer": "the catalogue record was rewritten to show uncertainty rather than false precision",
+          "explanation": "By the end, the catalogue record was rewritten to show uncertainty rather than false precision."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-pre-a1-luna-key",
+      "title": "Luna and the Gate Bell",
+      "level": "Pre-A1",
+      "topic": "home, doors, and helpful neighbours",
+      "estimatedMinutes": 12,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about home, doors, and helpful neighbours, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "after school, Luna arrived at the small gate outside her house, where the sky was pink and quiet.",
+        "Luna had come for opening the front door, a small task that should have taken only a few minutes.",
+        "Near the entrance, Luna noticed a silver bell beside the gate. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Luna picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Aunt Rosa appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a silver bell beside the gate. Aunt Rosa did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the gate key was not in Luna's pocket. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Luna noticed the bell made a soft broken sound. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Luna and Aunt Rosa rang the bell twice and waited. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Luna returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Aunt Rosa said very little, but the silence was useful. It gave Luna space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Luna followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the key was inside her lunch bag. It did not feel loud; it felt exact.",
+        "Luna understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Aunt Rosa checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Luna chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: Aunt Rosa opened the gate and laughed kindly. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Luna felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Aunt Rosa returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Luna left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the silver bell moved once in the evening air."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Luna notice first?",
+          "options": [
+            "a silver bell beside the gate",
+            "opening the front door",
+            "the silver bell moved once in the evening air"
+          ],
+          "answer": "a silver bell beside the gate",
+          "explanation": "The text says Luna notices a silver bell beside the gate."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the gate key was not in Luna's pocket",
+            "Aunt Rosa opened the gate and laughed kindly",
+            "the sky was pink and quiet"
+          ],
+          "answer": "the gate key was not in Luna's pocket",
+          "explanation": "The central problem is that the gate key was not in Luna's pocket."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "Aunt Rosa opened the gate and laughed kindly",
+            "the bell made a soft broken sound",
+            "opening the front door"
+          ],
+          "answer": "Aunt Rosa opened the gate and laughed kindly",
+          "explanation": "By the end, Aunt Rosa opened the gate and laughed kindly."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-a1-marco-map",
+      "title": "Marco and the Blue Festival Map",
+      "level": "A1",
+      "topic": "festivals, maps, and simple choices",
+      "estimatedMinutes": 14,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about festivals, maps, and simple choices, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on Saturday afternoon, Marco arrived at a weekend street festival, where music and warm air filled the street.",
+        "Marco had come for finding the puppet show, a small task that should have taken only a few minutes.",
+        "Near the entrance, Marco noticed a blue festival map. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Marco picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "his cousin Ana appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a blue festival map. his cousin Ana did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: two stages had the same name on the signs. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Marco noticed one stage had a small star on the map. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Marco and his cousin Ana asked a food seller for directions. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Marco returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "his cousin Ana said very little, but the silence was useful. It gave Marco space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Marco followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the puppet show was behind the fountain. It did not feel loud; it felt exact.",
+        "Marco understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "his cousin Ana checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Marco chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: Marco and Ana arrived before the first song. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Marco felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "his cousin Ana returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Marco left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the blue map folded neatly beside two paper tickets."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Marco notice first?",
+          "options": [
+            "a blue festival map",
+            "finding the puppet show",
+            "the blue map folded neatly beside two paper tickets"
+          ],
+          "answer": "a blue festival map",
+          "explanation": "The text says Marco notices a blue festival map."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "two stages had the same name on the signs",
+            "Marco and Ana arrived before the first song",
+            "music and warm air filled the street"
+          ],
+          "answer": "two stages had the same name on the signs",
+          "explanation": "The central problem is that two stages had the same name on the signs."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "Marco and Ana arrived before the first song",
+            "one stage had a small star on the map",
+            "finding the puppet show"
+          ],
+          "answer": "Marco and Ana arrived before the first song",
+          "explanation": "By the end, Marco and Ana arrived before the first song."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-a2-rainy-market",
+      "title": "The Rainy Market Stall",
+      "level": "A2",
+      "topic": "food markets, weather, and family recipes",
+      "estimatedMinutes": 16,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about food markets, weather, and family recipes, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on a rainy morning, Sofia arrived at a market street covered with canvas roofs, where water ran from roof to roof.",
+        "Sofia had come for ingredients for soup, a small task that should have taken only a few minutes.",
+        "Near the entrance, Sofia noticed a shopping list with a tomato stain. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Sofia picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "her grandmother appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a shopping list with a tomato stain. her grandmother did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the usual vegetable stall was closed. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Sofia noticed a handwritten sign pointed to a temporary stall. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Sofia and her grandmother followed the sign through the wet street. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Sofia returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "her grandmother said very little, but the silence was useful. It gave Sofia space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Sofia followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the seller had saved the last bunch of herbs. It did not feel loud; it felt exact.",
+        "Sofia understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "her grandmother checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Sofia chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the soup tasted different but better than expected. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Sofia felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "her grandmother returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Sofia left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the stained list dried next to a warm bowl."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Sofia notice first?",
+          "options": [
+            "a shopping list with a tomato stain",
+            "ingredients for soup",
+            "the stained list dried next to a warm bowl"
+          ],
+          "answer": "a shopping list with a tomato stain",
+          "explanation": "The text says Sofia notices a shopping list with a tomato stain."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the usual vegetable stall was closed",
+            "the soup tasted different but better than expected",
+            "water ran from roof to roof"
+          ],
+          "answer": "the usual vegetable stall was closed",
+          "explanation": "The central problem is that the usual vegetable stall was closed."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the soup tasted different but better than expected",
+            "a handwritten sign pointed to a temporary stall",
+            "ingredients for soup"
+          ],
+          "answer": "the soup tasted different but better than expected",
+          "explanation": "By the end, the soup tasted different but better than expected."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-b1-missing-chorus",
+      "title": "The Missing Chorus",
+      "level": "B1",
+      "topic": "music, memory, and an old recording",
+      "estimatedMinutes": 18,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about music, memory, and an old recording, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on a quiet Sunday, Nadia arrived at a small radio studio above a theatre, where clouds made the windows look silver.",
+        "Nadia had come for sorting old concert recordings, a small task that should have taken only a few minutes.",
+        "Near the entrance, Nadia noticed a tape box with no label. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Nadia picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Leo appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a tape box with no label. Leo did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: a famous local song was missing its final chorus. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Nadia noticed the tape box had a theatre seat number written inside. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Nadia and Leo checked the studio logs and the balcony seats. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Nadia returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Leo said very little, but the silence was useful. It gave Nadia space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Nadia followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the chorus had been recorded from the audience by accident. It did not feel loud; it felt exact.",
+        "Nadia understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Leo checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Nadia chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the station restored the song with the crowd singing in the background. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Nadia felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Leo returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Nadia left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the recovered chorus sounded imperfect and completely alive."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Nadia notice first?",
+          "options": [
+            "a tape box with no label",
+            "sorting old concert recordings",
+            "the recovered chorus sounded imperfect and completely alive"
+          ],
+          "answer": "a tape box with no label",
+          "explanation": "The text says Nadia notices a tape box with no label."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "a famous local song was missing its final chorus",
+            "the station restored the song with the crowd singing in the background",
+            "clouds made the windows look silver"
+          ],
+          "answer": "a famous local song was missing its final chorus",
+          "explanation": "The central problem is that a famous local song was missing its final chorus."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the station restored the song with the crowd singing in the background",
+            "the tape box had a theatre seat number written inside",
+            "sorting old concert recordings"
+          ],
+          "answer": "the station restored the song with the crowd singing in the background",
+          "explanation": "By the end, the station restored the song with the crowd singing in the background."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-b2-window-seat",
+      "title": "The Window Seat Debate",
+      "level": "B2",
+      "topic": "public transport, fairness, and small design decisions",
+      "estimatedMinutes": 20,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about public transport, fairness, and small design decisions, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on a rainy Wednesday, Renata arrived at a city bus committee meeting, where umbrellas leaned against every chair.",
+        "Renata had come for reviewing complaints about crowded buses, a small task that should have taken only a few minutes.",
+        "Near the entrance, Renata noticed a seating diagram marked with red circles. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Renata picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Owen appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a seating diagram marked with red circles. Owen did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: passengers argued about who should get the window seats near the front. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Renata noticed the complaints were really about access to fresh air and safe exits. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Renata and Owen studied route data and passenger interviews. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Renata returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Owen said very little, but the silence was useful. It gave Renata space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Renata followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: a small layout change could reduce conflict without adding seats. It did not feel loud; it felt exact.",
+        "Renata understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Owen checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Renata chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the committee approved a trial design on two routes. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Renata felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Owen returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Renata left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the red circles on the diagram turned into arrows and clearer signs."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Renata notice first?",
+          "options": [
+            "a seating diagram marked with red circles",
+            "reviewing complaints about crowded buses",
+            "the red circles on the diagram turned into arrows and clearer signs"
+          ],
+          "answer": "a seating diagram marked with red circles",
+          "explanation": "The text says Renata notices a seating diagram marked with red circles."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "passengers argued about who should get the window seats near the front",
+            "the committee approved a trial design on two routes",
+            "umbrellas leaned against every chair"
+          ],
+          "answer": "passengers argued about who should get the window seats near the front",
+          "explanation": "The central problem is that passengers argued about who should get the window seats near the front."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the committee approved a trial design on two routes",
+            "the complaints were really about access to fresh air and safe exits",
+            "reviewing complaints about crowded buses"
+          ],
+          "answer": "the committee approved a trial design on two routes",
+          "explanation": "By the end, the committee approved a trial design on two routes."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-c1-archive-room",
+      "title": "The Archive Room's Second Box",
+      "level": "C1",
+      "topic": "historical evidence, public memory, and interpretation",
+      "estimatedMinutes": 22,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about historical evidence, public memory, and interpretation, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "on a long winter afternoon, Helena arrived at the back room of a regional archive, where the radiator clicked while snow softened the street outside.",
+        "Helena had come for preparing a small exhibition about factory workers, a small task that should have taken only a few minutes.",
+        "Near the entrance, Helena noticed a second box of uncatalogued letters. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Helena picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Rafi appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a second box of uncatalogued letters. Rafi did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: the official records described obedience while the letters suggested resistance. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Helena noticed several letters used the same harmless phrase before strikes. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Helena and Rafi matched dates, shifts, and signatures across the files. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Helena returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Rafi said very little, but the silence was useful. It gave Helena space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Helena followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: workers had built a coded system for warning each other. It did not feel loud; it felt exact.",
+        "Helena understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Rafi checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Helena chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the exhibition presented caution, not certainty, as part of the truth. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Helena felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Rafi returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Helena left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the second box remained open, making the official story less comfortable."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Helena notice first?",
+          "options": [
+            "a second box of uncatalogued letters",
+            "preparing a small exhibition about factory workers",
+            "the second box remained open, making the official story less comfortable"
+          ],
+          "answer": "a second box of uncatalogued letters",
+          "explanation": "The text says Helena notices a second box of uncatalogued letters."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "the official records described obedience while the letters suggested resistance",
+            "the exhibition presented caution, not certainty, as part of the truth",
+            "the radiator clicked while snow softened the street outside"
+          ],
+          "answer": "the official records described obedience while the letters suggested resistance",
+          "explanation": "The central problem is that the official records described obedience while the letters suggested resistance."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the exhibition presented caution, not certainty, as part of the truth",
+            "several letters used the same harmless phrase before strikes",
+            "preparing a small exhibition about factory workers"
+          ],
+          "answer": "the exhibition presented caution, not certainty, as part of the truth",
+          "explanation": "By the end, the exhibition presented caution, not certainty, as part of the truth."
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-c2-glass-hall",
+      "title": "The Glass Hall Hearing",
+      "level": "C2",
+      "topic": "architecture, public testimony, and institutional language",
+      "estimatedMinutes": 24,
+      "source": "Locupom original long reading",
+      "summary": "A long original narrative about architecture, public testimony, and institutional language, built as a natural reading text with 32 paragraphs.",
+      "paragraphs": [
+        "under the white noon lights, Irene arrived at a glass hall built for public hearings, where heat gathered under the transparent roof.",
+        "Irene had come for reviewing testimony about a new civic building, a small task that should have taken only a few minutes.",
+        "Near the entrance, Irene noticed a transcript with one repeated phrase. It looked ordinary at first, but it did not belong where it was.",
+        "The place was not empty. Every shelf, sign, chair, and corner seemed to hold a little piece of the day's routine.",
+        "Irene picked up the object carefully and waited for an obvious answer, but no obvious answer came.",
+        "Malik appeared soon after, carrying the calm expression of someone who knew the building better than most people.",
+        "Together they looked at a transcript with one repeated phrase. Malik did not solve the problem immediately, which made the object feel more important.",
+        "The first problem was simple: official language made discomfort sound like minor preference. The second problem was quieter: nobody wanted to make the wrong guess too quickly.",
+        "Irene noticed residents kept saying the hall made them feel watched. It was small enough to ignore and clear enough to matter.",
+        "For a moment, the whole place seemed to slow down around that clue. Ordinary sounds became sharper, and ordinary details began to connect.",
+        "Irene and Malik tracked how the transcript softened each complaint. They moved carefully because the answer seemed to depend on patience.",
+        "A person passing by offered one explanation, but it did not fit the clue. Another explanation sounded better, yet it left too many details outside the story.",
+        "Irene returned to the first clue and looked again. The answer was not hidden far away; it was hidden inside a familiar routine.",
+        "That was when they found a second detail, almost invisible because everyone had walked past it many times before.",
+        "Malik said very little, but the silence was useful. It gave Irene space to test one idea against another.",
+        "The situation became less like a puzzle and more like a memory of the place itself. Something old had been waiting inside something ordinary.",
+        "Irene followed the clue through the room, across the floor, and toward the part of the setting people usually ignored.",
+        "The search was not dramatic, but it changed the way the room looked. Each object seemed to ask whether it had been seen properly.",
+        "Then came the discovery: the architecture itself had shaped who felt welcome to speak. It did not feel loud; it felt exact.",
+        "Irene understood why the first explanation had been too easy. It had explained the object without explaining the place.",
+        "Malik checked the detail one more time. The check was important because a quick conclusion can be as misleading as no conclusion at all.",
+        "The new answer created a choice. They could leave the matter small, or they could let it change what people knew about the place.",
+        "Irene chose the slower path and made sure the discovery was recorded clearly.",
+        "Other people arrived, one by one, and each person added a small piece of context. The story grew wider without becoming less precise.",
+        "By then, the object no longer seemed accidental. It had become a sign pointing toward a forgotten responsibility.",
+        "The resolution was practical: the final report treated atmosphere as evidence, not decoration. It did not fix everything, but it fixed the part that could be fixed that day.",
+        "Irene felt the quiet satisfaction of a problem handled with care instead of speed.",
+        "Malik returned to the normal work of the day, but the normal work now carried a little more meaning.",
+        "The place looked almost the same afterward. That was the strange part: important changes do not always announce themselves loudly.",
+        "Irene left with the sense that ordinary places keep records, even when nobody calls them records.",
+        "Behind the main event, a smaller truth remained: attention had turned a misplaced object into a fuller story.",
+        "At the end, the glass hall looked brighter after the hearing and less innocent."
+      ],
+      "questions": [
+        {
+          "id": "object",
+          "prompt": "What does Irene notice first?",
+          "options": [
+            "a transcript with one repeated phrase",
+            "reviewing testimony about a new civic building",
+            "the glass hall looked brighter after the hearing and less innocent"
+          ],
+          "answer": "a transcript with one repeated phrase",
+          "explanation": "The text says Irene notices a transcript with one repeated phrase."
+        },
+        {
+          "id": "problem",
+          "prompt": "What makes the situation difficult?",
+          "options": [
+            "official language made discomfort sound like minor preference",
+            "the final report treated atmosphere as evidence, not decoration",
+            "heat gathered under the transparent roof"
+          ],
+          "answer": "official language made discomfort sound like minor preference",
+          "explanation": "The central problem is that official language made discomfort sound like minor preference."
+        },
+        {
+          "id": "resolution",
+          "prompt": "What happens by the end?",
+          "options": [
+            "the final report treated atmosphere as evidence, not decoration",
+            "residents kept saying the hall made them feel watched",
+            "reviewing testimony about a new civic building"
+          ],
+          "answer": "the final report treated atmosphere as evidence, not decoration",
+          "explanation": "By the end, the final report treated atmosphere as evidence, not decoration."
+        }
+      ]
+    }
+  ],
+  "speakingPrompts": [
+    {
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-speaking-key",
+      "level": "Pre-A1",
+      "title": "Find the Colour",
+      "prompt": "Choose three classroom objects. Say the colour and ask: Is this your ___?",
+      "support": [
+        "a yellow key",
+        "a blue pen",
+        "Is this your bag?"
+      ],
+      "targetLanguage": [
+        "colours",
+        "classroom objects",
+        "your"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-speaking-map",
+      "level": "A1",
+      "title": "Give Simple Directions",
+      "prompt": "Explain how to get from a cafe to a library using three short directions.",
+      "support": [
+        "Go straight.",
+        "Turn left at the park.",
+        "It is near the cafe."
+      ],
+      "targetLanguage": [
+        "go straight",
+        "turn left",
+        "near"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a2-speaking-adapt-plan",
+      "level": "A2",
+      "title": "Adapt the Plan",
+      "prompt": "Describe a plan that changed because of the weather. Say what happened, what you did, and what you learned.",
+      "support": [
+        "It started to rain.",
+        "We decided to...",
+        "The plan changed, but..."
+      ],
+      "targetLanguage": [
+        "past simple",
+        "weather phrases",
+        "but / so"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-speaking-garden",
+      "level": "B1",
+      "title": "Invite Neighbours",
+      "prompt": "Invite people to help with a community garden. Explain the problem, suggest one small action, and report one person's idea.",
+      "support": [
+        "The garden has been closed...",
+        "We need people to...",
+        "Peter said that..."
+      ],
+      "targetLanguage": [
+        "invitations",
+        "reported speech",
+        "community actions"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-speaking-museum",
+      "level": "B2",
+      "title": "Make Culture Accessible",
+      "prompt": "Recommend two improvements to a museum audio guide while keeping a balanced and respectful tone.",
+      "support": [
+        "The facts are accurate, but...",
+        "Visitors may need...",
+        "I would keep..., while changing..."
+      ],
+      "targetLanguage": [
+        "balanced contrast",
+        "recommendations",
+        "accessibility vocabulary"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c1-speaking-translation",
+      "level": "C1",
+      "title": "Defend a Translation Choice",
+      "prompt": "Compare two possible translations of an emotional sentence. Explain what each version gains, loses, protects, or erases.",
+      "support": [
+        "The simpler verb preserves...",
+        "The abstract noun weakens...",
+        "This choice changes the tone by..."
+      ],
+      "targetLanguage": [
+        "nuance",
+        "stance",
+        "evaluative language"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-speaking-apology",
+      "level": "C2",
+      "title": "Revise Public Responsibility",
+      "prompt": "Turn an evasive public apology into a precise one. Explain why your wording accepts responsibility without becoming theatrical.",
+      "support": [
+        "Mistakes were made -> We failed to...",
+        "This wording names...",
+        "It avoids exaggeration by..."
+      ],
+      "targetLanguage": [
+        "accountability",
+        "register control",
+        "rhetorical precision"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-pre-a1-speaking-cup",
+      "level": "Pre-A1",
+      "title": "Find and Name",
+      "prompt": "Point to three things near you. Say the colour and the object. Then ask: Is this your ___?",
+      "support": [
+        "a red cup",
+        "a blue bag",
+        "Is this your pen?"
+      ],
+      "targetLanguage": [
+        "colours",
+        "this is",
+        "your"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-a1-speaking-shop",
+      "level": "A1",
+      "title": "Ask the Price",
+      "prompt": "Role-play buying a notebook. Ask the price, say how much money you have, and choose a cheaper item.",
+      "support": [
+        "How much is it?",
+        "I have three pounds.",
+        "Do you have a smaller one?"
+      ],
+      "targetLanguage": [
+        "how much",
+        "I have",
+        "shop nouns"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-a2-speaking-delay",
+      "level": "A2",
+      "title": "Describe a Delay",
+      "prompt": "Tell a short story about a delayed trip. Say what happened, how you felt, and what useful thing you did while waiting.",
+      "support": [
+        "My train was delayed.",
+        "I felt annoyed because...",
+        "While I waited, I..."
+      ],
+      "targetLanguage": [
+        "past simple",
+        "while",
+        "because"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-b1-speaking-radio",
+      "level": "B1",
+      "title": "Report a Memory",
+      "prompt": "Interview someone about a sound or song they remember, then report their answer in your own words.",
+      "support": [
+        "She said that...",
+        "He told me that...",
+        "It reminded him of..."
+      ],
+      "targetLanguage": [
+        "reported speech",
+        "used to",
+        "memory vocabulary"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-b2-speaking-campaign",
+      "level": "B2",
+      "title": "Evidence Before Slogans",
+      "prompt": "Propose one small improvement to a study space. Use evidence, admit one limitation, and finish with a practical request.",
+      "support": [
+        "The evidence suggests...",
+        "Although this will not solve...",
+        "We are asking for..."
+      ],
+      "targetLanguage": [
+        "balanced argument",
+        "concession",
+        "proposal language"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-c1-speaking-map",
+      "level": "C1",
+      "title": "Cautious Interpretation",
+      "prompt": "Describe an incomplete piece of evidence and explain what it suggests, what it does not prove, and what further evidence you need.",
+      "support": [
+        "This may suggest...",
+        "It does not necessarily prove...",
+        "To verify this, I would need..."
+      ],
+      "targetLanguage": [
+        "hedging",
+        "inference",
+        "evidence limits"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-c2-speaking-margin",
+      "level": "C2",
+      "title": "Preserve the Pressure",
+      "prompt": "Compare two translations or rewrites of an ambiguous sentence. Explain which version preserves tone, implication, and responsibility better.",
+      "support": [
+        "The first version foregrounds...",
+        "The second version risks implying...",
+        "I would preserve ambiguity here because..."
+      ],
+      "targetLanguage": [
+        "register control",
+        "rhetorical implication",
+        "translation judgement"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-pre-a1-speaking-key",
+      "level": "Pre-A1",
+      "title": "Show and Say",
+      "prompt": "Hold or point to three classroom objects. Say: This is a ___. It is ___. Then spell one object.",
+      "support": [
+        "This is a pen.",
+        "It is blue.",
+        "P-E-N."
+      ],
+      "targetLanguage": [
+        "this is",
+        "colours",
+        "spelling"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-a1-speaking-map",
+      "level": "A1",
+      "title": "Ask for a Place",
+      "prompt": "Ask where a place is and answer with one direction and one location phrase.",
+      "support": [
+        "Where is the library?",
+        "Go straight.",
+        "It is next to the cafe."
+      ],
+      "targetLanguage": [
+        "where is",
+        "go straight",
+        "next to"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-a2-speaking-market",
+      "level": "A2",
+      "title": "Change the Plan",
+      "prompt": "Describe a plan that changed. Say what you wanted to do, what happened, and what you did instead.",
+      "support": [
+        "We wanted to...",
+        "It started to...",
+        "Instead, we..."
+      ],
+      "targetLanguage": [
+        "past simple",
+        "instead",
+        "because"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-b1-speaking-chorus",
+      "level": "B1",
+      "title": "Defend a Guess",
+      "prompt": "Choose a missing word from a song or sentence and explain why your guess fits the context.",
+      "support": [
+        "I think the word is...",
+        "The clue is...",
+        "It fits because..."
+      ],
+      "targetLanguage": [
+        "giving reasons",
+        "context clues",
+        "uncertainty"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-b2-speaking-seat",
+      "level": "B2",
+      "title": "Make the Strongest Case",
+      "prompt": "Argue for who should get the window seat: the early arriver, the diary writer, or the nervous traveller.",
+      "support": [
+        "Although...",
+        "The strongest reason is...",
+        "This matters because..."
+      ],
+      "targetLanguage": [
+        "concession",
+        "persuasion",
+        "evidence"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-c1-speaking-archive",
+      "level": "C1",
+      "title": "Evidence or Interpretation",
+      "prompt": "Explain the difference between what a text says directly and what a reader may infer from it.",
+      "support": [
+        "The evidence states...",
+        "One possible interpretation is...",
+        "However, this does not prove..."
+      ],
+      "targetLanguage": [
+        "hedging",
+        "interpretation",
+        "academic caution"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-c2-speaking-glass",
+      "level": "C2",
+      "title": "Accountable Wording",
+      "prompt": "Rewrite a vague public statement so it names action, responsibility, and limits without sounding careless or hostile.",
+      "support": [
+        "The original wording obscures...",
+        "A clearer version would be...",
+        "I would keep this restraint because..."
+      ],
+      "targetLanguage": [
+        "rhetorical precision",
+        "register control",
+        "accountability"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-exercise-key",
+      "level": "Pre-A1",
+      "type": "matching",
+      "title": "School Object Match",
+      "instruction": "Match each English word to the Spanish meaning.",
+      "items": [
+        {
+          "prompt": "key",
+          "answer": "llave"
+        },
+        {
+          "prompt": "floor",
+          "answer": "piso/suelo"
+        },
+        {
+          "prompt": "yellow",
+          "answer": "amarillo"
+        },
+        {
+          "prompt": "teacher",
+          "answer": "docente/profesor"
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-exercise-map",
+      "level": "A1",
+      "type": "ordering",
+      "title": "Put the Directions in Order",
+      "instruction": "Order the directions from the cafe to the library.",
+      "items": [
+        "Walk straight for two minutes.",
+        "Turn left at the park.",
+        "Look for the brown building."
+      ],
+      "answer": [
+        "Walk straight for two minutes.",
+        "Turn left at the park.",
+        "Look for the brown building."
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a2-exercise-market",
+      "level": "A2",
+      "type": "gap_fill",
+      "title": "Weather Changed the Plan",
+      "instruction": "Complete the sentence with the best option: It started to rain, ____ we went inside.",
+      "options": [
+        "so",
+        "because",
+        "although"
+      ],
+      "answer": "so"
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-exercise-garden",
+      "level": "B1",
+      "type": "sentence_transformation",
+      "title": "Report the Garden Idea",
+      "instruction": "Rewrite in reported speech: Peter said, \"The garden needs small actions every week.\"",
+      "answer": "Peter said that the garden needed small actions every week.",
+      "hint": "Backshift needs to needed after said."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-exercise-museum",
+      "level": "B2",
+      "type": "multiple_choice",
+      "title": "Balanced Recommendation",
+      "instruction": "Choose the most balanced sentence.",
+      "options": [
+        "The guide is useless and must be replaced.",
+        "Although the guide is accurate, it would be easier to follow with clearer context.",
+        "The guide is perfect because it sounds serious."
+      ],
+      "answer": "Although the guide is accurate, it would be easier to follow with clearer context."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c1-exercise-translation",
+      "level": "C1",
+      "type": "analysis",
+      "title": "Refinement or Avoidance?",
+      "instruction": "Explain why an abstract noun can weaken an emotional translation. Use one example sentence.",
+      "answerGuide": "A strong answer explains that abstraction can hide physical effort, agency, or emotional force, then contrasts it with a plainer verb."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-exercise-apology",
+      "level": "C2",
+      "type": "rewrite",
+      "title": "Remove Evasion",
+      "instruction": "Rewrite: Mistakes were made during implementation. Make the sentence accountable and specific.",
+      "answer": "We failed to act on the inspection reports sent in March.",
+      "hint": "Name the agent, action, and evidence."
+    },
+    {
+      "id": "weekday-2026-06-12-pre-a1-exercise-cup",
+      "level": "Pre-A1",
+      "type": "matching",
+      "title": "Colour and Object Match",
+      "instruction": "Match each word to the correct meaning.",
+      "items": [
+        {
+          "prompt": "cup",
+          "answer": "taza/vaso"
+        },
+        {
+          "prompt": "bus",
+          "answer": "colectivo/bus"
+        },
+        {
+          "prompt": "red",
+          "answer": "rojo"
+        },
+        {
+          "prompt": "seat",
+          "answer": "asiento"
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-a1-exercise-shop",
+      "level": "A1",
+      "type": "gap_fill",
+      "title": "Shop Question",
+      "instruction": "Complete: How ____ is the notebook?",
+      "options": [
+        "much",
+        "many",
+        "old"
+      ],
+      "answer": "much"
+    },
+    {
+      "id": "weekday-2026-06-12-a2-exercise-delay",
+      "level": "A2",
+      "type": "sentence_order",
+      "title": "Delayed Sentence",
+      "instruction": "Order the words: was / train / delayed / my / minutes / thirty / by.",
+      "answer": "My train was delayed by thirty minutes."
+    },
+    {
+      "id": "weekday-2026-06-12-b1-exercise-radio",
+      "level": "B1",
+      "type": "rewrite",
+      "title": "Report the Memory",
+      "instruction": "Rewrite as reported speech: Mrs Allen said, \"This song reminds me of my first job interview.\"",
+      "sampleAnswer": "Mrs Allen said that the song reminded her of her first job interview."
+    },
+    {
+      "id": "weekday-2026-06-12-b2-exercise-campaign",
+      "level": "B2",
+      "type": "argument_improvement",
+      "title": "Make It Evidence-Based",
+      "instruction": "Improve this claim: \"The study room is terrible and everyone hates it.\"",
+      "sampleAnswer": "Noise records suggest that scraping chairs are the main problem, so felt pads and clearer group-work areas would make the study room calmer."
+    },
+    {
+      "id": "weekday-2026-06-12-c1-exercise-map",
+      "level": "C1",
+      "type": "hedging",
+      "title": "Avoid Overclaiming",
+      "instruction": "Rewrite with caution: \"The pencil streets prove residents had a complete alternative plan.\"",
+      "sampleAnswer": "The pencil streets suggest that residents may have discussed alternative routes, although they do not prove the existence of a complete plan."
+    },
+    {
+      "id": "weekday-2026-06-12-c2-exercise-margin",
+      "level": "C2",
+      "type": "style_analysis",
+      "title": "Ambiguity With Purpose",
+      "instruction": "Explain why \"those whose actions enabled the transition\" may be better than naming a group directly.",
+      "sampleAnswer": "It preserves the source text's deliberate ambiguity while keeping a formal register and avoiding an unsupported political interpretation."
+    },
+    {
+      "id": "weekday-2026-06-11-pre-a1-exercise-key",
+      "level": "Pre-A1",
+      "type": "matching",
+      "title": "Classroom Object Match",
+      "instruction": "Match each word to the correct meaning.",
+      "items": [
+        {
+          "prompt": "key",
+          "answer": "llave"
+        },
+        {
+          "prompt": "book",
+          "answer": "libro"
+        },
+        {
+          "prompt": "desk",
+          "answer": "escritorio"
+        },
+        {
+          "prompt": "teacher",
+          "answer": "profesor/a"
+        }
+      ]
+    },
+    {
+      "id": "weekday-2026-06-11-a1-exercise-map",
+      "level": "A1",
+      "type": "sentence_order",
+      "title": "Put the Direction in Order",
+      "instruction": "Order the words: straight / go / and / left / turn.",
+      "answer": "Go straight and turn left."
+    },
+    {
+      "id": "weekday-2026-06-11-a2-exercise-market",
+      "level": "A2",
+      "type": "gap_fill",
+      "title": "Instead or Because",
+      "instruction": "Complete: There was no chicken, so Sofia chose beans ____.",
+      "options": [
+        "instead",
+        "because",
+        "already"
+      ],
+      "answer": "instead"
+    },
+    {
+      "id": "weekday-2026-06-11-b1-exercise-chorus",
+      "level": "B1",
+      "type": "short_answer",
+      "title": "Use the Clue",
+      "instruction": "Explain why context can be more useful than one unclear sound in listening.",
+      "sampleAnswer": "Context shows how the missing word fits the whole message, so it helps us choose the most likely meaning."
+    },
+    {
+      "id": "weekday-2026-06-11-b2-exercise-seat",
+      "level": "B2",
+      "type": "argument_sort",
+      "title": "Preference, Evidence, or Need",
+      "instruction": "Classify: 'I get nervous when I cannot see outside.'",
+      "options": [
+        "preference",
+        "evidence",
+        "need"
+      ],
+      "answer": "need"
+    },
+    {
+      "id": "weekday-2026-06-11-c1-exercise-archive",
+      "level": "C1",
+      "type": "rewrite",
+      "title": "Hedge the Claim",
+      "instruction": "Rewrite with academic caution: 'The letters prove all workers were angry.'",
+      "sampleAnswer": "The letters suggest that anger was present among some workers, although the collection also shows humour and uncertainty."
+    },
+    {
+      "id": "weekday-2026-06-11-c2-exercise-glass",
+      "level": "C2",
+      "type": "style_edit",
+      "title": "Remove the Hiding Place",
+      "instruction": "Rewrite: 'Mistakes were made during the planning process.'",
+      "sampleAnswer": "We underestimated the planning costs and did not explain the delay early enough."
+    }
+  ],
+  "vocabulary": [
+    {
+      "word": "principal",
+      "meaning": "main or most important; also the head of a school in American English",
+      "usageNote": "Do not confuse with principle, which is a rule or belief.",
+      "example": "The principal reason for rewriting the guide was that visitors needed clearer context."
+    },
+    {
+      "word": "principle",
+      "meaning": "a basic rule, standard, or belief that guides behaviour",
+      "usageNote": "Think of principle as an idea; principal often means main.",
+      "example": "The club followed the principle that first drafts should be heard before they are defended."
+    },
+    {
+      "word": "compliment",
+      "meaning": "a polite expression of praise",
+      "usageNote": "Compliment with i means praise; complement with e means complete or go well with.",
+      "example": "The teacher gave Mara a compliment for inviting neighbours in clear English."
+    },
+    {
+      "word": "complement",
+      "meaning": "to complete something or combine well with it",
+      "usageNote": "A bilingual poster can complement a spoken invitation.",
+      "example": "The short audio scenes complemented the museum facts by giving visitors a reason to care."
+    },
+    {
+      "word": "stationary",
+      "meaning": "not moving",
+      "usageNote": "Stationary with a means still; stationery with e means paper and office supplies.",
+      "example": "The train remained stationary while Mateo wrote six sentences in his diary."
+    },
+    {
+      "word": "stationery",
+      "meaning": "paper, envelopes, notebooks, and other writing materials",
+      "usageNote": "Use stationery for things you write on or with.",
+      "example": "Emma bought cheap stationery so she could collect new English words every day."
+    },
+    {
+      "word": "elicit",
+      "meaning": "to draw out a response, answer, or reaction",
+      "usageNote": "Often used in teaching, interviews, and research.",
+      "example": "The teacher used pictures to elicit weather vocabulary before the market story."
+    },
+    {
+      "word": "illicit",
+      "meaning": "illegal or not allowed by rules",
+      "usageNote": "Illicit sounds like elicit but means forbidden.",
+      "example": "The article discussed illicit recordings, so the class reviewed the difference carefully."
+    },
+    {
+      "word": "allude",
+      "meaning": "to refer to something indirectly",
+      "usageNote": "Allude takes to: The speaker alluded to a previous mistake.",
+      "example": "The mayor alluded to the warnings at first, but the revised apology named them directly."
+    },
+    {
+      "word": "elude",
+      "meaning": "to escape from or avoid someone or something; also to be hard to understand",
+      "usageNote": "A meaning can elude you when you cannot grasp it.",
+      "example": "The emotional force of the sentence eluded Amira until she replaced the abstract noun with a plain verb."
+    },
+    {
+      "word": "raise",
+      "meaning": "to lift something or increase an amount; also to mention an issue",
+      "usageNote": "Use raise a question, raise prices, raise awareness. Do not confuse with rise, which is usually intransitive.",
+      "example": "Maya raised the issue after collecting evidence from the study room."
+    },
+    {
+      "word": "rise",
+      "meaning": "to go up or increase without a direct object",
+      "usageNote": "Prices rise; someone raises prices.",
+      "example": "Noise levels rose after lunch when students moved the chairs."
+    },
+    {
+      "word": "borrow",
+      "meaning": "to take something from someone for a limited time and return it",
+      "usageNote": "The receiver borrows; the giver lends.",
+      "example": "Julia borrowed her grandfather's radio for the school project."
+    },
+    {
+      "word": "lend",
+      "meaning": "to give something to someone temporarily",
+      "usageNote": "Lend someone something; borrow something from someone.",
+      "example": "Her grandfather lent her the radio because he trusted her with it."
+    },
+    {
+      "word": "remember",
+      "meaning": "to keep or bring something back to mind",
+      "usageNote": "Remember doing something = memory of past action; remember to do something = not forget a future action.",
+      "example": "Mrs Allen remembered hearing the song before her first job interview."
+    },
+    {
+      "word": "remind",
+      "meaning": "to make someone remember something",
+      "usageNote": "Use remind someone of something, or remind someone to do something.",
+      "example": "The song reminded Omar of Sundays at home."
+    },
+    {
+      "word": "avoid",
+      "meaning": "to stay away from something or prevent it from happening",
+      "usageNote": "Avoid is followed by a noun or -ing form, not to + verb.",
+      "example": "Leila avoided overstating what the unfinished map could prove."
+    },
+    {
+      "word": "prevent",
+      "meaning": "to stop something from happening",
+      "usageNote": "Common pattern: prevent someone/something from doing something.",
+      "example": "Better signs could prevent students from using the quiet room for group calls."
+    },
+    {
+      "word": "affect",
+      "meaning": "to influence or change something",
+      "usageNote": "Usually a verb. Do not confuse with effect, usually a noun.",
+      "example": "The translator knew that one word could affect the political tone of the sentence."
+    },
+    {
+      "word": "effect",
+      "meaning": "a result or consequence",
+      "usageNote": "Usually a noun. In formal English, effect can be a verb meaning bring about, but learners should master the noun first.",
+      "example": "The felt pads had an immediate effect on the noise in the study room."
+    },
+    {
+      "word": "beside",
+      "meaning": "next to; at the side of",
+      "usageNote": "Do not confuse with besides, which often means 'in addition'.",
+      "example": "The school is beside the library."
+    },
+    {
+      "word": "besides",
+      "meaning": "in addition to; also",
+      "usageNote": "Use besides when adding another point.",
+      "example": "Besides the reading, we practised three speaking prompts."
+    },
+    {
+      "word": "actually",
+      "meaning": "in fact; really",
+      "usageNote": "A common false friend for Spanish speakers; it does not mean actualmente.",
+      "example": "I thought the word was problem, but it was actually promise."
+    },
+    {
+      "word": "currently",
+      "meaning": "at the present time",
+      "usageNote": "Use currently for actualmente.",
+      "example": "The app is currently serving fresh B1 readings."
+    },
+    {
+      "word": "sensible",
+      "meaning": "practical and reasonable",
+      "usageNote": "It does not usually mean sensitive.",
+      "example": "Choosing beans instead of chicken was a sensible decision."
+    },
+    {
+      "word": "sensitive",
+      "meaning": "easily affected emotionally or able to notice small changes",
+      "usageNote": "Use sensitive for people, topics, data, or subtle perception.",
+      "example": "The C2 speaker was sensitive to the political tone of the statement."
+    },
+    {
+      "word": "evidence",
+      "meaning": "facts or information that support a claim",
+      "usageNote": "Usually uncountable in English: some evidence, not an evidence.",
+      "example": "Ravi had evidence that he arrived early, but it did not prove he needed the seat."
+    },
+    {
+      "word": "proof",
+      "meaning": "information that shows something is definitely true",
+      "usageNote": "Proof is stronger than evidence.",
+      "example": "The letters were evidence of disagreement, not proof that everyone felt the same."
+    },
+    {
+      "word": "delay",
+      "meaning": "to make something happen later; a period of waiting",
+      "usageNote": "Can be a verb or a noun.",
+      "example": "The council delayed the vote and failed to explain the delay."
+    },
+    {
+      "word": "postpone",
+      "meaning": "to arrange for something to happen at a later time",
+      "usageNote": "Often used for meetings, events, votes, and plans.",
+      "example": "They postponed the housing project until the new estimate was ready."
+    }
+  ]
+}

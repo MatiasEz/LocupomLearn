@@ -27,7 +27,7 @@ struct LocupomTopicsResponse: Decodable {
 }
 
 enum LocupomTopicsAPIClient {
-    static let baseURL = URL(string: "http://127.0.0.1:8787")!
+    static let baseURL = URL(string: "https://locupom-topics-api.vercel.app")!
 
     static func fetchGrammarTopics(levels: [String]) async throws -> [LocupomRemoteTopic] {
         var fetchedTopics: [LocupomRemoteTopic] = []

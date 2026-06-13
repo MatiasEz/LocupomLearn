@@ -4988,6 +4988,59 @@ private struct LocupomTopicsResponse: Decodable {
     let topics: [LocupomRemoteTopic]
 }
 
+private struct LocupomReadingResponse: Decodable {
+    let provider: String
+    let providerConfigured: Bool
+    let providerError: String?
+    let reading: LocupomLevelledReading
+}
+
+private struct LocupomLevelledReading: Identifiable, Decodable {
+    let id: String
+    let title: String
+    let level: String
+    let cefrLevel: String
+    let topic: String
+    let estimatedMinutes: Int
+    let source: String
+    let provider: String
+    let summary: String
+    let content: String
+    let questions: [LocupomReadingQuestion]
+
+    static func fallback(for level: TopicCEFRLevel) -> LocupomLevelledReading {
+        let question = LocupomReadingQuestion(
+            id: "offline-main",
+            prompt: "What is the main idea?",
+            options: ["Small regular practice helps learning.", "Learning only works with long texts.", "Grammar should be skipped."],
+            answer: "Small regular practice helps learning.",
+            explanation: "The text focuses on a short routine that can be repeated often."
+        )
+
+        return LocupomLevelledReading(
+            id: "offline-\(level.rawValue.lowercased())",
+            title: "\(level.shortCode) Reading: A small habit",
+            level: level.rawValue,
+            cefrLevel: level.rawValue == "Pre-A1" ? "A1" : level.rawValue,
+            topic: level.defaultReadingTopic,
+            estimatedMinutes: 3,
+            source: "Offline Locupom",
+            provider: "offline",
+            summary: "A short offline reading for \(level.shortCode).",
+            content: "A small habit can make English feel easier. Read a short text, choose three useful words, and say one sentence aloud. The practice is simple, but it helps your brain meet English every day.",
+            questions: [question]
+        )
+    }
+}
+
+private struct LocupomReadingQuestion: Identifiable, Decodable {
+    let id: String
+    let prompt: String
+    let options: [String]
+    let answer: String
+    let explanation: String
+}
+
 private enum TopicCEFRLevel: String, CaseIterable, Identifiable, Hashable {
     case preA1 = "Pre-A1"
     case a1 = "A1"
@@ -5092,6 +5145,25 @@ private enum TopicCEFRLevel: String, CaseIterable, Identifiable, Hashable {
         [rawValue]
     }
 
+    var defaultReadingTopic: String {
+        switch self {
+        case .preA1:
+            "school"
+        case .a1:
+            "daily routines"
+        case .a2:
+            "weekend plans"
+        case .b1:
+            "community gardens"
+        case .b2:
+            "museum access"
+        case .c1:
+            "urban memory"
+        case .c2:
+            "public communication"
+        }
+    }
+
     init(profileLevel: LearningLevel) {
         switch profileLevel {
         case .beginner:
@@ -5105,7 +5177,7 @@ private enum TopicCEFRLevel: String, CaseIterable, Identifiable, Hashable {
 }
 
 private enum LocupomTopicsAPIClient {
-    static let baseURL = URL(string: "http://127.0.0.1:8787")!
+    static let baseURL = URL(string: "https://locupom-topics-api.vercel.app")!
 
     static func fetchGrammarTopics(levels: [String]) async throws -> [LocupomRemoteTopic] {
         var topics: [LocupomRemoteTopic] = []
@@ -5132,6 +5204,28 @@ private enum LocupomTopicsAPIClient {
 
         return try JSONDecoder().decode(LocupomTopicsResponse.self, from: data).topics
     }
+
+    static func fetchReading(level: String, topic: String, length: String = "standard") async throws -> LocupomReadingResponse {
+        var components = URLComponents(url: baseURL.appendingPathComponent("readings"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "level", value: level),
+            URLQueryItem(name: "topic", value: topic),
+            URLQueryItem(name: "length", value: length)
+        ]
+        guard let url = components.url else {
+            throw LanguageLearningError.invalidQuery
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 8
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
+            throw LanguageLearningError.server(statusCode: httpResponse.statusCode)
+        }
+
+        return try JSONDecoder().decode(LocupomReadingResponse.self, from: data)
+    }
 }
 
 private struct TopicsPracticeView: View {
@@ -5142,6 +5236,10 @@ private struct TopicsPracticeView: View {
     @State private var selectedLevel: TopicCEFRLevel = .a1
     @State private var hasInitializedLevel = false
     @State private var remoteTopicsByLevel: [TopicCEFRLevel: [GrammarTopic]] = [:]
+    @State private var reading: LocupomLevelledReading?
+    @State private var readingErrorMessage: String?
+    @State private var isLoadingReading = false
+    @State private var selectedReadingAnswer: String?
 
     init(showsCloseButton: Bool = true, hidesTabBar: Bool = true) {
         self.showsCloseButton = showsCloseButton
@@ -5172,6 +5270,20 @@ private struct TopicsPracticeView: View {
                     TopicLevelSelectorCard(selectedLevel: $selectedLevel)
                         .padding(.top, 8)
 
+                    TopicLevelReadingCard(
+                        reading: reading,
+                        isLoading: isLoadingReading,
+                        errorMessage: readingErrorMessage,
+                        selectedLevel: selectedLevel,
+                        selectedAnswer: selectedReadingAnswer,
+                        refreshAction: {
+                            Task {
+                                await loadReading(for: selectedLevel, forceRefresh: true)
+                            }
+                        },
+                        chooseAnswer: chooseReadingAnswer
+                    )
+
                     TopicLevelTopicListCard(
                         topics: topics,
                         selectedLevel: selectedLevel
@@ -5196,6 +5308,9 @@ private struct TopicsPracticeView: View {
         }
         .task(id: selectedLevel) {
             await loadTopics(for: selectedLevel)
+        }
+        .task(id: selectedLevel) {
+            await loadReading(for: selectedLevel)
         }
     }
 
@@ -5282,6 +5397,47 @@ private struct TopicsPracticeView: View {
         return (style.0, style.1)
     }
 
+    @MainActor
+    private func loadReading(for level: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, reading?.level == level.rawValue {
+            return
+        }
+
+        isLoadingReading = true
+        readingErrorMessage = nil
+        selectedReadingAnswer = nil
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchReading(
+                level: level.rawValue,
+                topic: level.defaultReadingTopic
+            )
+            reading = response.reading
+            readingErrorMessage = response.providerError
+        } catch {
+            reading = LocupomLevelledReading.fallback(for: level)
+            readingErrorMessage = "Usando lectura offline hasta que el API local este disponible."
+        }
+
+        isLoadingReading = false
+    }
+
+    private func chooseReadingAnswer(question: LocupomReadingQuestion, answer: String) {
+        selectedReadingAnswer = answer
+        let isCorrect = answer == question.answer
+        learningProgress.recordModule(LearningModule.topics.rawValue, wasCorrect: isCorrect)
+
+        if isCorrect {
+            learningProgress.recordErrorResolved(module: LearningModule.topics.rawValue, expected: question.answer)
+        } else {
+            learningProgress.recordError(
+                module: LearningModule.topics.rawValue,
+                expected: question.answer,
+                actual: answer,
+                context: question.prompt
+            )
+        }
+    }
 }
 
 private struct TopicsBrowserHeader: View {
@@ -5497,6 +5653,193 @@ private struct TopicLevelTopicListCard: View {
 
     private var topicCountText: String {
         topics.count == 1 ? "1 tema" : "\(topics.count) temas"
+    }
+}
+
+private struct TopicLevelReadingCard: View {
+    let reading: LocupomLevelledReading?
+    let isLoading: Bool
+    let errorMessage: String?
+    let selectedLevel: TopicCEFRLevel
+    let selectedAnswer: String?
+    let refreshAction: () -> Void
+    let chooseAnswer: (LocupomReadingQuestion, String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                Label("Lectura CEFR", systemImage: "book.pages.fill")
+                    .font(.system(size: 17, weight: .black, design: .rounded))
+                    .foregroundStyle(TranslateTheme.ink)
+
+                Spacer(minLength: 8)
+
+                if let reading {
+                    Text(reading.source)
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(selectedLevel.accent)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(selectedLevel.accent.opacity(0.10), in: Capsule())
+                }
+
+                Button(action: refreshAction) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 14, weight: .black))
+                        .foregroundStyle(selectedLevel.accent)
+                        .frame(width: 34, height: 34)
+                        .background(selectedLevel.accent.opacity(0.10), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(isLoading)
+            }
+
+            if isLoading {
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .tint(selectedLevel.accent)
+                    Text("Cargando lectura de \(selectedLevel.shortCode)...")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(TranslateTheme.muted)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 10)
+            } else if let reading {
+                readingContent(reading)
+            } else {
+                Text(errorMessage ?? "No pude cargar una lectura para este nivel.")
+                    .font(.caption)
+                    .foregroundStyle(TranslateTheme.muted)
+                    .lineSpacing(3)
+            }
+        }
+        .padding(16)
+        .background(.white.opacity(0.94), in: RoundedRectangle(cornerRadius: 22))
+        .shadow(color: TranslateTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
+    }
+
+    @ViewBuilder
+    private func readingContent(_ reading: LocupomLevelledReading) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let errorMessage {
+                Label(errorMessage, systemImage: "wifi.slash")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.orange)
+                    .lineLimit(2)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(reading.title)
+                    .font(.system(size: 20, weight: .black, design: .rounded))
+                    .foregroundStyle(TranslateTheme.ink)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.82)
+
+                HStack(spacing: 8) {
+                    ReadingMetaPill(text: reading.level, systemImage: "chart.bar.fill", tint: selectedLevel.accent)
+                    ReadingMetaPill(text: "\(reading.estimatedMinutes)m", systemImage: "timer", tint: TranslateTheme.mint)
+                    ReadingMetaPill(text: reading.topic, systemImage: "tag.fill", tint: .orange)
+                }
+            }
+
+            Text(reading.content)
+                .font(.subheadline)
+                .lineSpacing(4)
+                .foregroundStyle(TranslateTheme.ink.opacity(0.86))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(13)
+                .background(TranslateTheme.softSurface, in: RoundedRectangle(cornerRadius: 15))
+
+            if let question = reading.questions.first {
+                readingQuestion(question)
+            }
+        }
+    }
+
+    private func readingQuestion(_ question: LocupomReadingQuestion) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Quick check", systemImage: "checkmark.circle.fill")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(TranslateTheme.ink)
+
+            Text(question.prompt)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(TranslateTheme.ink)
+                .lineSpacing(3)
+
+            VStack(spacing: 8) {
+                ForEach(question.options.isEmpty ? [question.answer] : question.options, id: \.self) { option in
+                    Button {
+                        chooseAnswer(question, option)
+                    } label: {
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: selectedAnswer == option ? "largecircle.fill.circle" : "circle")
+                                .foregroundStyle(selectedAnswer == option ? selectedLevel.accent : TranslateTheme.muted.opacity(0.65))
+                                .padding(.top, 2)
+
+                            Text(option)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(TranslateTheme.ink)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(11)
+                        .background(optionBackground(option, question: question), in: RoundedRectangle(cornerRadius: 13))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            if let selectedAnswer {
+                TranslateInfoCard(
+                    systemImage: selectedAnswer == question.answer ? "checkmark.seal.fill" : "lightbulb.fill",
+                    title: selectedAnswer == question.answer ? "Correct" : "Review",
+                    detail: selectedAnswer == question.answer ? question.explanation : "Answer: \(question.answer). \(question.explanation)",
+                    tint: selectedAnswer == question.answer ? TranslateTheme.mint : .orange
+                )
+            }
+        }
+        .padding(13)
+        .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(selectedLevel.accent.opacity(0.12), lineWidth: 1)
+        )
+    }
+
+    private func optionBackground(_ option: String, question: LocupomReadingQuestion) -> Color {
+        guard let selectedAnswer else {
+            return TranslateTheme.softSurface
+        }
+
+        if option == question.answer {
+            return TranslateTheme.mint.opacity(0.16)
+        }
+
+        if option == selectedAnswer {
+            return Color.orange.opacity(0.13)
+        }
+
+        return TranslateTheme.softSurface
+    }
+}
+
+private struct ReadingMetaPill: View {
+    let text: String
+    let systemImage: String
+    let tint: Color
+
+    var body: some View {
+        Label(text, systemImage: systemImage)
+            .font(.caption2.weight(.black))
+            .foregroundStyle(tint)
+            .lineLimit(1)
+            .minimumScaleFactor(0.70)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background(tint.opacity(0.10), in: Capsule())
     }
 }
 
