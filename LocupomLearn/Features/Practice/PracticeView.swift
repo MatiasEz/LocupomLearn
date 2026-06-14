@@ -55,6 +55,7 @@ struct PracticeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
+        .locupomFloatingTabBarHidden(true)
     }
 
     private func practiceContent(song: Song) -> some View {
@@ -70,7 +71,6 @@ struct PracticeView: View {
                     MusicLessonHeader(
                         lessonNumber: currentIndex + 1,
                         totalLessons: lines.count,
-                        hearts: max(0, 3 - sessionMissCount),
                         progress: progress(lines: lines),
                         closeAction: { dismiss() }
                     )
@@ -106,7 +106,7 @@ struct PracticeView: View {
                         }
                     )
 
-                    MusicModeSelector(mode: $mode, level: songLevel)
+                    MusicModeSelector(mode: $mode)
 
                     switch mode {
                     case .gated:
@@ -400,7 +400,7 @@ struct PracticeView: View {
                     .lineSpacing(6)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                    .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
 
                 ContentUnavailableView("No encontre una palabra para ocultar", systemImage: "text.badge.xmark")
 
@@ -422,7 +422,7 @@ struct PracticeView: View {
                 .lineSpacing(8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
 
             HStack {
                 Label("Errores \(wrongGuesses.count)/\(maxWrongGuesses)", systemImage: "xmark.circle")
@@ -489,12 +489,12 @@ struct PracticeView: View {
                 .lineSpacing(6)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
 
             TextEditor(text: $answer)
                 .frame(minHeight: 110)
                 .scrollContentBackground(.hidden)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
 
@@ -1332,23 +1332,21 @@ private enum PracticeMode: String, CaseIterable, Identifiable {
 }
 
 private enum MusicLessonTheme {
-    static let ink = Color(red: 0.05, green: 0.08, blue: 0.24)
-    static let muted = Color(red: 0.42, green: 0.45, blue: 0.60)
+    static let ink = Color(.label)
+    static let muted = Color(.secondaryLabel)
     static let primary = Color(red: 0.20, green: 0.36, blue: 0.98)
     static let secondary = Color(red: 0.47, green: 0.35, blue: 0.98)
     static let mint = Color(red: 0.38, green: 0.78, blue: 0.73)
-    static let surface = Color.white
-    static let softSurface = Color(red: 0.96, green: 0.97, blue: 1.0)
+    static let surface = Color(.secondarySystemBackground)
+    static let softSurface = Color(.tertiarySystemBackground)
 }
 
 private struct MusicLessonBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         LinearGradient(
-            colors: [
-                Color(red: 0.98, green: 0.99, blue: 1.0),
-                Color(red: 0.93, green: 0.95, blue: 1.0),
-                Color(red: 0.98, green: 0.99, blue: 1.0)
-            ],
+            colors: backgroundColors,
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -1366,6 +1364,22 @@ private struct MusicLessonBackground: View {
                 .frame(width: 260, height: 260)
                 .offset(x: -140, y: 120)
         }
+    }
+
+    private var backgroundColors: [Color] {
+        if colorScheme == .dark {
+            return [
+                Color(red: 0.04, green: 0.06, blue: 0.13),
+                Color(red: 0.08, green: 0.08, blue: 0.20),
+                Color(red: 0.03, green: 0.09, blue: 0.12)
+            ]
+        }
+
+        return [
+            Color(red: 0.98, green: 0.99, blue: 1.0),
+            Color(red: 0.93, green: 0.95, blue: 1.0),
+            Color(red: 0.98, green: 0.99, blue: 1.0)
+        ]
     }
 }
 
@@ -1385,45 +1399,32 @@ private struct MusicDotPattern: View {
 private struct MusicLessonHeader: View {
     let lessonNumber: Int
     let totalLessons: Int
-    let hearts: Int
     let progress: Double
     let closeAction: () -> Void
 
     var body: some View {
-        VStack(spacing: 14) {
+        ZStack {
             HStack {
                 Button(action: closeAction) {
                     Image(systemName: "xmark")
-                        .font(.headline)
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(MusicLessonTheme.ink)
                         .frame(width: 42, height: 42)
-                        .background(MusicLessonTheme.surface.opacity(0.86), in: Circle())
                 }
                 .buttonStyle(.plain)
 
-                Spacer()
-
-                Text("Lesson \(lessonNumber) of \(totalLessons)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(MusicLessonTheme.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-
-                Spacer()
-
-                HStack(spacing: 5) {
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(Color.red.opacity(0.78))
-
-                    Text("\(hearts)")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.red)
-                }
-                .frame(width: 42, height: 42)
+                Spacer(minLength: 0)
             }
 
-            MusicProgressSegments(progress: progress)
+            Text("Música")
+                .font(.system(size: 21, weight: .semibold))
+                .foregroundStyle(MusicLessonTheme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal, 54)
         }
+        .frame(height: 42)
     }
 }
 
@@ -1492,7 +1493,7 @@ private struct MusicSongPlayerCard<Player: View>: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay {
                             RoundedRectangle(cornerRadius: 14)
-                                .stroke(.white.opacity(0.7), lineWidth: 1)
+                                .stroke(MusicLessonTheme.surface.opacity(0.7), lineWidth: 1)
                         }
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -1563,7 +1564,6 @@ private struct MusicWaveformView: View {
 
 private struct MusicModeSelector: View {
     @Binding var mode: PracticeMode
-    let level: LearningLevel
 
     var body: some View {
         HStack(spacing: 8) {
@@ -1577,16 +1577,6 @@ private struct MusicModeSelector: View {
                 )
             }
         }
-        .overlay(alignment: .bottomTrailing) {
-            Text(level.shortCode)
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(MusicLessonTheme.mint)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(MusicLessonTheme.surface, in: Capsule())
-                .offset(y: 22)
-        }
-        .padding(.bottom, 8)
     }
 }
 
@@ -1968,7 +1958,7 @@ private struct SongPracticeMissionPanel: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -1995,7 +1985,7 @@ private struct MissionPill: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(9)
-        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -2042,7 +2032,7 @@ private struct PracticeCoachInsight: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -2121,7 +2111,7 @@ private struct LyricContextPanel: View {
                 }
             }
             .padding(10)
-            .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+            .background(MusicLessonTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
             if !keyWords.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
@@ -2141,7 +2131,7 @@ private struct LyricContextPanel: View {
                             }
                             .buttonStyle(.plain)
                             .foregroundStyle(selectedWord == word ? Color.white : Color.accentColor)
-                            .background(selectedWord == word ? Color.accentColor : Color(.tertiarySystemBackground), in: Capsule())
+                            .background(selectedWord == word ? Color.accentColor : MusicLessonTheme.softSurface, in: Capsule())
                         }
                     }
                 }
@@ -2174,7 +2164,7 @@ private struct LyricContextPanel: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -2197,7 +2187,7 @@ private struct ContextLineRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(10)
-        .background(isCurrent ? Color.accentColor.opacity(0.08) : Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(isCurrent ? Color.accentColor.opacity(0.08) : MusicLessonTheme.softSurface, in: RoundedRectangle(cornerRadius: 8))
     }
 }
 
@@ -2274,7 +2264,7 @@ private struct SyncCalibrationPanel: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func formatTime(_ value: TimeInterval) -> String {
@@ -2329,7 +2319,7 @@ private struct ClozeLineCard: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var clozePattern: String {
@@ -2391,7 +2381,7 @@ private struct FeedbackView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -2421,7 +2411,7 @@ private struct PracticeWordDiffView: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(MusicLessonTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func label(for token: TextComparisonToken) -> String {
@@ -2459,7 +2449,7 @@ private struct PracticeWordDiffView: View {
         case .wrong:
             return .orange.opacity(0.14)
         case .missing, .extra:
-            return Color(.tertiarySystemBackground)
+            return MusicLessonTheme.softSurface
         }
     }
 }

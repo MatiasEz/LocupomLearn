@@ -1,6 +1,7 @@
 const http = require("http");
 const crypto = require("crypto");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 
 const PORT = Number(process.env.PORT || 8787);
@@ -8,12 +9,272 @@ const ROOT_DIR = __dirname;
 const DATA_DIR = path.join(ROOT_DIR, "data");
 const PDF_DIR = path.join(ROOT_DIR, "pdfs");
 const MORNING_BRIEF_CONTENT_PATH = path.join(DATA_DIR, "morning-brief-content.json");
+const PROGRESS_FILE = process.env.LOCUPOM_PROGRESS_FILE
+  || path.join(process.env.LOCUPOM_PROGRESS_DIR || os.tmpdir(), "locupom-progress.json");
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+  "Access-Control-Max-Age": "86400"
+};
+
+function httpError(statusCode, message) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
 
 function loadJSON(filePath, fallback) {
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch {
     return fallback;
+  }
+}
+
+let progressCache = null;
+
+function emptyProgressStore() {
+  return {
+    version: 1,
+    updatedAt: null,
+    learners: {}
+  };
+}
+
+function loadProgressStore() {
+  if (progressCache) return progressCache;
+  const loaded = loadJSON(PROGRESS_FILE, emptyProgressStore());
+  progressCache = {
+    version: loaded.version || 1,
+    updatedAt: loaded.updatedAt || null,
+    learners: loaded.learners && typeof loaded.learners === "object" ? loaded.learners : {}
+  };
+  return progressCache;
+}
+
+function saveProgressStore(store) {
+  store.updatedAt = new Date().toISOString();
+  const directory = path.dirname(PROGRESS_FILE);
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(PROGRESS_FILE, JSON.stringify(store, null, 2));
+}
+
+function normalizeLearnerId(value) {
+  const learnerId = String(value || "").trim();
+  if (!learnerId) return null;
+  if (learnerId.length > 120) return null;
+  if (!/^[a-zA-Z0-9._:@-]+$/.test(learnerId)) return null;
+  return learnerId;
+}
+
+function requireLearnerId(value) {
+  const learnerId = normalizeLearnerId(value);
+  if (!learnerId) {
+    throw httpError(400, "learnerId is required and may only contain letters, numbers, dots, underscores, colons, @ and hyphens.");
+  }
+  return learnerId;
+}
+
+function learnerProgress(store, learnerId) {
+  store.learners[learnerId] ||= {
+    completed: {},
+    createdAt: new Date().toISOString(),
+    updatedAt: null
+  };
+  store.learners[learnerId].completed ||= {};
+  return store.learners[learnerId];
+}
+
+function normalizeProgressKind(value) {
+  const key = String(value || "item").trim().toLowerCase().replace(/[^a-z]/g, "");
+  const aliases = {
+    reading: "reading",
+    readings: "reading",
+    exercise: "exercise",
+    exercises: "exercise",
+    speaking: "speaking",
+    speakingprompt: "speaking",
+    speakingprompts: "speaking",
+    vocabulary: "vocabulary",
+    vocab: "vocabulary",
+    word: "vocabulary",
+    topic: "topic",
+    topics: "topic",
+    roadmap: "topic",
+    item: "item"
+  };
+  return aliases[key] || "item";
+}
+
+function completionKey(kind, itemId) {
+  return `${normalizeProgressKind(kind)}:${String(itemId || "").trim()}`;
+}
+
+function parseCompletionIdentifier(value, fallbackKind = "item") {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const match = raw.match(/^([a-zA-Z][a-zA-Z_.-]*):(.*)$/);
+  if (match && match[2]) {
+    return {
+      kind: normalizeProgressKind(match[1]),
+      itemId: match[2].trim()
+    };
+  }
+  return {
+    kind: normalizeProgressKind(fallbackKind),
+    itemId: raw
+  };
+}
+
+function normalizeCompletionPayload(payload) {
+  const source = payload?.item && typeof payload.item === "object" ? payload.item : payload || {};
+  const parsed = parseCompletionIdentifier(
+    source.key || source.completionKey || source.progressKey || source.id,
+    source.kind || source.type || "item"
+  );
+  const rawItemId = String(source.itemId || source.contentId || parsed?.itemId || "").trim();
+  const parsedItemId = parseCompletionIdentifier(rawItemId, source.kind || source.type || parsed?.kind || "item");
+  const kind = normalizeProgressKind(source.kind || source.type || parsed?.kind || parsedItemId?.kind);
+  const itemId = String(parsedItemId?.itemId || rawItemId).trim();
+
+  if (!itemId) {
+    throw httpError(400, "itemId is required. You can also pass id as 'kind:itemId'.");
+  }
+
+  return {
+    key: completionKey(kind, itemId),
+    kind,
+    itemId,
+    level: source.level || null,
+    title: source.title || null,
+    source: source.source || null,
+    metadata: source.metadata && typeof source.metadata === "object" ? source.metadata : null
+  };
+}
+
+function publicCompletionRecord(record) {
+  return {
+    key: record.key,
+    kind: record.kind,
+    itemId: record.itemId,
+    level: record.level || null,
+    title: record.title || null,
+    source: record.source || null,
+    metadata: record.metadata || null,
+    completedAt: record.completedAt
+  };
+}
+
+function completedEntriesForLearner(learnerId) {
+  if (!learnerId) return [];
+  const store = loadProgressStore();
+  const learner = store.learners[learnerId];
+  if (!learner?.completed) return [];
+  return Object.values(learner.completed).map(publicCompletionRecord);
+}
+
+function splitParamList(value) {
+  return String(value || "")
+    .split(/[,\s]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function completionFilterFor(searchParams) {
+  const learnerId = normalizeLearnerId(searchParams.get("learnerId") || searchParams.get("userId") || searchParams.get("deviceId"));
+  const completedKeys = new Set();
+  const untypedCompletedItemIds = new Set();
+  const completedParams = [
+    ...splitParamList(searchParams.get("completed")),
+    ...splitParamList(searchParams.get("completedIds")),
+    ...splitParamList(searchParams.get("excludeIds"))
+  ];
+
+  for (const value of completedParams) {
+    const parsed = parseCompletionIdentifier(value);
+    if (!parsed) continue;
+    if (parsed.kind === "item") {
+      untypedCompletedItemIds.add(parsed.itemId);
+    } else {
+      completedKeys.add(completionKey(parsed.kind, parsed.itemId));
+    }
+  }
+
+  for (const record of completedEntriesForLearner(learnerId)) {
+    completedKeys.add(record.key);
+  }
+
+  const includeCompleted = searchParams.get("includeCompleted") === "true" || searchParams.get("excludeCompleted") === "false";
+  const explicitExclude = searchParams.get("excludeCompleted") === "true";
+  const hasCompletedState = Boolean(learnerId) || completedKeys.size > 0 || untypedCompletedItemIds.size > 0;
+
+  return {
+    learnerId,
+    shouldExclude: !includeCompleted && (explicitExclude || hasCompletedState),
+    completedKeys,
+    untypedCompletedItemIds
+  };
+}
+
+function isCompletedItem(item, kind, filter) {
+  if (!filter?.shouldExclude || !item?.id) return false;
+  return filter.completedKeys.has(completionKey(kind, item.id))
+    || filter.untypedCompletedItemIds.has(item.id);
+}
+
+function filterIncompleteItems(items, kind, filter) {
+  if (!filter?.shouldExclude) return items;
+  return items.filter((item) => !isCompletedItem(item, kind, filter));
+}
+
+function progressResponse(filter, total, visible) {
+  if (!filter?.shouldExclude) return undefined;
+  return {
+    learnerId: filter.learnerId || null,
+    excludeCompleted: true,
+    completedCount: filter.completedKeys.size + filter.untypedCompletedItemIds.size,
+    hiddenCompleted: Math.max(0, total - visible)
+  };
+}
+
+function readRequestBody(req) {
+  if (req.body && typeof req.body === "object" && !Buffer.isBuffer(req.body)) {
+    return Promise.resolve(req.body);
+  }
+
+  if (typeof req.body === "string" || Buffer.isBuffer(req.body)) {
+    return Promise.resolve(String(req.body));
+  }
+
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk;
+      if (body.length > 1024 * 1024) {
+        reject(httpError(413, "Request body is too large."));
+        req.destroy();
+      }
+    });
+    req.on("end", () => resolve(body));
+    req.on("error", reject);
+  });
+}
+
+async function readJSONBody(req) {
+  const body = await readRequestBody(req);
+  if (body && typeof body === "object" && !Buffer.isBuffer(body)) {
+    return body;
+  }
+
+  const raw = String(body || "").trim();
+  if (!raw) return {};
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw httpError(400, "Invalid JSON body.");
   }
 }
 
@@ -2093,7 +2354,7 @@ function buildLocalReading({ level, topic, length }) {
   const variantId = `long-${paragraphCount}`;
 
   return {
-    id: `${normalizedLevel.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${slugifyReading(normalizedTopic)}-${length || "standard"}-${variantId}-${crypto.randomUUID().slice(0, 8)}`,
+    id: `${normalizedLevel.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${slugifyReading(normalizedTopic)}-${length || "standard"}-${variantId}`,
     title,
     level: normalizedLevel,
     cefrLevel: readingCefrLevel(normalizedLevel),
@@ -2130,43 +2391,140 @@ function normalizeMorningBriefReading(item) {
   };
 }
 
-function morningBriefItems(kind, searchParams) {
-  const level = normalizeLevel(searchParams.get("level"));
-  const collection = morningBriefContent[kind] || [];
-  return collection.filter((item) => !level || item.level === level);
+function normalizeVocabularyItem(item, index) {
+  const id = item.id || `vocab-${slugify(item.word || item.term || String(index + 1))}`;
+  return {
+    id,
+    level: item.level || "All",
+    ...item
+  };
 }
 
-function morningBriefReading(searchParams) {
+function normalizeExerciseItem(item, index) {
+  const id = item.id || `exercise-${slugify(item.title || item.prompt || String(index + 1))}`;
+  return {
+    id,
+    skill: inferExerciseSkill(item),
+    ...item
+  };
+}
+
+function inferExerciseSkill(item) {
+  if (item.skill) return item.skill;
+  const type = String(item.type || "").toLowerCase();
+  if (["translation", "free_translation"].includes(type)) return "translation";
+  if (["writing", "writing_prompt", "analysis", "argument_improvement", "style_analysis"].includes(type)) return "writing";
+  if (["listening", "cloze_listening"].includes(type)) return "listening";
+  if (["grammar", "gap_fill", "multiple_choice"].includes(type)) return "grammar";
+  if (["ordering", "sentence_order", "sentence_builder"].includes(type)) return "sentence_builder";
+  return "practice";
+}
+
+function matchesRequestedLevel(item, searchParams) {
+  const level = normalizeLevel(searchParams.get("level"));
+  return !level || item.level === level || item.level === "All";
+}
+
+function matchesRequestedSkill(item, searchParams) {
+  const skill = searchParams.get("skill") || searchParams.get("module");
+  return !skill || item.skill === skill;
+}
+
+function morningBriefCollectionTotal(kind, searchParams) {
+  return (morningBriefContent[kind] || [])
+    .map((item, index) => {
+      if (kind === "vocabulary") return normalizeVocabularyItem(item, index);
+      if (kind === "exercises") return normalizeExerciseItem(item, index);
+      return item;
+    })
+    .filter((item) => matchesRequestedLevel(item, searchParams))
+    .filter((item) => kind !== "exercises" || matchesRequestedSkill(item, searchParams))
+    .length;
+}
+
+function morningBriefItems(kind, searchParams, filter) {
+  const collection = morningBriefContent[kind] || [];
+  const progressKind = {
+    readings: "reading",
+    exercises: "exercise",
+    speakingPrompts: "speaking",
+    vocabulary: "vocabulary"
+  }[kind] || "item";
+  const normalized = kind === "readings"
+    ? collection.map(normalizeMorningBriefReading)
+    : kind === "vocabulary"
+      ? collection.map(normalizeVocabularyItem)
+      : kind === "exercises"
+        ? collection.map(normalizeExerciseItem)
+        : collection;
+
+  return filterIncompleteItems(
+    normalized
+      .filter((item) => matchesRequestedLevel(item, searchParams))
+      .filter((item) => kind !== "exercises" || matchesRequestedSkill(item, searchParams)),
+    progressKind,
+    filter
+  );
+}
+
+function morningBriefReading(searchParams, filter) {
   const level = normalizeLevel(searchParams.get("level")) || "B1";
   const topic = searchParams.get("topic")?.trim().toLowerCase();
   const candidates = (morningBriefContent.readings || [])
     .filter((item) => item.level === level)
-    .filter((item) => !topic || item.topic?.toLowerCase().includes(topic));
+    .filter((item) => !topic || item.topic?.toLowerCase().includes(topic))
+    .map(normalizeMorningBriefReading);
 
   if (candidates.length === 0) return null;
-  return normalizeMorningBriefReading(candidates[0]);
+
+  return candidates.find((item) => !isCompletedItem(item, "reading", filter)) || null;
 }
 
-async function getLevelledReading(searchParams) {
-  const briefReading = morningBriefReading(searchParams);
+function libraryReadingTopics(level, requestedTopic) {
+  if (requestedTopic?.trim()) return [normalizeTopic(requestedTopic, level)];
+  return readingTopicsByLevel[level] || readingTopicsByLevel.B1;
+}
+
+function buildIncompleteLibraryReading(searchParams, filter) {
+  const level = normalizeLevel(searchParams.get("level")) || "B1";
+  const length = searchParams.get("length") || "standard";
+  const requestedTopic = searchParams.get("topic");
+  const topicsToTry = libraryReadingTopics(level, requestedTopic);
+
+  for (const topic of topicsToTry) {
+    const reading = buildLocalReading({ level, topic, length });
+    if (!isCompletedItem(reading, "reading", filter)) {
+      return reading;
+    }
+  }
+
+  return null;
+}
+
+async function getLevelledReading(searchParams, filter = completionFilterFor(searchParams)) {
+  const briefReading = morningBriefReading(searchParams, filter);
   if (briefReading && searchParams.get("fallback") !== "library") {
     return {
       provider: "locupom-morning-brief",
       providerConfigured: true,
       cost: "free",
-      reading: briefReading
+      reading: briefReading,
+      progress: progressResponse(filter, 1, 1)
     };
   }
 
   const level = normalizeLevel(searchParams.get("level")) || "B1";
-  const topic = normalizeTopic(searchParams.get("topic"), level);
-  const length = searchParams.get("length") || "standard";
+  const reading = buildIncompleteLibraryReading(searchParams, filter);
 
   return {
     provider: "locupom-free",
     providerConfigured: true,
     cost: "free",
-    reading: buildLocalReading({ level, topic, length })
+    reading,
+    level,
+    completed: !reading && filter.shouldExclude,
+    message: !reading && filter.shouldExclude ? "No incomplete reading is available for this request." : undefined,
+    progress: progressResponse(filter, libraryReadingTopics(level, searchParams.get("topic")).length, reading ? 1 : 0)
   };
 }
 
@@ -2174,7 +2532,7 @@ function send(res, status, payload) {
   const body = JSON.stringify(payload, null, 2);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
+    ...CORS_HEADERS,
     "Cache-Control": "no-store"
   });
   res.end(body);
@@ -2183,7 +2541,7 @@ function send(res, status, payload) {
 function sendHTML(res, status, body) {
   res.writeHead(status, {
     "Content-Type": "text/html; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
+    ...CORS_HEADERS,
     "Cache-Control": "no-store"
   });
   res.end(body);
@@ -2194,7 +2552,7 @@ function sendFile(res, status, filePath, contentType) {
     if (error) return notFound(res, "File not found");
     res.writeHead(status, {
       "Content-Type": contentType,
-      "Access-Control-Allow-Origin": "*",
+      ...CORS_HEADERS,
       "Cache-Control": "no-store"
     });
     res.end(data);
@@ -2208,9 +2566,9 @@ function notFound(res, message = "Not found") {
 function handler(req, res) {
   return Promise.resolve(route(req, res)).catch((error) => {
     if (!res.headersSent) {
-      res.writeHead(500, {
+      res.writeHead(error.statusCode || 500, {
         "Content-Type": "application/json; charset=utf-8",
-        "Access-Control-Allow-Origin": "*",
+        ...CORS_HEADERS,
         "Cache-Control": "no-store"
       });
     }
@@ -2219,7 +2577,7 @@ function handler(req, res) {
   });
 }
 
-function listTopics(searchParams) {
+function listTopicsBase(searchParams) {
   const level = normalizeLevel(searchParams.get("level"));
   const category = searchParams.get("category");
   const q = searchParams.get("q")?.trim().toLowerCase();
@@ -2238,8 +2596,16 @@ function listTopics(searchParams) {
     .sort((a, b) => a.levelOrder - b.levelOrder || a.category.localeCompare(b.category) || a.order - b.order);
 }
 
-function groupRoadmap(levelLabel) {
-  const selected = topics.filter((topic) => topic.level === levelLabel || topic.level === "All");
+function listTopics(searchParams, filter = completionFilterFor(searchParams)) {
+  return filterIncompleteItems(listTopicsBase(searchParams), "topic", filter);
+}
+
+function groupRoadmap(levelLabel, filter = completionFilterFor(new URLSearchParams())) {
+  const selected = filterIncompleteItems(
+    topics.filter((topic) => topic.level === levelLabel || topic.level === "All"),
+    "topic",
+    filter
+  );
   const grouped = {};
 
   for (const topic of selected) {
@@ -2254,12 +2620,91 @@ function groupRoadmap(levelLabel) {
   return Object.values(grouped);
 }
 
+function progressPayload(learnerId) {
+  const completedItems = completedEntriesForLearner(learnerId)
+    .sort((first, second) => String(second.completedAt).localeCompare(String(first.completedAt)));
+
+  return {
+    learnerId,
+    completedCount: completedItems.length,
+    completedKeys: completedItems.map((item) => item.key),
+    completedItems
+  };
+}
+
+async function markCompleted(req, searchParams) {
+  const body = await readJSONBody(req);
+  const learnerId = requireLearnerId(body.learnerId || searchParams.get("learnerId") || body.userId || body.deviceId);
+  const completion = normalizeCompletionPayload(body);
+  const now = new Date().toISOString();
+  const store = loadProgressStore();
+  const learner = learnerProgress(store, learnerId);
+  const existing = learner.completed[completion.key];
+
+  learner.completed[completion.key] = {
+    ...existing,
+    ...completion,
+    completedAt: existing?.completedAt || now,
+    updatedAt: now
+  };
+  learner.updatedAt = now;
+  saveProgressStore(store);
+
+  return {
+    learnerId,
+    completed: publicCompletionRecord(learner.completed[completion.key]),
+    completedCount: Object.keys(learner.completed).length
+  };
+}
+
+async function unmarkCompleted(req, searchParams) {
+  const body = req.method === "DELETE" ? await readJSONBody(req) : {};
+  const learnerId = requireLearnerId(body.learnerId || searchParams.get("learnerId") || body.userId || body.deviceId);
+  const completion = normalizeCompletionPayload({
+    ...Object.fromEntries(searchParams.entries()),
+    ...body
+  });
+  const store = loadProgressStore();
+  const learner = learnerProgress(store, learnerId);
+  const removed = Boolean(learner.completed[completion.key]);
+
+  delete learner.completed[completion.key];
+  learner.updatedAt = new Date().toISOString();
+  saveProgressStore(store);
+
+  return {
+    learnerId,
+    removed,
+    key: completion.key,
+    completedCount: Object.keys(learner.completed).length
+  };
+}
+
 async function route(req, res) {
   if (req.method === "OPTIONS") return send(res, 204, {});
-  if (req.method !== "GET") return send(res, 405, { error: "Only GET is supported" });
 
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
+  const progressFilter = completionFilterFor(url.searchParams);
+
+  if (pathname === "/progress" || pathname === "/progress/completed") {
+    if (req.method === "GET") {
+      const learnerId = requireLearnerId(url.searchParams.get("learnerId") || url.searchParams.get("userId") || url.searchParams.get("deviceId"));
+      return send(res, 200, progressPayload(learnerId));
+    }
+
+    if (req.method === "POST") {
+      return send(res, 201, await markCompleted(req, url.searchParams));
+    }
+
+    if (req.method === "DELETE") {
+      return send(res, 200, await unmarkCompleted(req, url.searchParams));
+    }
+
+    return send(res, 405, { error: "Use GET, POST or DELETE for progress endpoints." });
+  }
+
+  if (req.method !== "GET") return send(res, 405, { error: "Only GET is supported for this endpoint." });
 
   if (pathname === "/") {
     return sendHTML(res, 200, `<!doctype html>
@@ -2315,6 +2760,8 @@ async function route(req, res) {
         "/speaking?level=B1",
         "/exercises?level=B1",
         "/vocabulary",
+        "/progress?learnerId=device-123",
+        "POST /progress/completed",
         "/roadmap?level=B1",
         "/search?q=passive"
       ]
@@ -2352,55 +2799,78 @@ async function route(req, res) {
   }
 
   if (pathname === "/topics") {
-    const result = listTopics(url.searchParams);
-    return send(res, 200, { count: result.length, topics: result });
+    const total = listTopicsBase(url.searchParams).length;
+    const result = listTopics(url.searchParams, progressFilter);
+    return send(res, 200, {
+      count: result.length,
+      topics: result,
+      progress: progressResponse(progressFilter, total, result.length)
+    });
   }
 
   if (pathname === "/readings") {
-    return send(res, 200, await getLevelledReading(url.searchParams));
+    return send(res, 200, await getLevelledReading(url.searchParams, progressFilter));
   }
 
   if (pathname === "/morning-brief") {
+    const readings = morningBriefItems("readings", url.searchParams, progressFilter);
+    const speakingPrompts = morningBriefItems("speakingPrompts", url.searchParams, progressFilter);
+    const exercises = morningBriefItems("exercises", url.searchParams, progressFilter);
+    const vocabulary = morningBriefItems("vocabulary", url.searchParams, progressFilter);
+    const total =
+      morningBriefCollectionTotal("readings", url.searchParams)
+      + morningBriefCollectionTotal("speakingPrompts", url.searchParams)
+      + morningBriefCollectionTotal("exercises", url.searchParams)
+      + morningBriefCollectionTotal("vocabulary", url.searchParams);
+    const visible = readings.length + speakingPrompts.length + exercises.length + vocabulary.length;
+
     return send(res, 200, {
       generatedAt: morningBriefContent.generatedAt,
       runId: morningBriefContent.runId,
       metadata: morningBriefContent.metadata || {},
       counts: {
-        readings: (morningBriefContent.readings || []).length,
-        speakingPrompts: (morningBriefContent.speakingPrompts || []).length,
-        exercises: (morningBriefContent.exercises || []).length,
-        vocabulary: (morningBriefContent.vocabulary || []).length
+        readings: readings.length,
+        speakingPrompts: speakingPrompts.length,
+        exercises: exercises.length,
+        vocabulary: vocabulary.length
       },
-      readings: (morningBriefContent.readings || []).map(normalizeMorningBriefReading),
-      speakingPrompts: morningBriefContent.speakingPrompts || [],
-      exercises: morningBriefContent.exercises || [],
-      vocabulary: morningBriefContent.vocabulary || []
+      progress: progressResponse(progressFilter, total, visible),
+      readings,
+      speakingPrompts,
+      exercises,
+      vocabulary
     });
   }
 
   if (pathname === "/speaking") {
-    const items = morningBriefItems("speakingPrompts", url.searchParams);
+    const total = morningBriefCollectionTotal("speakingPrompts", url.searchParams);
+    const items = morningBriefItems("speakingPrompts", url.searchParams, progressFilter);
     return send(res, 200, {
       generatedAt: morningBriefContent.generatedAt,
       count: items.length,
+      progress: progressResponse(progressFilter, total, items.length),
       speakingPrompts: items
     });
   }
 
   if (pathname === "/exercises") {
-    const items = morningBriefItems("exercises", url.searchParams);
+    const total = morningBriefCollectionTotal("exercises", url.searchParams);
+    const items = morningBriefItems("exercises", url.searchParams, progressFilter);
     return send(res, 200, {
       generatedAt: morningBriefContent.generatedAt,
       count: items.length,
+      progress: progressResponse(progressFilter, total, items.length),
       exercises: items
     });
   }
 
   if (pathname === "/vocabulary") {
+    const vocabulary = morningBriefItems("vocabulary", url.searchParams, progressFilter);
     return send(res, 200, {
       generatedAt: morningBriefContent.generatedAt,
-      count: (morningBriefContent.vocabulary || []).length,
-      vocabulary: morningBriefContent.vocabulary || []
+      count: vocabulary.length,
+      progress: progressResponse(progressFilter, morningBriefCollectionTotal("vocabulary", url.searchParams), vocabulary.length),
+      vocabulary
     });
   }
 
@@ -2417,15 +2887,24 @@ async function route(req, res) {
 
   if (pathname === "/roadmap") {
     const level = normalizeLevel(url.searchParams.get("level")) || "B1";
+    const total = topics.filter((topic) => topic.level === level || topic.level === "All").length;
+    const roadmap = groupRoadmap(level, progressFilter);
+    const visible = roadmap.reduce((count, group) => count + group.topics.length, 0);
     return send(res, 200, {
       level,
-      roadmap: groupRoadmap(level)
+      progress: progressResponse(progressFilter, total, visible),
+      roadmap
     });
   }
 
   if (pathname === "/search") {
-    const result = listTopics(url.searchParams);
-    return send(res, 200, { count: result.length, topics: result });
+    const total = listTopicsBase(url.searchParams).length;
+    const result = listTopics(url.searchParams, progressFilter);
+    return send(res, 200, {
+      count: result.length,
+      topics: result,
+      progress: progressResponse(progressFilter, total, result.length)
+    });
   }
 
   return notFound(res);

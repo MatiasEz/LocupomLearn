@@ -6,16 +6,8 @@ struct LearningHubView: View {
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var path: [LearningModule] = []
 
-    private var dueReviewCount: Int {
-        learningProgress.dueVocabulary().count
-    }
-
     private var recommendedModule: LearningModule {
         .daily
-    }
-
-    private var xpScore: Int {
-        max(120, learningProgress.totalCorrect * 70 + learningProgress.savedWords.count * 95 + learningProgress.profile.streak * 120)
     }
 
     private var courseProgress: Double {
@@ -27,7 +19,18 @@ struct LearningHubView: View {
     }
 
     private var continueTopicTitle: String {
-        GrammarTopic.deck(for: learningProgress.profile.level).first?.title ?? "English basics"
+        GrammarTopic.deck(for: selectedCEFRLevel.fallbackLearningLevel).first?.title ?? "English basics"
+    }
+
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
+
+    private var cefrLevelBinding: Binding<TopicCEFRLevel> {
+        Binding(
+            get: { selectedCEFRLevel },
+            set: { learningProgress.updateCEFRLevel($0.rawValue) }
+        )
     }
 
     var body: some View {
@@ -37,8 +40,6 @@ struct LearningHubView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        LocupomHomeHeader(notificationCount: dueReviewCount)
-
                         LocupomHomeHeroCard(
                             level: learningProgress.profile.level,
                             dailyGoalMinutes: learningProgress.profile.dailyGoalMinutes,
@@ -50,11 +51,7 @@ struct LearningHubView: View {
                             }
                         )
 
-                        LocupomHomeStatsCard(
-                            streak: learningProgress.profile.streak,
-                            xpScore: xpScore,
-                            dueReviews: dueReviewCount
-                        )
+                        TopicLevelSelectorCard(selectedLevel: cefrLevelBinding)
 
                         LocupomPracticeShortcutsCard { module in
                             path.append(module)
@@ -100,100 +97,43 @@ struct LearningTopicsTabView: View {
 }
 
 struct LearningPracticeTabView: View {
-    @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var path: [LearningModule] = []
-
-    private let columns = [
-        GridItem(.flexible(), spacing: 12),
-        GridItem(.flexible(), spacing: 12)
-    ]
 
     private let modules: [LearningModule] = [
         .translate,
         .writing,
         .listening,
+        .reading,
         .speaking,
         .sentences,
-        .grammar,
-        .vocabulary,
-        .review
+        .grammar
     ]
-
-    private var dueReviewCount: Int {
-        learningProgress.dueVocabulary().count
-    }
-
-    private var vocabularyPreview: [VocabularyPreviewItem] {
-        let saved = learningProgress.savedWords.prefix(3).enumerated().map { index, item in
-            let icons = ["briefcase.fill", "fork.knife", "face.smiling.fill"]
-            let tints: [Color] = [.cyan, .purple, .yellow]
-
-            return VocabularyPreviewItem(
-                word: item.word,
-                detail: item.note.isEmpty ? item.source : item.note,
-                systemImage: icons.indices.contains(index) ? icons[index] : "bookmark.fill",
-                tint: tints.indices.contains(index) ? tints[index] : LocupomTheme.primary,
-                isDone: item.accuracy >= 0.65
-            )
-        }
-
-        if !saved.isEmpty {
-            return saved
-        }
-
-        return [
-            VocabularyPreviewItem(word: "travel", detail: "(v.) viajar", systemImage: "airplane", tint: .cyan, isDone: true),
-            VocabularyPreviewItem(word: "meaning", detail: "(n.) sentido", systemImage: "text.bubble.fill", tint: .purple, isDone: false),
-            VocabularyPreviewItem(word: "listen", detail: "(v.) escuchar", systemImage: "speaker.wave.2.fill", tint: .yellow, isDone: true)
-        ]
-    }
 
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                LocupomLearningBackground()
+                LocupomPracticeBackground()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        LocupomTopBar(
-                            title: "Practica",
-                            notificationCount: dueReviewCount
-                        )
+                    VStack(alignment: .leading, spacing: 26) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Ejercicios")
+                                .font(.system(size: 25, weight: .black, design: .rounded))
+                                .foregroundStyle(LocupomTheme.ink)
+                                .lineLimit(1)
 
-                        HomeSectionHeader(
-                            title: "Habilidades",
-                            detail: "Entrenamientos cortos"
-                        )
-
-                        LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(modules) { module in
-                                NavigationLink(value: module) {
-                                    CompactLearningModuleCard(
-                                        module: module,
-                                        stat: learningProgress.stat(for: module.rawValue),
-                                        isRecommended: module == .review && dueReviewCount > 0
-                                    )
+                            VStack(spacing: 12) {
+                                ForEach(modules) { module in
+                                    NavigationLink(value: module) {
+                                        LocupomPracticeExerciseRow(module: module)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
-
-                        HomeSectionHeader(
-                            title: "Repasar",
-                            detail: "Memoria y errores"
-                        )
-
-                        LocupomVocabularyReviewCard(
-                            items: vocabularyPreview,
-                            dueReviews: dueReviewCount,
-                            action: {
-                                path.append(.review)
-                            }
-                        )
-
-                        LearningErrorBankPanel()
                     }
-                    .padding()
+                    .padding(.horizontal, 28)
+                    .padding(.top, 18)
                     .padding(.bottom, 120)
                 }
                 .scrollIndicators(.hidden)
@@ -218,11 +158,6 @@ struct LearningProgressTabView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        LocupomTopBar(
-                            title: "Avance",
-                            notificationCount: learningProgress.dueVocabulary().count
-                        )
-
                         LearningProgressPanel()
                         LearningErrorBankPanel()
                         LearningSourcesSummaryCard(songCount: store.songs.count)
@@ -238,23 +173,23 @@ struct LearningProgressTabView: View {
     }
 }
 
-private enum LocupomTheme {
-    static let ink = Color(red: 0.05, green: 0.08, blue: 0.24)
+enum LocupomTheme {
+    static let ink = Color(.label)
+    static let muted = Color(.secondaryLabel)
     static let primary = Color(red: 0.20, green: 0.36, blue: 0.98)
     static let secondary = Color(red: 0.47, green: 0.35, blue: 0.98)
     static let mint = Color(red: 0.38, green: 0.78, blue: 0.73)
-    static let surface = Color.white
-    static let softSurface = Color(red: 0.96, green: 0.97, blue: 1.0)
+    static let surface = Color(.secondarySystemBackground)
+    static let elevatedSurface = Color(.systemBackground)
+    static let softSurface = Color(.tertiarySystemBackground)
 }
 
-private struct LocupomLearningBackground: View {
+struct LocupomLearningBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         LinearGradient(
-            colors: [
-                Color(red: 0.97, green: 0.98, blue: 1.0),
-                Color(red: 0.93, green: 0.95, blue: 1.0),
-                Color(red: 0.98, green: 0.99, blue: 1.0)
-            ],
+            colors: backgroundColors,
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -266,6 +201,65 @@ private struct LocupomLearningBackground: View {
                 .padding(.top, 26)
                 .padding(.leading, 18)
         }
+    }
+
+    private var backgroundColors: [Color] {
+        if colorScheme == .dark {
+            return [
+                Color(red: 0.04, green: 0.06, blue: 0.13),
+                Color(red: 0.08, green: 0.09, blue: 0.20),
+                Color(red: 0.03, green: 0.08, blue: 0.11)
+            ]
+        }
+
+        return [
+            Color(red: 0.97, green: 0.98, blue: 1.0),
+            Color(red: 0.93, green: 0.95, blue: 1.0),
+            Color(red: 0.98, green: 0.99, blue: 1.0)
+        ]
+    }
+}
+
+struct LocupomPracticeBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        LinearGradient(
+            colors: backgroundColors,
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+        .overlay(alignment: .bottomTrailing) {
+            RadialGradient(
+                colors: [
+                    Color(red: 0.67, green: 0.91, blue: 0.88).opacity(0.48),
+                    Color(red: 0.67, green: 0.91, blue: 0.88).opacity(0)
+                ],
+                center: .center,
+                startRadius: 10,
+                endRadius: 240
+            )
+            .frame(width: 320, height: 320)
+            .offset(x: 94, y: 48)
+            .allowsHitTesting(false)
+        }
+    }
+
+    private var backgroundColors: [Color] {
+        if colorScheme == .dark {
+            return [
+                Color(red: 0.04, green: 0.06, blue: 0.13),
+                Color(red: 0.07, green: 0.08, blue: 0.18),
+                Color(red: 0.03, green: 0.09, blue: 0.11)
+            ]
+        }
+
+        return [
+            Color(red: 0.99, green: 0.99, blue: 1.0),
+            Color(red: 0.95, green: 0.97, blue: 1.0),
+            Color(red: 0.98, green: 1.0, blue: 1.0)
+        ]
     }
 }
 
@@ -282,41 +276,67 @@ private struct LocupomDotPattern: View {
     }
 }
 
-private struct LocupomTopBar: View {
-    let title: String
-    let notificationCount: Int
+private struct LocupomPracticeExerciseRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    let module: LearningModule
 
     var body: some View {
-        HStack(spacing: 12) {
-            LocupomLogoMark(size: 42)
+        HStack(spacing: 16) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(iconBackground)
 
-            Text(title)
-                .font(.title2.bold())
-                .foregroundStyle(LocupomTheme.ink)
-
-            Spacer()
-
-            Button {} label: {
-                Image(systemName: "bell")
-                    .font(.headline)
-                    .foregroundStyle(LocupomTheme.ink)
-                    .frame(width: 42, height: 42)
-                    .background(LocupomTheme.surface, in: Circle())
-                    .overlay(alignment: .topTrailing) {
-                        if notificationCount > 0 {
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 9, height: 9)
-                                .offset(x: -8, y: 8)
-                        }
-                    }
+                Image(systemName: module.practiceListSystemImage)
+                    .font(.system(size: 31, weight: .bold))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(module.practiceAccent)
             }
-            .buttonStyle(.plain)
+            .frame(width: 64, height: 64)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(module.practiceListTitle)
+                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.82)
+
+                Text(module.practiceListSubtitle)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink.opacity(0.52))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.82)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .layoutPriority(1)
+
+            Text(module.practiceListDuration)
+                .font(.system(size: 16, weight: .black, design: .rounded))
+                .foregroundStyle(module.practiceAccent)
+                .monospacedDigit()
+                .lineLimit(1)
+                .frame(minWidth: 50, alignment: .trailing)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 25, weight: .bold))
+                .foregroundStyle(LocupomTheme.muted.opacity(0.72))
         }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 15)
+        .frame(maxWidth: .infinity, minHeight: 96, alignment: .leading)
+        .background(LocupomTheme.surface.opacity(0.98), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(LocupomTheme.ink.opacity(0.08), lineWidth: 1)
+        }
+    }
+
+    private var iconBackground: Color {
+        colorScheme == .dark ? module.practiceAccent.opacity(0.18) : module.practiceIconBackground
     }
 }
 
-private struct LocupomLogoMark: View {
+struct LocupomLogoMark: View {
     let size: CGFloat
 
     var body: some View {
@@ -339,44 +359,6 @@ private struct LocupomLogoMark: View {
     }
 }
 
-private struct LocupomHomeHeader: View {
-    let notificationCount: Int
-
-    var body: some View {
-        HStack(spacing: 14) {
-            LocupomLogoMark(size: 58)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Locupom")
-                    .font(.system(size: 36, weight: .black, design: .rounded))
-                    .foregroundStyle(LocupomTheme.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.82)
-
-                Text("Tu camino de hoy")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundStyle(LocupomTheme.ink.opacity(0.58))
-                    .lineLimit(1)
-            }
-
-            Spacer(minLength: 10)
-
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: "bell")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundStyle(LocupomTheme.ink)
-                    .frame(width: 48, height: 48)
-
-                Circle()
-                    .fill(notificationCount > 0 ? LocupomTheme.secondary : LocupomTheme.primary)
-                    .frame(width: 10, height: 10)
-                    .offset(x: -5, y: 8)
-            }
-        }
-        .padding(.top, 2)
-    }
-}
-
 private struct LocupomHomeHeroCard: View {
     let level: LearningLevel
     let dailyGoalMinutes: Int
@@ -387,19 +369,6 @@ private struct LocupomHomeHeroCard: View {
         VStack(spacing: 18) {
             ZStack(alignment: .topTrailing) {
                 VStack(alignment: .leading, spacing: 15) {
-                    Text(level.shortCode)
-                        .font(.system(size: 25, weight: .black, design: .rounded))
-                        .foregroundStyle(LocupomTheme.secondary)
-                        .frame(width: 58, height: 58)
-                        .background(
-                            LinearGradient(
-                                colors: [LocupomTheme.secondary.opacity(0.12), LocupomTheme.primary.opacity(0.06)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        )
-
                     Text("Tu sesión\nde hoy")
                         .font(.system(size: 42, weight: .black, design: .rounded))
                         .foregroundStyle(LocupomTheme.ink)
@@ -488,7 +457,7 @@ private struct LocupomHomeHeroCard: View {
                 }
                 .padding(.horizontal, 15)
                 .padding(.vertical, 10)
-                .background(.white.opacity(0.88), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .background(LocupomTheme.elevatedSurface.opacity(0.88), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .stroke(LocupomTheme.primary.opacity(0.08), lineWidth: 1)
@@ -502,8 +471,8 @@ private struct LocupomHomeHeroCard: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            .white.opacity(0.98),
-                            Color(red: 0.96, green: 0.97, blue: 1.0).opacity(0.96)
+                            LocupomTheme.surface.opacity(0.98),
+                            LocupomTheme.softSurface.opacity(0.96)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -512,7 +481,7 @@ private struct LocupomHomeHeroCard: View {
         }
         .overlay {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(.white.opacity(0.92), lineWidth: 1.4)
+                .stroke(LocupomTheme.elevatedSurface.opacity(0.70), lineWidth: 1.4)
         }
         .shadow(color: LocupomTheme.primary.opacity(0.10), radius: 24, x: 0, y: 14)
     }
@@ -555,7 +524,7 @@ private struct LocupomHomeStatsCard: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 18)
-        .background(.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: LocupomTheme.primary.opacity(0.08), radius: 20, x: 0, y: 10)
     }
 
@@ -652,7 +621,7 @@ private struct LocupomPracticeShortcutsCard: View {
             }
         }
         .padding(18)
-        .background(.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: LocupomTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
     }
 }
@@ -686,7 +655,7 @@ private struct LocupomHomeShortcutTile: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 94)
-        .background(.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(LocupomTheme.elevatedSurface.opacity(0.82), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .stroke(LocupomTheme.ink.opacity(0.06), lineWidth: 1)
@@ -750,7 +719,7 @@ private struct LocupomContinueLearningCard: View {
             .buttonStyle(.plain)
         }
         .padding(18)
-        .background(.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: LocupomTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
     }
 
@@ -823,13 +792,6 @@ private struct LocupomWelcomeCard: View {
                 Text("Ready for \(dailyGoalMinutes) minutes of English?")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-
-                Text(level.shortCode)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(LocupomTheme.primary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(LocupomTheme.primary.opacity(0.10), in: Capsule())
             }
 
             Spacer()
@@ -896,13 +858,6 @@ private struct LocupomTodayPlanCard: View {
                 }
 
                 Spacer()
-
-                Text(level.shortCode)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(LocupomTheme.secondary, in: Capsule())
             }
 
             HStack(spacing: 13) {
@@ -944,12 +899,6 @@ private struct LocupomTodayPlanCard: View {
             ProgressView(value: progress)
                 .tint(LocupomTheme.primary)
                 .background(LocupomTheme.primary.opacity(0.12), in: Capsule())
-
-            HStack(spacing: 8) {
-                LearningStatPill(title: "Racha", value: "\(streak) dias", systemImage: "flame.fill", tint: .orange)
-                LearningStatPill(title: "XP", value: "\(xpScore)", systemImage: "star.circle.fill", tint: LocupomTheme.secondary)
-                LearningStatPill(title: "Repaso", value: "\(dueReviews)", systemImage: "repeat.circle.fill", tint: LocupomTheme.mint)
-            }
         }
         .padding(18)
         .background(LocupomTheme.surface, in: RoundedRectangle(cornerRadius: 18))
@@ -1501,10 +1450,10 @@ private struct DailyRoutinePanel: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
-                .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onAppear {
             withAnimation(.easeInOut(duration: 1.45).repeatForever(autoreverses: true)) {
                 isBreathing = true
@@ -1637,57 +1586,7 @@ private struct LearningStatPill: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(9)
-        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-    }
-}
-
-private struct LearningProfilePanel: View {
-    @EnvironmentObject private var learningProgress: LearningProgressStore
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(
-                title: "Tu nivel",
-                detail: "\(learningProgress.savedWords.count) palabras guardadas"
-            )
-
-            Picker("Nivel", selection: Binding(
-                get: { learningProgress.profile.level },
-                set: { learningProgress.updateLevel($0) }
-            )) {
-                ForEach(LearningLevel.allCases) { level in
-                    Text(level.title).tag(level)
-                }
-            }
-            .pickerStyle(.segmented)
-
-            HStack(spacing: 8) {
-                Label(learningProgress.profile.level.detail, systemImage: "slider.horizontal.3")
-                Spacer(minLength: 0)
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-
-            if learningProgress.recommendedLevel != learningProgress.profile.level {
-                HStack(spacing: 10) {
-                    Label(learningProgress.adaptiveMessage, systemImage: "wand.and.stars")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Spacer()
-
-                    Button("Aplicar") {
-                        learningProgress.updateLevel(learningProgress.recommendedLevel)
-                    }
-                    .buttonStyle(.bordered)
-                    .font(.caption.weight(.semibold))
-                }
-                .padding(10)
-                .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-            }
-        }
-        .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -1711,7 +1610,7 @@ private struct LearningProgressSummaryCard: View {
                 SummaryMetric(title: "Frases", value: "\(learningProgress.cachedSentences.count)", systemImage: "text.quote")
             }
             .padding(4)
-            .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+            .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
             Button {
                 withAnimation(.spring(response: 0.28, dampingFraction: 0.9)) {
@@ -1806,7 +1705,7 @@ private struct LearningSourcesSummaryCard: View {
                             Spacer()
                         }
                         .padding(10)
-                        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
@@ -1849,7 +1748,7 @@ private struct LearningProgressPanel: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -1901,7 +1800,7 @@ private struct LearningErrorBankPanel: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
-                    .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                    .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             } else {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(errors) { error in
@@ -1911,7 +1810,7 @@ private struct LearningErrorBankPanel: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -1955,7 +1854,7 @@ private struct LearningErrorRow: View {
             }
         }
         .padding(10)
-        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -2048,7 +1947,7 @@ private struct LearningModuleCard: View {
         }
         .frame(maxWidth: .infinity, minHeight: 148, alignment: .leading)
         .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(alignment: .topLeading) {
             Rectangle()
                 .fill(module.tint)
@@ -2082,7 +1981,7 @@ private struct LearningAPIRoadmap: View {
                     Spacer()
                 }
                 .padding(12)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
         }
     }
@@ -2108,23 +2007,16 @@ private struct SongsLearningView: View {
     }
 
     var body: some View {
-        Group {
-            if store.songs.isEmpty {
-                ContentUnavailableView {
-                    Label("Sin canciones", systemImage: "music.note")
-                } description: {
-                    Text("Guarda una cancion y queda lista para practicar.")
-                } actions: {
-                    Button {
-                        isShowingEditor = true
-                    } label: {
-                        Label("Crear cancion", systemImage: "plus")
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
+        ZStack {
+            LocupomLearningBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    musicHeader
+
+                    if store.songs.isEmpty {
+                        musicEmptyState
+                    } else {
                         if let recommendedSong {
                             NavigationLink {
                                 PracticeView(songID: recommendedSong.id)
@@ -2137,12 +2029,12 @@ private struct SongsLearningView: View {
                         HStack(spacing: 0) {
                             SummaryMetric(title: "Canciones", value: "\(store.songs.count)", systemImage: "music.note")
                             Divider()
-                            SummaryMetric(title: "Lineas", value: "\(totalLines)", systemImage: "text.quote")
+                            SummaryMetric(title: "Líneas", value: "\(totalLines)", systemImage: "text.quote")
                             Divider()
                             SummaryMetric(title: "Activas", value: "\(practicedSongs)", systemImage: "target")
                         }
                         .padding(6)
-                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
 
                         SectionHeader(title: "Biblioteca", detail: "\(store.songs.count) canciones")
 
@@ -2155,33 +2047,105 @@ private struct SongsLearningView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding()
                 }
+                .padding(.horizontal, 22)
+                .padding(.top, 18)
+                .padding(.bottom, 120)
             }
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle("Canciones")
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    isShowingTrending = true
-                } label: {
-                    Label("Tendencias", systemImage: "chart.line.uptrend.xyaxis")
-                }
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    isShowingEditor = true
-                } label: {
-                    Label("Agregar", systemImage: "plus")
-                }
-            }
-        }
+        .navigationTitle("")
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $isShowingEditor) {
             SongEditorView(song: nil)
         }
         .sheet(isPresented: $isShowingTrending) {
             TrendingView()
+        }
+    }
+
+    private var musicHeader: some View {
+        HStack(spacing: 12) {
+            LocupomLogoMark(size: 42)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Música")
+                    .font(.system(size: 30, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
+
+                Text("\(store.songs.count) canciones")
+                    .font(.system(size: 13, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.primary)
+            }
+
+            Spacer()
+
+            Button {
+                isShowingTrending = true
+            } label: {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 20, weight: .black))
+                    .foregroundStyle(LocupomTheme.primary)
+                    .frame(width: 44, height: 44)
+                    .background(LocupomTheme.surface.opacity(0.92), in: Circle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                isShowingEditor = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 22, weight: .black))
+                    .foregroundStyle(LocupomTheme.ink)
+                    .frame(width: 44, height: 44)
+                    .background(LocupomTheme.surface.opacity(0.92), in: Circle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var musicEmptyState: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Image(systemName: "music.note.list")
+                .font(.system(size: 34, weight: .black))
+                .foregroundStyle(LocupomTheme.primary)
+                .frame(width: 66, height: 66)
+                .background(LocupomTheme.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Sin canciones")
+                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
+
+                Text("Guardá una canción y queda lista para practicar.")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink.opacity(0.58))
+            }
+
+            Button {
+                isShowingEditor = true
+            } label: {
+                Label("Crear canción", systemImage: "plus")
+                    .font(.system(size: 17, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .background(
+                        LinearGradient(
+                            colors: [LocupomTheme.primary, LocupomTheme.secondary],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(20)
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
         }
     }
 
@@ -2244,7 +2208,7 @@ private struct SongSpotlightCard: View {
             }
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(alignment: .leading) {
             Rectangle()
                 .fill(Color.teal)
@@ -2290,11 +2254,12 @@ private struct SongPracticeRow: View {
                 .tint(.teal)
         }
         .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
 private struct DailyRoutineView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: SongLibraryStore
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var currentStepIndex = 0
@@ -2339,11 +2304,6 @@ private struct DailyRoutineView: View {
         currentStepIndex >= steps.count
     }
 
-    private var progressValue: Double {
-        guard !steps.isEmpty else { return 0 }
-        return Double(min(currentStepIndex, steps.count)) / Double(steps.count)
-    }
-
     private var nextStep: RoutineStep? {
         let nextIndex = currentStepIndex + 1
         guard steps.indices.contains(nextIndex) else { return nil }
@@ -2362,64 +2322,68 @@ private struct DailyRoutineView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Sesion de \(learningProgress.profile.dailyGoalMinutes) minutos")
-                        .font(.title2.bold())
-                    Text("Pensada para \(learningProgress.profile.level.title.lowercased()): poca friccion, varias habilidades y repaso cuando toca.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+        ZStack {
+            TranslatePracticeBackground()
 
-                SessionRhythmStrip(phases: routinePhases)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    ExerciseSessionTopBar(
+                        title: "Rutina",
+                        closeAction: { dismiss() }
+                    )
 
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("\(min(currentStepIndex + 1, steps.count)) de \(steps.count)")
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text("\(Int(progressValue * 100))%")
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Sesión de \(learningProgress.profile.dailyGoalMinutes) minutos")
+                            .font(.system(size: 36, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
+
+                        Text("Pensada para \(learningProgress.profile.level.title.lowercased()): poca fricción, varias habilidades y repaso cuando toca.")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    ProgressView(value: progressValue)
-                }
+                    SessionRhythmStrip(phases: routinePhases)
 
-                if isComplete {
-                    RoutineCompletionCard(
-                        completedCount: completedStepIndexes.count,
-                        totalCount: steps.count,
-                        restartAction: restartSession
-                    )
-                } else if steps.indices.contains(currentStepIndex) {
-                    RoutineCurrentStepCard(
-                        index: currentStepIndex,
-                        total: steps.count,
-                        step: steps[currentStepIndex],
-                        nextStep: nextStep,
-                        completeAction: completeCurrentStep,
-                        skipAction: skipCurrentStep
-                    )
-                }
-
-                VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(title: "Plan de hoy", detail: "\(completedStepIndexes.count)/\(steps.count)")
-
-                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                        RoutineChecklistRow(
-                            index: index,
-                            step: step,
-                            state: checklistState(for: index)
+                    if isComplete {
+                        RoutineCompletionCard(
+                            completedCount: completedStepIndexes.count,
+                            totalCount: steps.count,
+                            restartAction: restartSession
+                        )
+                    } else if steps.indices.contains(currentStepIndex) {
+                        RoutineCurrentStepCard(
+                            step: steps[currentStepIndex],
+                            nextStep: nextStep,
+                            completeAction: completeCurrentStep,
+                            skipAction: skipCurrentStep
                         )
                     }
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        SectionHeader(title: "Plan de hoy", detail: "Rutina")
+
+                        ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                            RoutineChecklistRow(
+                                index: index,
+                                step: step,
+                                state: checklistState(for: index)
+                            )
+                        }
+                    }
                 }
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 40)
             }
-            .padding()
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle("Rutina")
+        .navigationTitle("")
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
     }
 
     private func checklistState(for index: Int) -> RoutineChecklistState {
@@ -2453,24 +2417,55 @@ private struct DailyRoutineView: View {
 }
 
 private struct ReviewQueueView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var sessionWords: [SavedVocabularyItem] = []
     @State private var isAnswerVisible = false
     @State private var feedback: LearningFeedback?
 
     var body: some View {
-        Group {
+        ZStack {
+            TranslatePracticeBackground()
+
             if sessionWords.isEmpty {
-                ContentUnavailableView {
-                    Label("Nada para repasar", systemImage: "checkmark.seal")
-                } description: {
-                    Text(learningProgress.savedWords.isEmpty ? "Guarda palabras desde canciones o Explorar." : "Tus palabras guardadas todavia no vencieron.")
+                VStack(alignment: .leading, spacing: 24) {
+                    ExerciseSessionTopBar(
+                        title: "Repaso",
+                        closeAction: { dismiss() }
+                    )
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 34, weight: .black))
+                            .foregroundStyle(TranslateTheme.mint)
+                            .frame(width: 66, height: 66)
+                            .background(TranslateTheme.mint.opacity(0.14), in: Circle())
+
+                        Text("Nada para repasar")
+                            .font(.system(size: 28, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+
+                        Text(learningProgress.savedWords.isEmpty ? "Guardá palabras desde canciones o Explorar." : "Tus palabras guardadas todavía no vencieron.")
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(22)
+                    .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
+
+                    Spacer(minLength: 0)
                 }
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
             } else {
                 reviewContent(item: sessionWords[0])
             }
         }
-        .navigationTitle("Repaso")
+        .navigationTitle("")
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             if sessionWords.isEmpty {
                 sessionWords = learningProgress.dueVocabulary(limit: 20)
@@ -2480,7 +2475,12 @@ private struct ReviewQueueView: View {
 
     private func reviewContent(item: SavedVocabularyItem) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 16) {
+                ExerciseSessionTopBar(
+                    title: "Repaso",
+                    closeAction: { dismiss() }
+                )
+
                 ProgressHeader(
                     currentIndex: max(0, learningProgress.dueVocabulary(limit: 20).count - sessionWords.count),
                     total: max(1, learningProgress.dueVocabulary(limit: 20).count)
@@ -2515,7 +2515,7 @@ private struct ReviewQueueView: View {
                             Label(isAnswerVisible ? "Ocultar" : "Mostrar", systemImage: "eye")
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(TranslateSecondaryButtonStyle())
 
                         Button {
                             answer(item, wasCorrect: false)
@@ -2523,7 +2523,7 @@ private struct ReviewQueueView: View {
                             Label("Me costo", systemImage: "arrow.counterclockwise")
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(TranslateSecondaryButtonStyle())
 
                         Button {
                             answer(item, wasCorrect: true)
@@ -2531,14 +2531,18 @@ private struct ReviewQueueView: View {
                             Label("La recorde", systemImage: "checkmark")
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(TranslatePrimaryButtonStyle())
                     }
                 }
                 .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
             }
-            .padding()
+            .padding(.horizontal, 26)
+            .padding(.top, 18)
+            .padding(.bottom, 40)
         }
+        .scrollIndicators(.hidden)
     }
 
     private func answer(_ item: SavedVocabularyItem, wasCorrect: Bool) {
@@ -2577,8 +2581,6 @@ private enum RoutineChecklistState {
 }
 
 private struct RoutineCurrentStepCard: View {
-    let index: Int
-    let total: Int
     let step: RoutineStep
     let nextStep: RoutineStep?
     let completeAction: () -> Void
@@ -2598,7 +2600,7 @@ private struct RoutineCurrentStepCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Paso \(index + 1) de \(total)")
+                    Text("Ahora")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(step.module.tint)
                     Text(step.module.title)
@@ -2623,20 +2625,20 @@ private struct RoutineCurrentStepCard: View {
                     Label("Abrir practica", systemImage: "arrow.right.circle")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(TranslatePrimaryButtonStyle())
 
                 Button(action: completeAction) {
                     Label("Hecho", systemImage: "checkmark")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(TranslateSecondaryButtonStyle())
             }
 
             Button(action: skipAction) {
                 Label("Saltar por ahora", systemImage: "forward")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(TranslateSecondaryButtonStyle())
 
             if let nextStep {
                 HStack(spacing: 10) {
@@ -2655,11 +2657,11 @@ private struct RoutineCurrentStepCard: View {
                     Spacer()
                 }
                 .padding(10)
-                .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(alignment: .leading) {
             Rectangle()
                 .fill(step.module.tint)
@@ -2695,10 +2697,10 @@ private struct RoutineCompletionCard: View {
                 Label("Hacer otra vuelta", systemImage: "arrow.clockwise")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(TranslatePrimaryButtonStyle())
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -2751,11 +2753,12 @@ private struct RoutineChecklistRow: View {
                 .foregroundStyle(step.module.tint)
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
 private struct WordExplorerView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @StateObject private var pronunciationPlayer = PronunciationPlayer()
     @State private var query = "belong"
@@ -2779,195 +2782,229 @@ private struct WordExplorerView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Busca una palabra y convertimos eso en practica.")
-                        .font(.title3.bold())
-                    Text("Definicion, pronunciacion, palabras cercanas y frases reales con traduccion al espanol.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+        ZStack {
+            TranslatePracticeBackground()
 
-                VStack(alignment: .leading, spacing: 14) {
-                    TextField("Palabra en ingles", text: $query)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit {
-                            Task { await search() }
-                        }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    ExerciseSessionTopBar(
+                        title: "Explorar",
+                        closeAction: { dismiss() }
+                    )
 
-                    FlowLayout(spacing: 8) {
-                        ForEach(quickWords, id: \.self) { word in
-                            Button(word) {
-                                query = word
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Buscá palabras")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
+
+                        Text("Definición, pronunciación, palabras cercanas y frases reales.")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        TextField("Palabra en inglés", text: $query)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .padding(16)
+                            .background(TranslateTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(TranslateTheme.primary.opacity(0.16), lineWidth: 1)
+                            }
+                            .onSubmit {
                                 Task { await search() }
                             }
-                            .buttonStyle(.bordered)
-                        }
-                    }
 
-                    Button {
-                        Task { await search() }
-                    } label: {
-                        Label(isLoading ? "Buscando" : "Buscar", systemImage: "magnifyingglass")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(isLoading || query.trimmed.isEmpty)
-                }
-                .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-
-                if isLoading {
-                    ProgressView("Conectando APIs...")
-                        .frame(maxWidth: .infinity, minHeight: 120)
-                }
-
-                if let errorMessage {
-                    LearningNoticeView(
-                        systemImage: "wifi.exclamationmark",
-                        title: "No pude cargar datos",
-                        detail: errorMessage
-                    )
-                }
-
-                if let toolkit {
-                    WordSummaryView(
-                        toolkit: toolkit,
-                        playAudio: {
-                            if let audioURL = toolkit.audioURL {
-                                pronunciationPlayer.play(audioURL)
-                            }
-                        }
-                    )
-
-                    LearningAPISection(title: "Acciones", source: "Personal") {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack(spacing: 10) {
-                                Button {
-                                    saveCurrentWord(toolkit)
-                                } label: {
-                                    Label("Guardar", systemImage: "bookmark")
-                                        .frame(maxWidth: .infinity)
+                        FlowLayout(spacing: 8) {
+                            ForEach(quickWords, id: \.self) { word in
+                                Button(word) {
+                                    query = word
+                                    Task { await search() }
                                 }
-                                .buttonStyle(.borderedProminent)
-
-                                NavigationLink(value: LearningModule.review) {
-                                    Label("Repasar", systemImage: "repeat")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(.bordered)
-                            }
-
-                            Button {
-                                Task { await translateCurrentWord(toolkit) }
-                            } label: {
-                                Label(isTranslating ? "Traduciendo" : "Traducir", systemImage: "globe.americas")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
-                            .disabled(isTranslating)
-
-                            if let saveMessage {
-                                Label(saveMessage, systemImage: "checkmark.circle")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            if let translation {
-                                ExampleBox(
-                                    title: "Traduccion opcional",
-                                    bodyText: translation.translatedText
-                                )
+                                .font(.system(size: 14, weight: .black, design: .rounded))
+                                .foregroundStyle(TranslateTheme.primary)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(TranslateTheme.primary.opacity(0.10), in: Capsule())
+                                .buttonStyle(.plain)
                             }
                         }
-                    }
 
-                    if !toolkit.definitions.isEmpty {
-                        LearningAPISection(title: "Definiciones", source: "Dictionary API") {
-                            VStack(alignment: .leading, spacing: 10) {
-                                ForEach(toolkit.definitions) { definition in
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(definition.partOfSpeech.capitalized)
-                                            .font(.caption.weight(.semibold))
-                                            .foregroundStyle(.tint)
-                                        Text(definition.text)
-                                            .font(.subheadline)
-                                        if let example = definition.example {
-                                            Text(example)
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                                    if definition.id != toolkit.definitions.last?.id {
-                                        Divider()
-                                    }
-                                }
-                            }
+                        Button {
+                            Task { await search() }
+                        } label: {
+                            Label(isLoading ? "Buscando" : "Buscar", systemImage: "magnifyingglass")
+                                .frame(maxWidth: .infinity)
                         }
+                        .buttonStyle(TranslatePrimaryButtonStyle())
+                        .disabled(isLoading || query.trimmed.isEmpty)
+                    }
+                    .padding(22)
+                    .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
+
+                    if isLoading {
+                        ProgressView("Conectando APIs...")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .tint(TranslateTheme.primary)
+                            .frame(maxWidth: .infinity, minHeight: 120)
                     }
 
-                    if !toolkit.relatedWords.isEmpty {
-                        LearningAPISection(title: "Palabras cercanas", source: "Datamuse") {
-                            FlowLayout(spacing: 8) {
-                                ForEach(toolkit.relatedWords) { suggestion in
-                                    Button {
-                                        query = suggestion.word
-                                        Task { await search() }
-                                    } label: {
-                                        VStack(spacing: 2) {
-                                            Text(suggestion.word)
-                                                .font(.callout.weight(.semibold))
-                                            Text(suggestion.kind)
-                                                .font(.caption2)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 8)
-                                    }
-                                    .buttonStyle(.bordered)
-                                }
-                            }
-                        }
-                    }
-
-                    if !toolkit.examples.isEmpty {
-                        LearningAPISection(title: "Frases reales", source: "Tatoeba") {
-                            VStack(alignment: .leading, spacing: 10) {
-                                ForEach(toolkit.examples) { example in
-                                    VStack(alignment: .leading, spacing: 5) {
-                                        Text(example.text)
-                                            .font(.subheadline.weight(.semibold))
-                                        if let translation = example.translation {
-                                            Text(translation)
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(10)
-                                    .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-                                }
-                            }
-                        }
-                    }
-
-                    if !toolkit.hasContent {
+                    if let errorMessage {
                         LearningNoticeView(
-                            systemImage: "questionmark.folder",
-                            title: "Sin resultados",
-                            detail: "Proba con una palabra mas comun o revisa la conexion."
+                            systemImage: "wifi.exclamationmark",
+                            title: "No pude cargar datos",
+                            detail: errorMessage
                         )
                     }
+
+                    if let toolkit {
+                        WordSummaryView(
+                            toolkit: toolkit,
+                            playAudio: {
+                                if let audioURL = toolkit.audioURL {
+                                    pronunciationPlayer.play(audioURL)
+                                }
+                            }
+                        )
+
+                        LearningAPISection(title: "Acciones", source: "Personal") {
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack(spacing: 10) {
+                                    Button {
+                                        saveCurrentWord(toolkit)
+                                    } label: {
+                                        Label("Guardar", systemImage: "bookmark")
+                                            .frame(maxWidth: .infinity)
+                                    }
+                                    .buttonStyle(TranslatePrimaryButtonStyle())
+
+                                    NavigationLink(value: LearningModule.review) {
+                                        Label("Repasar", systemImage: "repeat")
+                                            .frame(maxWidth: .infinity)
+                                    }
+                                    .buttonStyle(TranslateSecondaryButtonStyle())
+                                }
+
+                                Button {
+                                    Task { await translateCurrentWord(toolkit) }
+                                } label: {
+                                    Label(isTranslating ? "Traduciendo" : "Traducir", systemImage: "globe.americas")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(TranslateSecondaryButtonStyle())
+                                .disabled(isTranslating)
+
+                                if let saveMessage {
+                                    Label(saveMessage, systemImage: "checkmark.circle")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                if let translation {
+                                    ExampleBox(
+                                        title: "Traduccion opcional",
+                                        bodyText: translation.translatedText
+                                    )
+                                }
+                            }
+                        }
+
+                        if !toolkit.definitions.isEmpty {
+                            LearningAPISection(title: "Definiciones", source: "Dictionary API") {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    ForEach(toolkit.definitions) { definition in
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(definition.partOfSpeech.capitalized)
+                                                .font(.caption.weight(.semibold))
+                                                .foregroundStyle(.tint)
+                                            Text(definition.text)
+                                                .font(.subheadline)
+                                            if let example = definition.example {
+                                                Text(example)
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                                        if definition.id != toolkit.definitions.last?.id {
+                                            Divider()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if !toolkit.relatedWords.isEmpty {
+                            LearningAPISection(title: "Palabras cercanas", source: "Datamuse") {
+                                FlowLayout(spacing: 8) {
+                                    ForEach(toolkit.relatedWords) { suggestion in
+                                        Button {
+                                            query = suggestion.word
+                                            Task { await search() }
+                                        } label: {
+                                            VStack(spacing: 2) {
+                                                Text(suggestion.word)
+                                                    .font(.callout.weight(.semibold))
+                                                Text(suggestion.kind)
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 8)
+                                        }
+                                        .buttonStyle(TranslateSecondaryButtonStyle())
+                                    }
+                                }
+                            }
+                        }
+
+                        if !toolkit.examples.isEmpty {
+                            LearningAPISection(title: "Frases reales", source: "Tatoeba") {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    ForEach(toolkit.examples) { example in
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text(example.text)
+                                                .font(.subheadline.weight(.semibold))
+                                            if let translation = example.translation {
+                                                Text(translation)
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(10)
+                                        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                    }
+                                }
+                            }
+                        }
+
+                        if !toolkit.hasContent {
+                            LearningNoticeView(
+                                systemImage: "questionmark.folder",
+                                title: "Sin resultados",
+                                detail: "Proba con una palabra mas comun o revisa la conexion."
+                            )
+                        }
+                    }
                 }
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 40)
             }
-            .padding()
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle("Explorar")
+        .navigationTitle("")
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
         .task {
             if toolkit == nil {
                 await search()
@@ -3030,15 +3067,22 @@ private struct TranslatePracticeView: View {
     @State private var showWordBank = false
     @State private var showExample = false
     @State private var speechSynthesizer = AVSpeechSynthesizer()
+    @State private var remotePrompts: [TranslationPracticePrompt] = []
+    @State private var loadedRemoteLevel: TopicCEFRLevel?
+    @State private var isLoadingPrompts = false
 
     private let service = LanguageLearningService()
 
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
+
     private var level: LearningLevel {
-        learningProgress.effectiveLevel(for: LearningModule.translate.rawValue)
+        selectedCEFRLevel.fallbackLearningLevel
     }
 
     private var prompts: [TranslationPracticePrompt] {
-        TranslationPracticePrompt.deck(for: level)
+        remotePrompts.isEmpty ? TranslationPracticePrompt.deck(for: level) : remotePrompts
     }
 
     private var prompt: TranslationPracticePrompt {
@@ -3053,22 +3097,27 @@ private struct TranslatePracticeView: View {
             TranslatePracticeBackground()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    TranslateLessonHeader(
-                        lessonNumber: promptIndex + 1,
-                        totalLessons: prompts.count,
-                        hearts: feedback?.isStrong == false ? 2 : 3,
-                        progress: progress,
+                VStack(alignment: .leading, spacing: 26) {
+                    ExerciseSessionTopBar(
+                        title: nil,
                         closeAction: { dismiss() }
                     )
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Translate freely")
-                            .font(.title2.bold())
+                        Text("Traducí\nlibremente")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
                             .foregroundStyle(TranslateTheme.ink)
+                            .lineSpacing(-2)
+                            .padding(.top, 8)
 
-                        Text("Express the meaning in your own words.")
-                            .font(.subheadline)
+                        Text("Transmití la idea con tus propias palabras.")
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                    }
+
+                    if isLoadingPrompts {
+                        Label("Cargando...", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(TranslateTheme.muted)
                     }
 
@@ -3096,46 +3145,94 @@ private struct TranslatePracticeView: View {
                         TranslateInfoCard(systemImage: "sparkles", title: "Example", detail: prompt.expectedTranslation, tint: TranslateTheme.secondary)
                     }
 
-                    TranslateFeedbackCard(feedback: feedback, corrections: corrections, isLoading: isSubmitting)
+                    TranslateAxoTipCard()
+
+                    if feedback != nil || isSubmitting {
+                        TranslateFeedbackCard(feedback: feedback, corrections: corrections, isLoading: isSubmitting)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
 
                     if let errorMessage {
                         TranslateInfoCard(systemImage: "wifi.exclamationmark", title: "Review unavailable", detail: errorMessage, tint: .orange)
                     }
-
-                    Button {
-                        if feedback == nil {
-                            Task { await submitAnswer() }
-                        } else {
-                            nextPrompt()
-                        }
-                    } label: {
-                        Text(feedback == nil ? (isSubmitting ? "Evaluating..." : "Submit answer") : "Next phrase")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(TranslatePrimaryButtonStyle())
-                    .disabled(isSubmitting || answer.trimmed.isEmpty)
-
-                    Label("Your answer is saved automatically", systemImage: "checkmark.shield")
-                        .font(.caption)
-                        .foregroundStyle(TranslateTheme.primary)
-                        .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 14)
-                .padding(.bottom, 34)
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 112)
             }
             .scrollIndicators(.hidden)
         }
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                if feedback == nil {
+                    Task { await submitAnswer() }
+                } else {
+                    nextPrompt()
+                }
+            } label: {
+                Label(
+                    feedback == nil ? (isSubmitting ? "Revisando..." : "Revisar respuesta") : "Siguiente frase",
+                    systemImage: feedback == nil ? "play.fill" : "arrow.right"
+                )
+                .font(.system(size: 22, weight: .black, design: .rounded))
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(TranslatePrimaryButtonStyle())
+            .disabled(isSubmitting || answer.trimmed.isEmpty)
+            .padding(.horizontal, 26)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+        }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
+        .task(id: selectedCEFRLevel) {
+            await loadTranslationPrompts(for: selectedCEFRLevel)
+        }
+        .onChange(of: learningProgress.cefrLevelCode) { _, _ in
+            promptIndex = 0
+            remotePrompts = []
+            loadedRemoteLevel = nil
+            resetCurrentPromptState()
+        }
     }
 
     private var progress: Double {
         guard !prompts.isEmpty else { return 0 }
         return Double(promptIndex + 1) / Double(prompts.count)
+    }
+
+    @MainActor
+    private func loadTranslationPrompts(for selectedLevel: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, loadedRemoteLevel == selectedLevel, !remotePrompts.isEmpty {
+            return
+        }
+
+        isLoadingPrompts = true
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchPracticeExercises(
+                skill: "translation",
+                level: selectedLevel.rawValue,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedPrompts = response.exercises.compactMap {
+                TranslationPracticePrompt(remote: $0, fallbackLevel: selectedLevel.fallbackLearningLevel)
+            }
+
+            loadedRemoteLevel = selectedLevel
+            remotePrompts = mappedPrompts
+            promptIndex = 0
+            resetCurrentPromptState()
+        } catch {
+            remotePrompts = []
+            loadedRemoteLevel = selectedLevel
+        }
+
+        isLoadingPrompts = false
     }
 
     private func submitAnswer() async {
@@ -3168,6 +3265,7 @@ private struct TranslatePracticeView: View {
         learningProgress.recordModule(LearningModule.translate.rawValue, wasCorrect: isStrong)
         if isStrong {
             learningProgress.recordErrorResolved(module: LearningModule.translate.rawValue, expected: prompt.expectedTranslation)
+            markTranslationCompletedIfNeeded(prompt)
         } else {
             learningProgress.recordError(
                 module: LearningModule.translate.rawValue,
@@ -3180,8 +3278,36 @@ private struct TranslatePracticeView: View {
         isSubmitting = false
     }
 
+    private func markTranslationCompletedIfNeeded(_ prompt: TranslationPracticePrompt) {
+        guard let apiContentId = prompt.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let completedLevel = selectedCEFRLevel.rawValue
+        let completedTitle = prompt.sourceText
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "exercise", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "exercise",
+                itemId: apiContentId,
+                level: completedLevel,
+                title: completedTitle
+            )
+        }
+    }
+
     private func nextPrompt() {
         promptIndex = promptIndex >= prompts.count - 1 ? 0 : promptIndex + 1
+        resetCurrentPromptState()
+    }
+
+    private func resetCurrentPromptState() {
         answer = ""
         feedback = nil
         corrections = []
@@ -3217,15 +3343,22 @@ private struct WritingCoachView: View {
     @State private var showVocabularyHelp = false
     @State private var showGrammarTips = false
     @State private var showRewriteSuggestion = false
+    @State private var remotePrompts: [WritingPracticePrompt] = []
+    @State private var loadedRemoteLevel: TopicCEFRLevel?
+    @State private var isLoadingPrompts = false
 
     private let service = LanguageLearningService()
 
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
+
     private var level: LearningLevel {
-        learningProgress.effectiveLevel(for: LearningModule.writing.rawValue)
+        selectedCEFRLevel.fallbackLearningLevel
     }
 
     private var prompts: [WritingPracticePrompt] {
-        WritingPracticePrompt.deck(for: level)
+        remotePrompts.isEmpty ? WritingPracticePrompt.deck(for: level) : remotePrompts
     }
 
     private var prompt: WritingPracticePrompt {
@@ -3244,32 +3377,32 @@ private struct WritingCoachView: View {
         return makeFeedback(corrections: [])
     }
 
-    private var progress: Double {
-        guard !prompts.isEmpty else { return 0 }
-        return Double(promptIndex + 1) / Double(prompts.count)
-    }
-
     var body: some View {
         ZStack {
             TranslatePracticeBackground()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    TranslateLessonHeader(
-                        lessonNumber: promptIndex + 1,
-                        totalLessons: prompts.count,
-                        hearts: feedback?.isStrong == false ? 2 : 3,
-                        progress: progress,
+                VStack(alignment: .leading, spacing: 26) {
+                    ExerciseSessionTopBar(
+                        title: "Writing",
                         closeAction: { dismiss() }
                     )
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Writing practice")
-                            .font(.title2.bold())
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Write & improve")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
                             .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
 
-                        Text("Write a short response in English.")
-                            .font(.subheadline)
+                        Text("Get focused feedback on your English.")
+                            .font(.system(size: 22, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                    }
+
+                    if isLoadingPrompts {
+                        Label("Cargando...", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(TranslateTheme.muted)
                     }
 
@@ -3329,14 +3462,9 @@ private struct WritingCoachView: View {
                     }
                     .buttonStyle(TranslatePrimaryButtonStyle())
                     .disabled(isSubmitting || answer.trimmed.isEmpty)
-
-                    Text("Uses AI  ·  Instant results")
-                        .font(.caption)
-                        .foregroundStyle(TranslateTheme.muted)
-                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 .padding(.horizontal, 18)
-                .padding(.top, 14)
+                .padding(.top, 18)
                 .padding(.bottom, 34)
             }
             .scrollIndicators(.hidden)
@@ -3345,6 +3473,15 @@ private struct WritingCoachView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
+        .task(id: selectedCEFRLevel) {
+            await loadWritingPrompts(for: selectedCEFRLevel)
+        }
+        .onChange(of: learningProgress.cefrLevelCode) { _, _ in
+            promptIndex = 0
+            remotePrompts = []
+            loadedRemoteLevel = nil
+            resetCurrentPromptState()
+        }
     }
 
     private var rewriteSuggestion: String {
@@ -3353,6 +3490,37 @@ private struct WritingCoachView: View {
         }
 
         return "Try connecting your ideas with transitions, keeping one clear main idea per sentence, and replacing repeated words with more specific vocabulary."
+    }
+
+    @MainActor
+    private func loadWritingPrompts(for selectedLevel: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, loadedRemoteLevel == selectedLevel, !remotePrompts.isEmpty {
+            return
+        }
+
+        isLoadingPrompts = true
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchPracticeExercises(
+                skill: "writing",
+                level: selectedLevel.rawValue,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedPrompts = response.exercises.compactMap {
+                WritingPracticePrompt(remote: $0, fallbackLevel: selectedLevel.fallbackLearningLevel)
+            }
+
+            loadedRemoteLevel = selectedLevel
+            remotePrompts = mappedPrompts
+            promptIndex = 0
+            resetCurrentPromptState()
+        } catch {
+            remotePrompts = []
+            loadedRemoteLevel = selectedLevel
+        }
+
+        isLoadingPrompts = false
     }
 
     private func submitWriting() async {
@@ -3373,6 +3541,7 @@ private struct WritingCoachView: View {
         learningProgress.recordModule(LearningModule.writing.rawValue, wasCorrect: result.isStrong)
         if result.isStrong {
             learningProgress.recordErrorResolved(module: LearningModule.writing.rawValue, expected: prompt.title)
+            markWritingCompletedIfNeeded(prompt)
         } else {
             learningProgress.recordError(
                 module: LearningModule.writing.rawValue,
@@ -3385,8 +3554,36 @@ private struct WritingCoachView: View {
         isSubmitting = false
     }
 
+    private func markWritingCompletedIfNeeded(_ prompt: WritingPracticePrompt) {
+        guard let apiContentId = prompt.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let completedLevel = selectedCEFRLevel.rawValue
+        let completedTitle = prompt.title
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "exercise", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "exercise",
+                itemId: apiContentId,
+                level: completedLevel,
+                title: completedTitle
+            )
+        }
+    }
+
     private func nextPrompt() {
         promptIndex = promptIndex >= prompts.count - 1 ? 0 : promptIndex + 1
+        resetCurrentPromptState()
+    }
+
+    private func resetCurrentPromptState() {
         answer = ""
         feedback = nil
         corrections = []
@@ -3453,7 +3650,8 @@ private struct WritingCoachView: View {
 }
 
 private struct WritingPracticePrompt: Identifiable {
-    let id = UUID()
+    let id: UUID
+    let apiContentId: String?
     let title: String
     let instruction: String
     let wordRange: ClosedRange<Int>
@@ -3462,6 +3660,49 @@ private struct WritingPracticePrompt: Identifiable {
     let sampleAnswer: String
     let vocabularyTargets: [String]
     let level: LearningLevel
+
+    init(
+        apiContentId: String? = nil,
+        title: String,
+        instruction: String,
+        wordRange: ClosedRange<Int>,
+        vocabularyHelp: String,
+        grammarTip: String,
+        sampleAnswer: String,
+        vocabularyTargets: [String],
+        level: LearningLevel
+    ) {
+        self.id = UUID()
+        self.apiContentId = apiContentId
+        self.title = title
+        self.instruction = instruction
+        self.wordRange = wordRange
+        self.vocabularyHelp = vocabularyHelp
+        self.grammarTip = grammarTip
+        self.sampleAnswer = sampleAnswer
+        self.vocabularyTargets = vocabularyTargets
+        self.level = level
+    }
+
+    init?(remote: LocupomRemotePracticeExercise, fallbackLevel: LearningLevel) {
+        guard let range = remote.wordRange, range.count >= 2 else {
+            return nil
+        }
+
+        let lower = max(1, min(range[0], range[1]))
+        let upper = max(lower, max(range[0], range[1]))
+        self.init(
+            apiContentId: remote.id,
+            title: remote.title,
+            instruction: remote.instruction,
+            wordRange: lower...upper,
+            vocabularyHelp: remote.vocabularyHelp ?? "Use precise words from the prompt.",
+            grammarTip: remote.grammarTip ?? "Keep one clear main idea per sentence.",
+            sampleAnswer: remote.sampleAnswer ?? "",
+            vocabularyTargets: remote.vocabularyTargets ?? [],
+            level: remote.level.trimmed.isEmpty ? fallbackLevel : LearningLevel.fromCEFRCode(remote.level)
+        )
+    }
 
     var characterLimit: Int {
         max(500, wordRange.upperBound * 8)
@@ -3830,22 +4071,60 @@ private struct WritingCorrectionsCard: View {
 }
 
 private enum TranslateTheme {
-    static let ink = Color(red: 0.05, green: 0.08, blue: 0.24)
-    static let muted = Color(red: 0.42, green: 0.45, blue: 0.60)
+    static let ink = Color(.label)
+    static let muted = Color(.secondaryLabel)
     static let primary = Color(red: 0.20, green: 0.36, blue: 0.98)
     static let secondary = Color(red: 0.47, green: 0.35, blue: 0.98)
     static let mint = Color(red: 0.38, green: 0.78, blue: 0.73)
-    static let surface = Color.white
-    static let softSurface = Color(red: 0.96, green: 0.97, blue: 1.0)
+    static let surface = Color(.secondarySystemBackground)
+    static let elevatedSurface = Color(.systemBackground)
+    static let softSurface = Color(.tertiarySystemBackground)
 }
 
 private struct TranslationPracticePrompt: Identifiable {
-    let id = UUID()
+    let id: UUID
+    let apiContentId: String?
     let sourceText: String
     let expectedTranslation: String
     let hint: String
     let wordBank: [String]
     let level: LearningLevel
+
+    init(
+        apiContentId: String? = nil,
+        sourceText: String,
+        expectedTranslation: String,
+        hint: String,
+        wordBank: [String],
+        level: LearningLevel
+    ) {
+        self.id = UUID()
+        self.apiContentId = apiContentId
+        self.sourceText = sourceText
+        self.expectedTranslation = expectedTranslation
+        self.hint = hint
+        self.wordBank = wordBank
+        self.level = level
+    }
+
+    init?(remote: LocupomRemotePracticeExercise, fallbackLevel: LearningLevel) {
+        let sourceText = remote.sourceText?.trimmed ?? remote.prompt?.trimmed ?? remote.instruction.trimmed
+        guard let expectedTranslation = remote.expectedTranslation?.trimmed, !sourceText.isEmpty, !expectedTranslation.isEmpty else {
+            return nil
+        }
+
+        self.init(
+            apiContentId: remote.id,
+            sourceText: sourceText,
+            expectedTranslation: expectedTranslation,
+            hint: remote.hint ?? remote.instruction,
+            wordBank: remote.wordBank ?? expectedTranslation
+                .lowercased()
+                .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter { $0.count > 2 },
+            level: remote.level.trimmed.isEmpty ? fallbackLevel : LearningLevel.fromCEFRCode(remote.level)
+        )
+    }
 
     static func deck(for level: LearningLevel) -> [TranslationPracticePrompt] {
         all.filter { $0.level == level }
@@ -3968,13 +4247,11 @@ private struct TranslationPracticeFeedback {
 }
 
 private struct TranslatePracticeBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         LinearGradient(
-            colors: [
-                Color(red: 0.98, green: 0.99, blue: 1.0),
-                Color(red: 0.93, green: 0.95, blue: 1.0),
-                Color(red: 0.98, green: 0.99, blue: 1.0)
-            ],
+            colors: backgroundColors,
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -3993,16 +4270,30 @@ private struct TranslatePracticeBackground: View {
                 .offset(x: -140, y: 120)
         }
     }
+
+    private var backgroundColors: [Color] {
+        if colorScheme == .dark {
+            return [
+                Color(red: 0.04, green: 0.06, blue: 0.13),
+                Color(red: 0.08, green: 0.08, blue: 0.20),
+                Color(red: 0.03, green: 0.09, blue: 0.12)
+            ]
+        }
+
+        return [
+            Color(red: 0.98, green: 0.99, blue: 1.0),
+            Color(red: 0.93, green: 0.95, blue: 1.0),
+            Color(red: 0.98, green: 0.99, blue: 1.0)
+        ]
+    }
 }
 
 private struct TopicsLearningBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         LinearGradient(
-            colors: [
-                Color(red: 0.94, green: 0.97, blue: 1.0),
-                Color(red: 0.98, green: 0.96, blue: 1.0),
-                Color(red: 0.92, green: 0.99, blue: 1.0)
-            ],
+            colors: backgroundColors,
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -4030,6 +4321,22 @@ private struct TopicsLearningBackground: View {
                 .padding(.trailing, 20)
         }
     }
+
+    private var backgroundColors: [Color] {
+        if colorScheme == .dark {
+            return [
+                Color(red: 0.04, green: 0.07, blue: 0.15),
+                Color(red: 0.08, green: 0.06, blue: 0.18),
+                Color(red: 0.03, green: 0.10, blue: 0.12)
+            ]
+        }
+
+        return [
+            Color(red: 0.94, green: 0.97, blue: 1.0),
+            Color(red: 0.98, green: 0.96, blue: 1.0),
+            Color(red: 0.92, green: 0.99, blue: 1.0)
+        ]
+    }
 }
 
 private struct TranslateDotPattern: View {
@@ -4045,23 +4352,54 @@ private struct TranslateDotPattern: View {
     }
 }
 
+private struct ExerciseSessionTopBar: View {
+    let title: String?
+    let closeAction: () -> Void
+
+    var body: some View {
+        ZStack {
+            HStack {
+                Button(action: closeAction) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(TranslateTheme.ink)
+                        .frame(width: 42, height: 42)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Cerrar")
+
+                Spacer(minLength: 0)
+            }
+
+            if let title {
+                Text(title)
+                    .font(.system(size: 21, weight: .semibold))
+                    .foregroundStyle(TranslateTheme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal, 54)
+            }
+        }
+        .frame(height: 42)
+    }
+}
+
 private struct TranslateLessonHeader: View {
     let lessonNumber: Int
     let totalLessons: Int
-    let hearts: Int
     let progress: Double
     let closeAction: (() -> Void)?
 
     var body: some View {
-        VStack(spacing: 14) {
+        ZStack {
             HStack(spacing: 12) {
                 if let closeAction {
                     Button(action: closeAction) {
                         Image(systemName: "xmark")
-                            .font(.headline)
+                            .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(TranslateTheme.ink)
                             .frame(width: 42, height: 42)
-                            .background(TranslateTheme.surface.opacity(0.86), in: Circle())
                     }
                     .buttonStyle(.plain)
                 } else {
@@ -4069,26 +4407,18 @@ private struct TranslateLessonHeader: View {
                         .frame(width: 42, height: 42)
                 }
 
-                Text("Lesson \(lessonNumber) of \(totalLessons)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(TranslateTheme.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.68)
-                    .monospacedDigit()
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                HStack(spacing: 5) {
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(Color.red.opacity(0.78))
-                    Text("\(hearts)")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.red)
-                }
-                .frame(width: 58, height: 42, alignment: .trailing)
+                Spacer(minLength: 0)
             }
 
-            TranslateProgressSegments(progress: progress)
+            Text("Práctica")
+                .font(.system(size: 21, weight: .semibold))
+                .foregroundStyle(TranslateTheme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal, 54)
         }
+        .frame(height: 42)
     }
 }
 
@@ -4130,26 +4460,31 @@ private struct TranslatePromptCard: View {
     let speakAction: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
-            Button(action: speakAction) {
-                Image(systemName: "speaker.wave.2.fill")
-                    .font(.headline)
-                    .foregroundStyle(TranslateTheme.primary)
-                    .frame(width: 44, height: 44)
-                    .background(TranslateTheme.primary.opacity(0.10), in: Circle())
-            }
-            .buttonStyle(.plain)
-
+        VStack(spacing: 0) {
             Text(prompt)
-                .font(.title3.bold())
+                .font(.system(size: 22, weight: .black, design: .rounded))
                 .foregroundStyle(TranslateTheme.ink)
                 .multilineTextAlignment(.center)
-                .lineSpacing(5)
+                .lineSpacing(4)
                 .frame(maxWidth: .infinity)
+                .padding(.horizontal, 18)
+                .padding(.top, 62)
+                .padding(.bottom, 34)
         }
-        .padding(18)
-        .background(TranslateTheme.surface, in: RoundedRectangle(cornerRadius: 18))
-        .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 18, x: 0, y: 10)
+        .background(TranslateTheme.surface.opacity(0.98), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(alignment: .top) {
+            Button(action: speakAction) {
+                Image(systemName: "speaker.wave.2.fill")
+                    .font(.system(size: 25, weight: .black))
+                    .foregroundStyle(TranslateTheme.primary)
+                    .frame(width: 64, height: 64)
+                    .background(TranslateTheme.softSurface, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .offset(y: -32)
+        }
+        .padding(.top, 32)
+        .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 22, x: 0, y: 12)
     }
 }
 
@@ -4158,39 +4493,50 @@ private struct TranslateAnswerEditor: View {
     let limit: Int
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            TextEditor(text: $answer)
-                .frame(minHeight: 132)
-                .scrollContentBackground(.hidden)
-                .padding(10)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled(false)
-                .onChange(of: answer) { _, newValue in
-                    if newValue.count > limit {
-                        answer = String(newValue.prefix(limit))
-                    }
-                }
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Your translation")
+                .font(.system(size: 13, weight: .black, design: .rounded))
+                .foregroundStyle(TranslateTheme.muted)
 
-            if answer.isEmpty {
-                Text("Type your translation in Spanish...")
-                    .foregroundStyle(TranslateTheme.muted.opacity(0.75))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 18)
-                    .allowsHitTesting(false)
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $answer)
+                    .frame(minHeight: 210)
+                    .scrollContentBackground(.hidden)
+                    .padding(.horizontal, 0)
+                    .padding(.vertical, 0)
+                    .textInputAutocapitalization(.sentences)
+                    .autocorrectionDisabled(false)
+                    .font(.system(size: 19, weight: .semibold, design: .rounded))
+                    .foregroundStyle(TranslateTheme.ink)
+                    .onChange(of: answer) { _, newValue in
+                        if newValue.count > limit {
+                            answer = String(newValue.prefix(limit))
+                        }
+                    }
+
+                if answer.isEmpty {
+                    Text("Escribí tu versión en español...")
+                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .foregroundStyle(TranslateTheme.muted.opacity(0.58))
+                        .padding(.top, 7)
+                        .allowsHitTesting(false)
+                }
             }
         }
-        .background(TranslateTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+        .padding(22)
+        .frame(maxWidth: .infinity, minHeight: 258, alignment: .topLeading)
+        .background(TranslateTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(TranslateTheme.primary.opacity(0.65), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(TranslateTheme.primary.opacity(0.78), lineWidth: 1.4)
         }
         .overlay(alignment: .bottomTrailing) {
             Text("\(answer.count) / \(limit)")
-                .font(.caption.monospacedDigit())
+                .font(.system(size: 18, weight: .black, design: .rounded).monospacedDigit())
                 .foregroundStyle(TranslateTheme.muted)
-                .padding(14)
+                .padding(18)
         }
-        .shadow(color: TranslateTheme.primary.opacity(0.06), radius: 14, x: 0, y: 8)
+        .shadow(color: TranslateTheme.primary.opacity(0.04), radius: 14, x: 0, y: 8)
     }
 }
 
@@ -4200,11 +4546,33 @@ private struct TranslateAssistActions: View {
     let exampleAction: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
-            TranslateActionChip(title: "Hint", systemImage: "lightbulb", action: hintAction)
-            TranslateActionChip(title: "Word bank", systemImage: "rectangle.split.2x1", action: wordBankAction)
-            TranslateActionChip(title: "Show example", systemImage: "sparkles", action: exampleAction)
+        HStack(spacing: 9) {
+            ExerciseActionChip(title: "Pista", systemImage: "lightbulb", action: hintAction)
+            ExerciseActionChip(title: "Banco de palabras", systemImage: "rectangle.split.2x1", action: wordBankAction)
+            ExerciseActionChip(title: "Ejemplo", systemImage: "sparkles", action: exampleAction)
         }
+    }
+}
+
+private struct ExerciseActionChip: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.system(size: 14, weight: .black, design: .rounded))
+                .foregroundStyle(TranslateTheme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.70)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 13)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .background(TranslateTheme.surface.opacity(0.96), in: Capsule())
+        .shadow(color: TranslateTheme.primary.opacity(0.10), radius: 16, x: 0, y: 8)
     }
 }
 
@@ -4293,6 +4661,58 @@ private struct TranslateWordBank: View {
         .padding(14)
         .background(TranslateTheme.surface, in: RoundedRectangle(cornerRadius: 16))
         .shadow(color: TranslateTheme.primary.opacity(0.06), radius: 14, x: 0, y: 8)
+    }
+}
+
+private struct TranslateAxoTipCard: View {
+    var body: some View {
+        HStack(alignment: .center, spacing: 14) {
+            Image("Ajolote_Home")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 84, height: 84)
+                .shadow(color: Color(red: 1.0, green: 0.75, blue: 0.18).opacity(0.18), radius: 10, x: 0, y: 6)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Axo tip")
+                    .font(.system(size: 20, weight: .black, design: .rounded))
+                    .foregroundStyle(TranslateTheme.ink)
+
+                Text("Keep the meaning first. Your answer doesn’t need to copy every word.")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(TranslateTheme.muted)
+                    .lineSpacing(1)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 8) {
+                    TranslateTipPill(title: "Meaning", tint: TranslateTheme.secondary)
+                    TranslateTipPill(title: "Natural", tint: TranslateTheme.mint)
+                    TranslateTipPill(title: "Grammar", tint: .orange)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
+        .background(TranslateTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: TranslateTheme.primary.opacity(0.06), radius: 18, x: 0, y: 10)
+    }
+}
+
+private struct TranslateTipPill: View {
+    let title: String
+    let tint: Color
+
+    var body: some View {
+        Text(title)
+            .font(.system(size: 13, weight: .black, design: .rounded))
+            .foregroundStyle(tint)
+            .lineLimit(1)
+            .minimumScaleFactor(0.74)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(tint.opacity(0.12), in: Capsule())
     }
 }
 
@@ -4430,98 +4850,199 @@ private struct TranslatePrimaryButtonStyle: ButtonStyle {
                 ),
                 in: Capsule()
             )
-            .shadow(color: TranslateTheme.primary.opacity(isEnabled ? 0.22 : 0), radius: 14, x: 0, y: 8)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+    }
+}
+
+private struct TranslateSecondaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 16, weight: .black, design: .rounded))
+            .foregroundStyle(isEnabled ? TranslateTheme.primary : TranslateTheme.muted.opacity(0.62))
+            .padding(.vertical, 15)
+            .background(TranslateTheme.primary.opacity(isEnabled ? 0.10 : 0.05), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
 }
 
 private struct VocabularyPracticeView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var index = 0
     @State private var answer = ""
     @State private var feedback: LearningFeedback?
     @State private var isShowingAnswer = false
+    @State private var remoteCards: [VocabularyCard] = []
+    @State private var loadedRemoteLevel: TopicCEFRLevel?
+    @State private var isLoadingCards = false
+
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
 
     private var level: LearningLevel {
-        learningProgress.effectiveLevel(for: LearningModule.vocabulary.rawValue)
+        selectedCEFRLevel.fallbackLearningLevel
     }
 
     private var cards: [VocabularyCard] {
-        VocabularyCard.deck(for: level)
+        remoteCards.isEmpty ? VocabularyCard.deck(for: level) : remoteCards
     }
 
     var body: some View {
         let safeIndex = min(index, max(cards.count - 1, 0))
         let card = cards[safeIndex]
 
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                ProgressHeader(currentIndex: safeIndex, total: cards.count)
+        ZStack {
+            TranslatePracticeBackground()
 
+            ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Label("Adaptado a \(level.title)", systemImage: "slider.horizontal.3")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tint)
+                    ExerciseSessionTopBar(
+                        title: "Vocabulario",
+                        closeAction: { dismiss() }
+                    )
 
-                    Text(card.translation)
-                        .font(.title2.bold())
-                    Text(card.definition)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Palabras útiles")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
 
-                    TextField("Escribi la palabra en ingles", text: $answer)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit { validate(card) }
-
-                    if isShowingAnswer {
-                        ExampleBox(title: card.word, bodyText: card.example)
+                        Text("Recordá la palabra desde su significado.")
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
                     }
 
-                    if let feedback {
-                        LearningFeedbackView(feedback: feedback)
+                    if isLoadingCards {
+                        Label("Cargando...", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
                     }
 
-                    HStack(spacing: 10) {
+                    ProgressHeader(currentIndex: safeIndex, total: cards.count)
+
+                    VStack(alignment: .leading, spacing: 16) {
+                        Label("Adaptado a \(level.title)", systemImage: "slider.horizontal.3")
+                            .font(.system(size: 14, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.primary)
+
+                        Text(card.translation)
+                            .font(.system(size: 30, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text(card.definition)
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        TextField("Escribí la palabra en inglés", text: $answer)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .padding(16)
+                            .background(TranslateTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(TranslateTheme.primary.opacity(0.16), lineWidth: 1)
+                            }
+                            .onSubmit { validate(card) }
+
+                        if isShowingAnswer {
+                            ExampleBox(title: card.word, bodyText: card.example)
+                        }
+
+                        if let feedback {
+                            LearningFeedbackView(feedback: feedback)
+                        }
+
+                        HStack(spacing: 10) {
+                            Button {
+                                validate(card)
+                            } label: {
+                                Label("Comprobar", systemImage: "checkmark")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(TranslatePrimaryButtonStyle())
+                            .disabled(answer.trimmed.isEmpty)
+
+                            Button {
+                                isShowingAnswer.toggle()
+                            } label: {
+                                Label(level.showsExtraHints ? "Ayuda" : "Ejemplo", systemImage: "lightbulb")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(TranslateSecondaryButtonStyle())
+                        }
+
                         Button {
-                            validate(card)
+                            moveNext()
                         } label: {
-                            Label("Comprobar", systemImage: "checkmark")
+                            Label("Siguiente", systemImage: "arrow.right")
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(answer.trimmed.isEmpty)
-
-                        Button {
-                            isShowingAnswer.toggle()
-                        } label: {
-                            Label(level.showsExtraHints ? "Ayuda" : "Ver ejemplo", systemImage: "lightbulb")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(TranslateSecondaryButtonStyle())
                     }
-
-                    Button {
-                        moveNext()
-                    } label: {
-                        Label("Siguiente", systemImage: "arrow.right")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
+                    .padding(22)
+                    .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
                 }
-                .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 40)
             }
-            .padding()
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle("Vocabulario")
-        .onChange(of: learningProgress.profile.level) { _, _ in
+        .navigationTitle("")
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .task(id: selectedCEFRLevel) {
+            await loadVocabulary(for: selectedCEFRLevel)
+        }
+        .onChange(of: learningProgress.cefrLevelCode) { _, _ in
             index = 0
+            remoteCards = []
+            loadedRemoteLevel = nil
             answer = ""
             feedback = nil
             isShowingAnswer = false
         }
+    }
+
+    @MainActor
+    private func loadVocabulary(for selectedLevel: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, loadedRemoteLevel == selectedLevel, !remoteCards.isEmpty {
+            return
+        }
+
+        isLoadingCards = true
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchVocabulary(
+                level: selectedLevel.rawValue,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedCards = response.vocabulary.compactMap {
+                VocabularyCard(remote: $0, fallbackLevel: selectedLevel.fallbackLearningLevel)
+            }
+
+            loadedRemoteLevel = selectedLevel
+            remoteCards = mappedCards
+            index = 0
+            answer = ""
+            feedback = nil
+            isShowingAnswer = false
+        } catch {
+            remoteCards = []
+            loadedRemoteLevel = selectedLevel
+        }
+
+        isLoadingCards = false
     }
 
     private func validate(_ card: VocabularyCard) {
@@ -4531,6 +5052,7 @@ private struct VocabularyPracticeView: View {
         learningProgress.saveWord(word: card.word, note: card.translation, source: "Vocabulario")
         if isCorrect {
             learningProgress.recordErrorResolved(module: LearningModule.vocabulary.rawValue, expected: card.word)
+            markVocabularyCompletedIfNeeded(card)
         } else {
             learningProgress.recordError(
                 module: LearningModule.vocabulary.rawValue,
@@ -4548,6 +5070,30 @@ private struct VocabularyPracticeView: View {
         )
     }
 
+    private func markVocabularyCompletedIfNeeded(_ card: VocabularyCard) {
+        guard let apiContentId = card.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let completedLevel = selectedCEFRLevel.rawValue
+        let completedTitle = card.word
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "vocabulary", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "vocabulary",
+                itemId: apiContentId,
+                level: completedLevel,
+                title: completedTitle
+            )
+        }
+    }
+
     private func moveNext() {
         index = (index + 1) % cards.count
         answer = ""
@@ -4557,97 +5103,186 @@ private struct VocabularyPracticeView: View {
 }
 
 private struct ListeningPracticeView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @StateObject private var speaker = PromptSpeaker()
     @State private var index = 0
     @State private var answer = ""
+    @State private var selectedWords: [String] = []
     @State private var feedback: LearningFeedback?
     @State private var lastCheckedAnswer = ""
+    @State private var remoteItems: [ListeningItem] = []
+    @State private var loadedRemoteLevel: TopicCEFRLevel?
+    @State private var isLoadingItems = false
+
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
 
     private var level: LearningLevel {
-        learningProgress.effectiveLevel(for: LearningModule.listening.rawValue)
+        selectedCEFRLevel.fallbackLearningLevel
     }
 
     private var items: [ListeningItem] {
-        ListeningItem.deck(for: level)
+        remoteItems.isEmpty ? ListeningItem.deck(for: level) : remoteItems
     }
 
     var body: some View {
         let safeIndex = min(index, max(items.count - 1, 0))
         let item = items[safeIndex]
+        let challenge = ListeningClozeChallenge(item: item, deck: items, level: level)
 
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                ProgressHeader(currentIndex: safeIndex, total: items.count)
+        ZStack {
+            TranslatePracticeBackground()
 
-                VStack(alignment: .leading, spacing: 14) {
-                    Text(level == .advanced ? "Dictado sin traduccion" : item.translation)
-                        .font(.title3.bold())
-                    Text("Adaptado a \(level.title) · velocidad \(Int(level.speechRate * 100))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    ExerciseSessionTopBar(
+                        title: "Listening",
+                        closeAction: { dismiss() }
+                    )
 
-                    Button {
-                        speaker.speak(item.phrase, rate: level.speechRate)
-                    } label: {
-                        Label("Escuchar", systemImage: "speaker.wave.2.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Listen & complete")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
 
-                    TextEditor(text: $answer)
-                        .frame(minHeight: 110)
-                        .scrollContentBackground(.hidden)
-                        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-
-                    if let feedback {
-                        LearningFeedbackView(feedback: feedback)
-                        if !feedback.isCorrect {
-                            LearningWordDiffView(answer: lastCheckedAnswer, target: item.phrase)
-                        }
+                        Text("Catch the missing words.")
+                            .font(.system(size: 22, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
                     }
 
-                    HStack(spacing: 10) {
-                        Button {
-                            validate(item)
-                        } label: {
-                            Label("Comprobar", systemImage: "checkmark")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(answer.trimmed.isEmpty)
-
-                        Button {
-                            moveNext()
-                        } label: {
-                            Label("Siguiente", systemImage: "arrow.right")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
+                    if isLoadingItems {
+                        Label("Cargando...", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
                     }
+
+                    ListeningAudioCard(
+                        title: challenge.trackTitle,
+                        artist: challenge.artistName,
+                        playAction: { speaker.speak(item.phrase, rate: level.speechRate) }
+                    )
+
+                    ListeningClozeCard(
+                        challenge: challenge,
+                        selectedWords: selectedWords,
+                        feedback: feedback,
+                        lastCheckedAnswer: lastCheckedAnswer,
+                        chooseWord: { chooseWord($0, challenge: challenge) },
+                        removeWord: removeWord
+                    )
+
+                    ListeningHelpCard()
                 }
-                .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 140)
             }
-            .padding()
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle("Listening")
-        .onChange(of: learningProgress.profile.level) { _, _ in
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                if feedback == nil {
+                    validate(item, challenge: challenge)
+                } else {
+                    moveNext()
+                }
+            } label: {
+                Text(feedback == nil ? "Check answers" : "Next line")
+                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(TranslatePrimaryButtonStyle())
+            .disabled(feedback == nil && selectedWords.count < challenge.answerWords.count)
+            .padding(.horizontal, 26)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+        }
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .task(id: selectedCEFRLevel) {
+            await loadListeningItems(for: selectedCEFRLevel)
+        }
+        .onChange(of: learningProgress.cefrLevelCode) { _, _ in
             index = 0
+            remoteItems = []
+            loadedRemoteLevel = nil
             answer = ""
+            selectedWords = []
             feedback = nil
+            lastCheckedAnswer = ""
         }
     }
 
-    private func validate(_ item: ListeningItem) {
-        lastCheckedAnswer = answer
-        let result = TextMatcher.evaluate(answer: answer, target: item.phrase)
+    @MainActor
+    private func loadListeningItems(for selectedLevel: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, loadedRemoteLevel == selectedLevel, !remoteItems.isEmpty {
+            return
+        }
+
+        isLoadingItems = true
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchPracticeExercises(
+                skill: "listening",
+                level: selectedLevel.rawValue,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedItems = response.exercises.compactMap {
+                ListeningItem(remote: $0, fallbackLevel: selectedLevel.fallbackLearningLevel)
+            }
+
+            loadedRemoteLevel = selectedLevel
+            remoteItems = mappedItems
+            index = 0
+            answer = ""
+            selectedWords = []
+            feedback = nil
+            lastCheckedAnswer = ""
+        } catch {
+            remoteItems = []
+            loadedRemoteLevel = selectedLevel
+        }
+
+        isLoadingItems = false
+    }
+
+    private func chooseWord(_ word: String, challenge: ListeningClozeChallenge) {
+        feedback = nil
+        lastCheckedAnswer = ""
+
+        if selectedWords.contains(word) {
+            removeWord(word)
+        } else if selectedWords.count < challenge.answerWords.count {
+            selectedWords.append(word)
+        }
+
+        answer = challenge.completedPhrase(with: selectedWords)
+    }
+
+    private func removeWord(_ word: String) {
+        selectedWords.removeAll { $0 == word }
+        feedback = nil
+        lastCheckedAnswer = ""
+    }
+
+    private func validate(_ item: ListeningItem, challenge: ListeningClozeChallenge) {
+        let checkedAnswer = challenge.completedPhrase(with: selectedWords)
+        answer = checkedAnswer
+        lastCheckedAnswer = checkedAnswer
+        let result = TextMatcher.evaluate(answer: checkedAnswer, target: item.phrase)
         let isCorrect = level.acceptsCloseAnswers ? result.isClose : result.isExact
         learningProgress.recordModule(LearningModule.listening.rawValue, wasCorrect: isCorrect)
         if isCorrect {
             learningProgress.recordErrorResolved(module: LearningModule.listening.rawValue, expected: item.phrase)
+            markListeningCompletedIfNeeded(item)
         } else {
             learningProgress.recordError(
                 module: LearningModule.listening.rawValue,
@@ -4665,15 +5300,311 @@ private struct ListeningPracticeView: View {
         )
     }
 
+    private func markListeningCompletedIfNeeded(_ item: ListeningItem) {
+        guard let apiContentId = item.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let completedLevel = selectedCEFRLevel.rawValue
+        let completedTitle = item.trackTitle
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "exercise", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "exercise",
+                itemId: apiContentId,
+                level: completedLevel,
+                title: completedTitle
+            )
+        }
+    }
+
     private func moveNext() {
         index = (index + 1) % items.count
         answer = ""
+        selectedWords = []
         lastCheckedAnswer = ""
         feedback = nil
     }
 }
 
+private extension Array where Element: Hashable {
+    func uniqued() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
+    }
+}
+
+private struct ListeningClozeChallenge {
+    let item: ListeningItem
+    let rawTokens: [String]
+    let missingIndices: [Int]
+    let answerWords: [String]
+    let options: [String]
+    let trackTitle: String
+    let artistName: String
+
+    init(item: ListeningItem, deck: [ListeningItem], level: LearningLevel) {
+        let parsedTokens = item.phrase.split(separator: " ").map(String.init)
+
+        let candidateIndices = parsedTokens.indices.filter { index in
+            TextMatcher.normalize(parsedTokens[index]).count >= 3
+        }
+        let blankCount = min(level == .beginner ? 1 : 2, max(candidateIndices.count, 1))
+        var chosenIndices: [Int] = []
+        let preferredOffsets = [
+            max(0, candidateIndices.count / 2),
+            max(0, candidateIndices.count - 2),
+            max(0, candidateIndices.count / 3),
+            0
+        ]
+
+        for offset in preferredOffsets where chosenIndices.count < blankCount {
+            guard candidateIndices.indices.contains(offset) else { continue }
+            let candidate = candidateIndices[offset]
+            if !chosenIndices.contains(candidate) {
+                chosenIndices.append(candidate)
+            }
+        }
+
+        if chosenIndices.isEmpty, let firstCandidate = candidateIndices.first {
+            chosenIndices = [firstCandidate]
+        }
+
+        let sortedMissingIndices = chosenIndices.sorted()
+        let resolvedAnswerWords = sortedMissingIndices.map { TextMatcher.normalize(parsedTokens[$0]) }
+
+        let answerSet = Set(resolvedAnswerWords)
+        let distractors = deck
+            .flatMap { $0.phrase.split(separator: " ").map(String.init) }
+            .map { TextMatcher.normalize($0) }
+            .filter { !$0.isEmpty && $0.count >= 3 && !answerSet.contains($0) }
+            .uniqued()
+
+        var builtOptions: [String] = []
+        if let firstDistractor = distractors.first {
+            builtOptions.append(firstDistractor)
+        }
+        builtOptions.append(contentsOf: resolvedAnswerWords)
+        builtOptions.append(contentsOf: distractors.dropFirst().prefix(max(2, 4 - builtOptions.count)))
+
+        self.item = item
+        rawTokens = parsedTokens
+        missingIndices = sortedMissingIndices
+        answerWords = resolvedAnswerWords
+        options = Array(builtOptions.uniqued().prefix(max(4, resolvedAnswerWords.count + 2)))
+
+        trackTitle = item.trackTitle
+        artistName = item.artistName
+    }
+
+    func displayPhrase(with selectedWords: [String]) -> String {
+        rawTokens.enumerated().map { index, token in
+            guard let answerPosition = missingIndices.firstIndex(of: index) else {
+                return token
+            }
+
+            if selectedWords.indices.contains(answerPosition) {
+                return selectedWords[answerPosition]
+            }
+
+            return "____"
+        }
+        .joined(separator: " ")
+    }
+
+    func completedPhrase(with selectedWords: [String]) -> String {
+        rawTokens.enumerated().map { index, token in
+            guard let answerPosition = missingIndices.firstIndex(of: index) else {
+                return token
+            }
+
+            return selectedWords.indices.contains(answerPosition) ? selectedWords[answerPosition] : "____"
+        }
+        .joined(separator: " ")
+    }
+}
+
+private struct ListeningAudioCard: View {
+    let title: String
+    let artist: String
+    let playAction: () -> Void
+
+    private let barHeights: [CGFloat] = [13, 22, 17, 35, 19, 27, 14, 31]
+
+    var body: some View {
+        VStack(spacing: -6) {
+            HStack(spacing: 24) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [TranslateTheme.primary, TranslateTheme.secondary],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    Image(systemName: "pentagon.fill")
+                        .font(.system(size: 62, weight: .black))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 104, height: 104)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(title)
+                        .font(.system(size: 26, weight: .black, design: .rounded))
+                        .foregroundStyle(TranslateTheme.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+
+                    Text(artist)
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundStyle(TranslateTheme.muted)
+
+                    HStack(alignment: .bottom, spacing: 9) {
+                        ForEach(Array(barHeights.enumerated()), id: \.offset) { index, height in
+                            Capsule()
+                                .fill(index % 3 == 0 ? TranslateTheme.secondary : TranslateTheme.primary.opacity(0.42))
+                                .frame(width: 8, height: height)
+                        }
+                    }
+                    .padding(.top, 12)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            Button(action: playAction) {
+                Image(systemName: "play.fill")
+                    .font(.system(size: 24, weight: .black))
+                    .foregroundStyle(.white)
+                    .frame(width: 70, height: 70)
+                    .background(TranslateTheme.primary, in: Circle())
+                    .shadow(color: TranslateTheme.primary.opacity(0.22), radius: 14, x: 0, y: 8)
+            }
+            .buttonStyle(.plain)
+            .offset(y: -10)
+        }
+        .padding(.horizontal, 22)
+        .padding(.top, 24)
+        .padding(.bottom, 8)
+        .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color(red: 0.82, green: 0.87, blue: 1.0).opacity(0.62), lineWidth: 1)
+        }
+        .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
+    }
+}
+
+private struct ListeningClozeCard: View {
+    let challenge: ListeningClozeChallenge
+    let selectedWords: [String]
+    let feedback: LearningFeedback?
+    let lastCheckedAnswer: String
+    let chooseWord: (String) -> Void
+    let removeWord: (String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text(challenge.displayPhrase(with: selectedWords))
+                .font(.system(size: 24, weight: .medium, design: .rounded))
+                .foregroundStyle(TranslateTheme.ink)
+                .lineSpacing(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+
+            FlowLayout(spacing: 10) {
+                ForEach(challenge.options, id: \.self) { word in
+                    Button {
+                        chooseWord(word)
+                    } label: {
+                        Text(word)
+                            .font(.system(size: 18, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.76)
+                            .padding(.horizontal, 22)
+                            .padding(.vertical, 13)
+                    }
+                    .buttonStyle(.plain)
+                    .background(selectedWords.contains(word) ? TranslateTheme.primary.opacity(0.13) : TranslateTheme.elevatedSurface, in: Capsule())
+                    .overlay {
+                        Capsule()
+                            .stroke(TranslateTheme.primary.opacity(selectedWords.contains(word) ? 0.95 : 0.58), lineWidth: 1.2)
+                    }
+                }
+            }
+
+            if !selectedWords.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(selectedWords, id: \.self) { word in
+                        Button {
+                            removeWord(word)
+                        } label: {
+                            Label(word, systemImage: "xmark.circle.fill")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(TranslateTheme.ink)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 7)
+                        }
+                        .buttonStyle(.plain)
+                        .background(TranslateTheme.softSurface, in: Capsule())
+                    }
+                }
+            }
+
+            if let feedback {
+                LearningFeedbackView(feedback: feedback)
+
+                if !feedback.isCorrect {
+                    LearningWordDiffView(answer: lastCheckedAnswer, target: challenge.item.phrase)
+                }
+            }
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, minHeight: 300, alignment: .topLeading)
+        .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
+    }
+}
+
+private struct ListeningHelpCard: View {
+    var body: some View {
+        HStack(spacing: 18) {
+            Image(systemName: "sparkle")
+                .font(.system(size: 27, weight: .black))
+                .foregroundStyle(TranslateTheme.mint)
+                .frame(width: 66, height: 66)
+                .background(TranslateTheme.mint.opacity(0.16), in: Circle())
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Need help?")
+                    .font(.system(size: 20, weight: .black, design: .rounded))
+                    .foregroundStyle(TranslateTheme.ink)
+
+                Text("Try slow mode or replay one line.")
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundStyle(TranslateTheme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 22)
+        .background(TranslateTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: TranslateTheme.primary.opacity(0.06), radius: 18, x: 0, y: 10)
+    }
+}
+
 private struct SentenceBuilderPracticeView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var index = 0
     @State private var availableTokens: [WordToken] = []
@@ -4681,15 +5612,21 @@ private struct SentenceBuilderPracticeView: View {
     @State private var feedback: LearningFeedback?
     @State private var puzzles: [SentencePuzzle] = []
     @State private var isLoadingMore = false
+    @State private var isLoadingInitialPuzzles = false
     @State private var sourceMessage = "Estas primeras frases vienen incluidas en la app."
     @State private var errorMessage: String?
     @State private var recordedCorrectPuzzleIDs = Set<UUID>()
     @State private var lastCheckedAnswer = ""
+    @State private var loadedRemoteLevel: TopicCEFRLevel?
 
     private let service = LanguageLearningService()
 
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
+
     private var level: LearningLevel {
-        learningProgress.effectiveLevel(for: LearningModule.sentences.rawValue)
+        selectedCEFRLevel.fallbackLearningLevel
     }
 
     private var activePuzzles: [SentencePuzzle] {
@@ -4698,119 +5635,161 @@ private struct SentenceBuilderPracticeView: View {
 
     var body: some View {
         if activePuzzles.isEmpty {
-            ContentUnavailableView("No hay frases para este nivel", systemImage: "text.word.spacing")
-                .navigationTitle("Frases")
+            ZStack {
+                TranslatePracticeBackground()
+                ContentUnavailableView("No hay frases para este nivel", systemImage: "text.word.spacing")
+            }
+            .navigationTitle("")
+            .toolbar(.hidden, for: .navigationBar)
         } else {
             let safeIndex = min(index, max(activePuzzles.count - 1, 0))
             let puzzle = activePuzzles[safeIndex]
             let isLastPuzzle = safeIndex == activePuzzles.count - 1
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    ProgressHeader(currentIndex: safeIndex, total: activePuzzles.count)
+            ZStack {
+                TranslatePracticeBackground()
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(alignment: .top, spacing: 12) {
-                            Label(puzzle.source, systemImage: "quote.bubble")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tint)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ExerciseSessionTopBar(
+                            title: "Frases",
+                            closeAction: { dismiss() }
+                        )
 
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Armá oraciones")
+                                .font(.system(size: 39, weight: .black, design: .rounded))
+                                .foregroundStyle(TranslateTheme.ink)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.78)
+
+                            Text("Ordená las palabras y controlá el significado.")
+                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                .foregroundStyle(TranslateTheme.muted)
+                        }
+
+                        ProgressHeader(currentIndex: safeIndex, total: activePuzzles.count)
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(alignment: .top, spacing: 12) {
+                                Label(puzzle.source, systemImage: "quote.bubble")
+                                    .font(.system(size: 14, weight: .black, design: .rounded))
+                                    .foregroundStyle(TranslateTheme.primary)
+
+                                Spacer()
+
+                                Button {
+                                    Task { await loadMorePuzzles() }
+                                } label: {
+                                    Label(isLoadingMore ? "Buscando" : "Más", systemImage: "arrow.down.circle")
+                                        .font(.system(size: 13, weight: .black, design: .rounded))
+                                        .foregroundStyle(TranslateTheme.primary)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(TranslateTheme.primary.opacity(0.10), in: Capsule())
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(isLoadingMore || isLoadingInitialPuzzles)
+                            }
+
+                            if isLoadingInitialPuzzles {
+                                Label("Cargando...", systemImage: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(TranslateTheme.muted)
+                            }
+
+                            Text(sourceMessage)
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .foregroundStyle(TranslateTheme.muted)
+
+                            Label("Adaptado a \(level.title): \(level.sentenceWordRange.lowerBound)-\(level.sentenceWordRange.upperBound) palabras", systemImage: "slider.horizontal.3")
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundStyle(TranslateTheme.muted)
+
+                            if let errorMessage {
+                                Label(errorMessage, systemImage: "exclamationmark.triangle")
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.orange)
+                            }
+                        }
+                        .padding(16)
+                        .background(TranslateTheme.surface.opacity(0.94), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text(puzzle.translation)
+                                .font(.system(size: 24, weight: .black, design: .rounded))
+                                .foregroundStyle(TranslateTheme.ink)
+                                .fixedSize(horizontal: false, vertical: true)
+
+                            TokenArea(title: "Tu frase", tokens: selectedTokens) { token in
+                                selectedTokens.removeAll { $0.id == token.id }
+                                availableTokens.append(token)
+                                feedback = nil
+                            }
+
+                            TokenArea(title: "Palabras disponibles", tokens: availableTokens) { token in
+                                availableTokens.removeAll { $0.id == token.id }
+                                selectedTokens.append(token)
+                                feedback = nil
+                                autoValidateIfComplete(puzzle)
+                            }
+
+                            if let feedback {
+                                LearningFeedbackView(feedback: feedback)
+                                if !feedback.isCorrect {
+                                    LearningWordDiffView(answer: lastCheckedAnswer, target: puzzle.answer)
+                                }
+                            }
+
+                            HStack(spacing: 10) {
+                                Button {
+                                    validate(puzzle)
+                                } label: {
+                                    Label("Comprobar", systemImage: "checkmark")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(TranslatePrimaryButtonStyle())
+                                .disabled(selectedTokens.isEmpty)
+
+                                Button {
+                                    resetPuzzle(puzzle)
+                                } label: {
+                                    Label("Reiniciar", systemImage: "arrow.counterclockwise")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(TranslateSecondaryButtonStyle())
+                            }
 
                             Button {
-                                Task { await loadMorePuzzles() }
+                                Task { await moveNextOrLoadMore() }
                             } label: {
-                                Label(isLoadingMore ? "Buscando" : "Obtener mas", systemImage: "arrow.down.circle")
+                                Label(
+                                    isLastPuzzle ? (isLoadingMore ? "Buscando" : "Siguiente tanda") : "Siguiente",
+                                    systemImage: isLastPuzzle ? "arrow.down.circle" : "arrow.right"
+                                )
+                                    .frame(maxWidth: .infinity)
                             }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(TranslateSecondaryButtonStyle())
                             .disabled(isLoadingMore)
                         }
-
-                        Text(sourceMessage)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        Label("Adaptado a \(level.title): \(level.sentenceWordRange.lowerBound)-\(level.sentenceWordRange.upperBound) palabras", systemImage: "slider.horizontal.3")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        if let errorMessage {
-                            Label(errorMessage, systemImage: "exclamationmark.triangle")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                        }
+                        .padding(22)
+                        .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
                     }
-                    .padding(14)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text(puzzle.translation)
-                            .font(.title3.bold())
-
-                        TokenArea(title: "Tu frase", tokens: selectedTokens) { token in
-                            selectedTokens.removeAll { $0.id == token.id }
-                            availableTokens.append(token)
-                            feedback = nil
-                        }
-
-                        TokenArea(title: "Palabras disponibles", tokens: availableTokens) { token in
-                            availableTokens.removeAll { $0.id == token.id }
-                            selectedTokens.append(token)
-                            feedback = nil
-                            autoValidateIfComplete(puzzle)
-                        }
-
-                        if let feedback {
-                            LearningFeedbackView(feedback: feedback)
-                            if !feedback.isCorrect {
-                                LearningWordDiffView(answer: lastCheckedAnswer, target: puzzle.answer)
-                            }
-                        }
-
-                        HStack(spacing: 10) {
-                            Button {
-                                validate(puzzle)
-                            } label: {
-                                Label("Comprobar", systemImage: "checkmark")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(selectedTokens.isEmpty)
-
-                            Button {
-                                resetPuzzle(puzzle)
-                            } label: {
-                                Label("Reiniciar", systemImage: "arrow.counterclockwise")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
-                        }
-
-                        Button {
-                            Task { await moveNextOrLoadMore() }
-                        } label: {
-                            Label(
-                                isLastPuzzle ? (isLoadingMore ? "Buscando" : "Siguiente tanda") : "Siguiente",
-                                systemImage: isLastPuzzle ? "arrow.down.circle" : "arrow.right"
-                            )
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(isLoadingMore)
-                    }
-                    .padding(16)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                    .padding(.horizontal, 26)
+                    .padding(.top, 18)
+                    .padding(.bottom, 40)
                 }
-                .padding()
-                .padding(.bottom, 110)
+                .scrollIndicators(.hidden)
             }
-            .navigationTitle("Frases")
+            .navigationTitle("")
+            .navigationBarBackButtonHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
+            .toolbar(.hidden, for: .tabBar)
+            .task(id: selectedCEFRLevel) {
+                await loadInitialPuzzles(for: selectedCEFRLevel)
+            }
             .onAppear {
-                if puzzles.isEmpty {
-                    puzzles = SentencePuzzle.deck(for: level)
-                    sourceMessage = "Frases locales para nivel \(level.title.lowercased())."
-                }
-
                 if availableTokens.isEmpty && selectedTokens.isEmpty {
                     resetPuzzle(puzzle)
                 }
@@ -4819,18 +5798,67 @@ private struct SentenceBuilderPracticeView: View {
                 guard activePuzzles.indices.contains(newValue) else { return }
                 resetPuzzle(activePuzzles[newValue])
             }
-            .onChange(of: learningProgress.profile.level) { _, newLevel in
-                puzzles = SentencePuzzle.deck(for: newLevel)
-                sourceMessage = "Frases locales para nivel \(newLevel.title.lowercased())."
+            .onChange(of: learningProgress.cefrLevelCode) { _, _ in
+                puzzles = []
+                loadedRemoteLevel = nil
+                sourceMessage = "Estas primeras frases vienen incluidas en la app."
                 errorMessage = nil
                 recordedCorrectPuzzleIDs = []
                 lastCheckedAnswer = ""
                 index = 0
-                if let first = puzzles.first {
+                availableTokens = []
+                selectedTokens = []
+                feedback = nil
+                if let first = activePuzzles.first {
                     resetPuzzle(first)
                 }
             }
         }
+    }
+
+    @MainActor
+    private func loadInitialPuzzles(for selectedLevel: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, loadedRemoteLevel == selectedLevel, !puzzles.isEmpty {
+            return
+        }
+
+        isLoadingInitialPuzzles = true
+        errorMessage = nil
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchPracticeExercises(
+                skill: "sentence_builder",
+                level: selectedLevel.rawValue,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedPuzzles = response.exercises.compactMap {
+                SentencePuzzle(remote: $0, fallbackLevel: selectedLevel.fallbackLearningLevel)
+            }
+
+            loadedRemoteLevel = selectedLevel
+            index = 0
+            recordedCorrectPuzzleIDs = []
+            lastCheckedAnswer = ""
+
+            if mappedPuzzles.isEmpty {
+                puzzles = []
+                sourceMessage = "Frases locales para nivel \(selectedLevel.fallbackLearningLevel.title.lowercased())."
+            } else {
+                puzzles = mappedPuzzles
+                sourceMessage = "Frases nuevas para tu nivel."
+            }
+
+            if let first = activePuzzles.first {
+                resetPuzzle(first)
+            }
+        } catch {
+            loadedRemoteLevel = selectedLevel
+            puzzles = []
+            sourceMessage = "Frases locales para nivel \(selectedLevel.fallbackLearningLevel.title.lowercased())."
+        }
+
+        isLoadingInitialPuzzles = false
     }
 
     @discardableResult
@@ -4844,6 +5872,7 @@ private struct SentenceBuilderPracticeView: View {
         }
         if isCorrect {
             learningProgress.recordErrorResolved(module: LearningModule.sentences.rawValue, expected: puzzle.answer)
+            markSentenceCompletedIfNeeded(puzzle)
         } else {
             learningProgress.recordError(
                 module: LearningModule.sentences.rawValue,
@@ -4861,6 +5890,30 @@ private struct SentenceBuilderPracticeView: View {
         )
 
         return isCorrect
+    }
+
+    private func markSentenceCompletedIfNeeded(_ puzzle: SentencePuzzle) {
+        guard let apiContentId = puzzle.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let completedLevel = selectedCEFRLevel.rawValue
+        let completedTitle = puzzle.answer
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "exercise", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "exercise",
+                itemId: apiContentId,
+                level: completedLevel,
+                title: completedTitle
+            )
+        }
     }
 
     private func autoValidateIfComplete(_ puzzle: SentencePuzzle) {
@@ -4935,18 +5988,25 @@ private struct SentenceBuilderPracticeView: View {
 }
 
 private struct LocupomRemoteTopic: Decodable {
+    let id: String
     let title: String
     let level: String
+    let levelOrder: Int?
+    let order: Int?
     let category: String
+    let categoryLabel: String?
     let summary: String
     let pattern: String
+    let sourceBasis: [String]?
     let lessonBlocks: [LocupomRemoteLessonBlock]?
     let learningObjectives: [String]
     let examples: [String]
     let commonMistakes: [String]
+    let practiceIdeas: [String]?
     let practiceTasks: [LocupomRemotePracticeTask]?
     let externalResources: LocupomRemoteExternalResources?
     let quiz: LocupomRemoteTopicQuiz
+    let source: LocupomRemoteTopicSource?
 }
 
 private struct LocupomRemoteLessonBlock: Decodable {
@@ -4966,6 +6026,7 @@ private struct LocupomRemotePracticeTask: Decodable {
 }
 
 private struct LocupomRemoteExternalResources: Decodable {
+    let sourcePdf: LocupomRemoteExternalResource?
     let authenticExamples: LocupomRemoteExternalResource?
     let wordBank: LocupomRemoteExternalResource?
     let writingCheck: LocupomRemoteExternalResource?
@@ -4974,7 +6035,20 @@ private struct LocupomRemoteExternalResources: Decodable {
 private struct LocupomRemoteExternalResource: Decodable {
     let provider: String
     let query: String?
-    let description: String
+    let description: String?
+    let documentId: String?
+    let path: String?
+    let pages: [Int]?
+}
+
+private struct LocupomRemoteTopicSource: Decodable {
+    let documentId: String?
+    let documentTitle: String?
+    let fullText: String?
+    let outlinePath: [String]?
+    let pageStart: Int?
+    let pageEnd: Int?
+    let pdfPath: String?
 }
 
 private struct LocupomRemoteTopicQuiz: Decodable {
@@ -4992,7 +6066,8 @@ private struct LocupomReadingResponse: Decodable {
     let provider: String
     let providerConfigured: Bool
     let providerError: String?
-    let reading: LocupomLevelledReading
+    let message: String?
+    let reading: LocupomLevelledReading?
 }
 
 private struct LocupomLevelledReading: Identifiable, Decodable {
@@ -5009,13 +6084,29 @@ private struct LocupomLevelledReading: Identifiable, Decodable {
     let questions: [LocupomReadingQuestion]
 
     static func fallback(for level: TopicCEFRLevel) -> LocupomLevelledReading {
-        let question = LocupomReadingQuestion(
-            id: "offline-main",
-            prompt: "What is the main idea?",
-            options: ["Small regular practice helps learning.", "Learning only works with long texts.", "Grammar should be skipped."],
-            answer: "Small regular practice helps learning.",
-            explanation: "The text focuses on a short routine that can be repeated often."
-        )
+        let questions = [
+            LocupomReadingQuestion(
+                id: "offline-main",
+                prompt: "What is the main idea?",
+                options: ["Small regular practice helps learning.", "Learning only works with long texts.", "Grammar should be skipped."],
+                answer: "Small regular practice helps learning.",
+                explanation: "The text focuses on a short routine that can be repeated often."
+            ),
+            LocupomReadingQuestion(
+                id: "offline-action",
+                prompt: "Which action does the text suggest?",
+                options: ["Choose three useful words.", "Read one long book every day.", "Avoid saying sentences aloud."],
+                answer: "Choose three useful words.",
+                explanation: "The text says to choose three useful words and say one sentence aloud."
+            ),
+            LocupomReadingQuestion(
+                id: "offline-effect",
+                prompt: "Why does the habit help?",
+                options: ["It brings English into daily practice.", "It removes all grammar rules.", "It replaces listening practice."],
+                answer: "It brings English into daily practice.",
+                explanation: "The passage says the simple practice helps your brain meet English every day."
+            )
+        ]
 
         return LocupomLevelledReading(
             id: "offline-\(level.rawValue.lowercased())",
@@ -5028,7 +6119,7 @@ private struct LocupomLevelledReading: Identifiable, Decodable {
             provider: "offline",
             summary: "A short offline reading for \(level.shortCode).",
             content: "A small habit can make English feel easier. Read a short text, choose three useful words, and say one sentence aloud. The practice is simple, but it helps your brain meet English every day.",
-            questions: [question]
+            questions: questions
         )
     }
 }
@@ -5039,6 +6130,104 @@ private struct LocupomReadingQuestion: Identifiable, Decodable {
     let options: [String]
     let answer: String
     let explanation: String
+}
+
+private struct LocupomSpeakingResponse: Decodable {
+    let generatedAt: String?
+    let count: Int
+    let speakingPrompts: [LocupomRemoteSpeakingPrompt]
+}
+
+private struct LocupomRemoteSpeakingPrompt: Decodable {
+    let id: String
+    let level: String
+    let title: String
+    let prompt: String
+    let support: [String]?
+    let targetLanguage: [String]?
+    let targetPhrase: String?
+    let targetPhrases: [String]?
+}
+
+private struct LocupomPracticeExercisesResponse: Decodable {
+    let generatedAt: String?
+    let count: Int
+    let exercises: [LocupomRemotePracticeExercise]
+}
+
+private struct LocupomRemotePracticeExercise: Decodable {
+    let id: String
+    let level: String
+    let skill: String?
+    let type: String?
+    let title: String
+    let instruction: String
+    let prompt: String?
+    let sourceText: String?
+    let expectedTranslation: String?
+    let hint: String?
+    let wordBank: [String]?
+    let phrase: String?
+    let translation: String?
+    let trackTitle: String?
+    let artistName: String?
+    let options: [String]?
+    let answer: FlexibleStringArray?
+    let explanation: String?
+    let wordRange: [Int]?
+    let vocabularyHelp: String?
+    let grammarTip: String?
+    let sampleAnswer: String?
+    let vocabularyTargets: [String]?
+    let source: String?
+}
+
+private enum FlexibleStringArray: Decodable {
+    case string(String)
+    case strings([String])
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
+        } else {
+            self = .strings((try? container.decode([String].self)) ?? [])
+        }
+    }
+
+    var firstString: String? {
+        switch self {
+        case .string(let value):
+            return value
+        case .strings(let values):
+            return values.first
+        }
+    }
+
+    var strings: [String] {
+        switch self {
+        case .string(let value):
+            return [value]
+        case .strings(let values):
+            return values
+        }
+    }
+}
+
+private struct LocupomVocabularyResponse: Decodable {
+    let generatedAt: String?
+    let count: Int
+    let vocabulary: [LocupomRemoteVocabularyItem]
+}
+
+private struct LocupomRemoteVocabularyItem: Decodable {
+    let id: String
+    let level: String?
+    let word: String
+    let translation: String?
+    let meaning: String?
+    let usageNote: String?
+    let example: String?
 }
 
 private enum TopicCEFRLevel: String, CaseIterable, Identifiable, Hashable {
@@ -5179,19 +6368,21 @@ private enum TopicCEFRLevel: String, CaseIterable, Identifiable, Hashable {
 private enum LocupomTopicsAPIClient {
     static let baseURL = URL(string: "https://locupom-topics-api.vercel.app")!
 
-    static func fetchGrammarTopics(levels: [String]) async throws -> [LocupomRemoteTopic] {
+    static func fetchGrammarTopics(levels: [String], learnerId: String? = nil, completedKeys: [String] = []) async throws -> [LocupomRemoteTopic] {
         var topics: [LocupomRemoteTopic] = []
         for level in levels {
-            topics.append(contentsOf: try await fetchGrammarTopics(level: level))
+            topics.append(contentsOf: try await fetchGrammarTopics(level: level, learnerId: learnerId, completedKeys: completedKeys))
         }
         return topics
     }
 
-    private static func fetchGrammarTopics(level: String) async throws -> [LocupomRemoteTopic] {
+    private static func fetchGrammarTopics(level: String, learnerId: String?, completedKeys: [String]) async throws -> [LocupomRemoteTopic] {
         var components = URLComponents(url: baseURL.appendingPathComponent("topics"), resolvingAgainstBaseURL: false)!
         components.queryItems = [
-            URLQueryItem(name: "level", value: level)
-        ]
+            URLQueryItem(name: "level", value: level),
+            learnerId.map { URLQueryItem(name: "learnerId", value: $0) },
+            completedQueryItem(completedKeys)
+        ].compactMap { $0 }
         guard let url = components.url else { return [] }
 
         var request = URLRequest(url: url)
@@ -5205,13 +6396,15 @@ private enum LocupomTopicsAPIClient {
         return try JSONDecoder().decode(LocupomTopicsResponse.self, from: data).topics
     }
 
-    static func fetchReading(level: String, topic: String, length: String = "standard") async throws -> LocupomReadingResponse {
+    static func fetchReading(level: String, topic: String, length: String = "standard", learnerId: String? = nil, completedKeys: [String] = []) async throws -> LocupomReadingResponse {
         var components = URLComponents(url: baseURL.appendingPathComponent("readings"), resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "level", value: level),
             URLQueryItem(name: "topic", value: topic),
-            URLQueryItem(name: "length", value: length)
-        ]
+            URLQueryItem(name: "length", value: length),
+            learnerId.map { URLQueryItem(name: "learnerId", value: $0) },
+            completedQueryItem(completedKeys)
+        ].compactMap { $0 }
         guard let url = components.url else {
             throw LanguageLearningError.invalidQuery
         }
@@ -5226,6 +6419,110 @@ private enum LocupomTopicsAPIClient {
 
         return try JSONDecoder().decode(LocupomReadingResponse.self, from: data)
     }
+
+    static func fetchSpeakingPrompts(level: String, learnerId: String? = nil, completedKeys: [String] = []) async throws -> LocupomSpeakingResponse {
+        var components = URLComponents(url: baseURL.appendingPathComponent("speaking"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "level", value: level),
+            learnerId.map { URLQueryItem(name: "learnerId", value: $0) },
+            completedQueryItem(completedKeys)
+        ].compactMap { $0 }
+        guard let url = components.url else {
+            throw LanguageLearningError.invalidQuery
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 8
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
+            throw LanguageLearningError.server(statusCode: httpResponse.statusCode)
+        }
+
+        return try JSONDecoder().decode(LocupomSpeakingResponse.self, from: data)
+    }
+
+    static func fetchPracticeExercises(skill: String, level: String, learnerId: String? = nil, completedKeys: [String] = []) async throws -> LocupomPracticeExercisesResponse {
+        var components = URLComponents(url: baseURL.appendingPathComponent("exercises"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "level", value: level),
+            URLQueryItem(name: "skill", value: skill),
+            learnerId.map { URLQueryItem(name: "learnerId", value: $0) },
+            completedQueryItem(completedKeys)
+        ].compactMap { $0 }
+        guard let url = components.url else {
+            throw LanguageLearningError.invalidQuery
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 8
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
+            throw LanguageLearningError.server(statusCode: httpResponse.statusCode)
+        }
+
+        return try JSONDecoder().decode(LocupomPracticeExercisesResponse.self, from: data)
+    }
+
+    static func fetchVocabulary(level: String, learnerId: String? = nil, completedKeys: [String] = []) async throws -> LocupomVocabularyResponse {
+        var components = URLComponents(url: baseURL.appendingPathComponent("vocabulary"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "level", value: level),
+            learnerId.map { URLQueryItem(name: "learnerId", value: $0) },
+            completedQueryItem(completedKeys)
+        ].compactMap { $0 }
+        guard let url = components.url else {
+            throw LanguageLearningError.invalidQuery
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 8
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
+            throw LanguageLearningError.server(statusCode: httpResponse.statusCode)
+        }
+
+        return try JSONDecoder().decode(LocupomVocabularyResponse.self, from: data)
+    }
+
+    private static func completedQueryItem(_ completedKeys: [String]) -> URLQueryItem? {
+        guard !completedKeys.isEmpty else {
+            return nil
+        }
+        return URLQueryItem(name: "completed", value: completedKeys.joined(separator: ","))
+    }
+
+    static func markCompleted(learnerId: String, kind: String, itemId: String, level: String? = nil, title: String? = nil) async throws {
+        let url = baseURL.appendingPathComponent("progress/completed")
+        let payload = CompletionPayload(
+            learnerId: learnerId,
+            kind: kind,
+            itemId: itemId,
+            level: level,
+            title: title
+        )
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 5
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(payload)
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
+            throw LanguageLearningError.server(statusCode: httpResponse.statusCode)
+        }
+    }
+
+    private struct CompletionPayload: Encodable {
+        let learnerId: String
+        let kind: String
+        let itemId: String
+        let level: String?
+        let title: String?
+    }
 }
 
 private struct TopicsPracticeView: View {
@@ -5233,22 +6530,23 @@ private struct TopicsPracticeView: View {
     @EnvironmentObject private var learningProgress: LearningProgressStore
     private let showsCloseButton: Bool
     private let hidesTabBar: Bool
-    @State private var selectedLevel: TopicCEFRLevel = .a1
-    @State private var hasInitializedLevel = false
     @State private var remoteTopicsByLevel: [TopicCEFRLevel: [GrammarTopic]] = [:]
-    @State private var reading: LocupomLevelledReading?
-    @State private var readingErrorMessage: String?
-    @State private var isLoadingReading = false
-    @State private var selectedReadingAnswer: String?
 
     init(showsCloseButton: Bool = true, hidesTabBar: Bool = true) {
         self.showsCloseButton = showsCloseButton
         self.hidesTabBar = hidesTabBar
     }
 
+    private var selectedLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
+
     private var topics: [GrammarTopic] {
         if let remoteTopics = remoteTopicsByLevel[selectedLevel], !remoteTopics.isEmpty {
-            return remoteTopics
+            let incompleteTopics = remoteTopics.filter {
+                !learningProgress.isRemoteContentCompleted(kind: "topic", itemId: $0.apiContentId)
+            }
+            return incompleteTopics
         }
 
         return GrammarTopic.deck(for: selectedLevel.fallbackLearningLevel)
@@ -5267,23 +6565,6 @@ private struct TopicsPracticeView: View {
                         closeAction: { dismiss() }
                     )
 
-                    TopicLevelSelectorCard(selectedLevel: $selectedLevel)
-                        .padding(.top, 8)
-
-                    TopicLevelReadingCard(
-                        reading: reading,
-                        isLoading: isLoadingReading,
-                        errorMessage: readingErrorMessage,
-                        selectedLevel: selectedLevel,
-                        selectedAnswer: selectedReadingAnswer,
-                        refreshAction: {
-                            Task {
-                                await loadReading(for: selectedLevel, forceRefresh: true)
-                            }
-                        },
-                        chooseAnswer: chooseReadingAnswer
-                    )
-
                     TopicLevelTopicListCard(
                         topics: topics,
                         selectedLevel: selectedLevel
@@ -5299,18 +6580,9 @@ private struct TopicsPracticeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
-        .toolbar(hidesTabBar ? .hidden : .visible, for: .tabBar)
-        .onAppear {
-            if !hasInitializedLevel {
-                selectedLevel = TopicCEFRLevel(profileLevel: learningProgress.profile.level)
-                hasInitializedLevel = true
-            }
-        }
+        .toolbar(.hidden, for: .tabBar)
         .task(id: selectedLevel) {
             await loadTopics(for: selectedLevel)
-        }
-        .task(id: selectedLevel) {
-            await loadReading(for: selectedLevel)
         }
     }
 
@@ -5321,8 +6593,12 @@ private struct TopicsPracticeView: View {
         }
 
         do {
-            let remoteTopics = try await LocupomTopicsAPIClient.fetchGrammarTopics(levels: level.apiLevels)
-            let mappedTopics = remoteTopics.enumerated().map { index, remoteTopic in
+            let remoteTopics = try await LocupomTopicsAPIClient.fetchGrammarTopics(
+                levels: level.apiLevels,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedTopics = remoteTopics.sorted(by: topicAPISort).enumerated().map { index, remoteTopic in
                 makeTopic(from: remoteTopic, level: level, index: index)
             }
 
@@ -5336,20 +6612,28 @@ private struct TopicsPracticeView: View {
 
     private func makeTopic(from remoteTopic: LocupomRemoteTopic, level: TopicCEFRLevel, index: Int) -> GrammarTopic {
         let style = topicStyle(index: index)
-        let examples = remoteTopic.examples.prefix(3).map {
-            GrammarTopicExample(sentence: $0, note: "\(remoteTopic.level) example from Locupom API.")
+        let categoryLabel = remoteTopic.categoryLabel ?? remoteTopic.category.capitalized
+        let sourceTitle = remoteTopic.source?.documentTitle ?? remoteTopic.externalResources?.sourcePdf?.documentId
+        let examples = remoteTopic.examples.map {
+            GrammarTopicExample(sentence: $0, note: sourceTitle.map { "From \($0)." } ?? "\(remoteTopic.level) example from Locupom API.")
         }
         let mistakes = remoteTopic.commonMistakes.isEmpty
             ? ["Check meaning and form before choosing the answer."]
             : remoteTopic.commonMistakes
-        let objectives = remoteTopic.learningObjectives.prefix(2).joined(separator: " ")
+        let objectives = remoteTopic.learningObjectives.prefix(3).joined(separator: " ")
         let quizOptions = remoteTopic.quiz.options.isEmpty
             ? [remoteTopic.quiz.answer, "Meaning, form and context", "Only memorising rules"]
             : remoteTopic.quiz.options
+        let externalResources = GrammarTopicExternalResources(remote: remoteTopic.externalResources)
+        let source = remoteTopic.source.map(GrammarTopicSource.init(remote:))
+        let fallbackSearchTerm = externalResources.authenticExamples?.query
+            ?? externalResources.wordBank?.query
+            ?? remoteTopic.title
 
         return GrammarTopic(
+            apiContentId: remoteTopic.id,
             title: remoteTopic.title,
-            tagline: "\(remoteTopic.level) - \(remoteTopic.category.capitalized)",
+            tagline: "\(remoteTopic.level) - \(categoryLabel)",
             summary: remoteTopic.summary,
             formula: remoteTopic.pattern,
             whenToUse: objectives.isEmpty ? remoteTopic.summary : objectives,
@@ -5358,6 +6642,11 @@ private struct TopicsPracticeView: View {
                 : examples,
             commonMistakes: mistakes,
             objectives: remoteTopic.learningObjectives,
+            category: remoteTopic.category,
+            categoryLabel: categoryLabel,
+            apiOrder: remoteTopic.order,
+            sourceBasis: remoteTopic.sourceBasis ?? [],
+            practiceIdeas: remoteTopic.practiceIdeas ?? [],
             lessonBlocks: (remoteTopic.lessonBlocks ?? []).map {
                 GrammarTopicLessonBlock(title: $0.title, body: $0.body)
             },
@@ -5373,7 +6662,9 @@ private struct TopicsPracticeView: View {
                     explanation: $0.explanation
                 )
             },
-            externalSearchTerm: remoteTopic.externalResources?.authenticExamples?.query ?? remoteTopic.title,
+            source: source,
+            externalResources: externalResources,
+            externalSearchTerm: fallbackSearchTerm,
             quizQuestion: remoteTopic.quiz.question,
             quizOptions: quizOptions,
             quizAnswer: remoteTopic.quiz.answer,
@@ -5382,6 +6673,22 @@ private struct TopicsPracticeView: View {
             systemImage: style.image,
             tint: style.tint
         )
+    }
+
+    private func topicAPISort(_ first: LocupomRemoteTopic, _ second: LocupomRemoteTopic) -> Bool {
+        if (first.levelOrder ?? 0) != (second.levelOrder ?? 0) {
+            return (first.levelOrder ?? 0) < (second.levelOrder ?? 0)
+        }
+
+        if first.category != second.category {
+            return first.category < second.category
+        }
+
+        if (first.order ?? 0) != (second.order ?? 0) {
+            return (first.order ?? 0) < (second.order ?? 0)
+        }
+
+        return first.title < second.title
     }
 
     private func topicStyle(index: Int) -> (image: String, tint: Color) {
@@ -5397,6 +6704,78 @@ private struct TopicsPracticeView: View {
         return (style.0, style.1)
     }
 
+}
+
+private struct ReadingPracticeView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var learningProgress: LearningProgressStore
+    @State private var selectedLevel: TopicCEFRLevel = .a1
+    @State private var hasInitializedLevel = false
+    @State private var reading: LocupomLevelledReading?
+    @State private var readingErrorMessage: String?
+    @State private var isLoadingReading = false
+    @State private var selectedReadingAnswers: [String: String] = [:]
+
+    var body: some View {
+        ZStack {
+            TranslatePracticeBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    ExerciseSessionTopBar(
+                        title: "Reading",
+                        closeAction: { dismiss() }
+                    )
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Leer & responder")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
+
+                        Text("Comprendé un texto corto por nivel.")
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                    }
+
+                    TopicLevelReadingCard(
+                        reading: reading,
+                        isLoading: isLoadingReading,
+                        errorMessage: readingErrorMessage,
+                        selectedLevel: selectedLevel,
+                        selectedAnswers: selectedReadingAnswers,
+                        refreshAction: {
+                            Task {
+                                await loadReading(for: selectedLevel, forceRefresh: true)
+                            }
+                        },
+                        chooseAnswer: chooseReadingAnswer
+                    )
+                }
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 34)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .locupomFloatingTabBarHidden(true)
+        .onAppear {
+            if !hasInitializedLevel {
+                selectedLevel = TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+                hasInitializedLevel = true
+            }
+        }
+        .task(id: selectedLevel) {
+            await loadReading(for: selectedLevel)
+        }
+    }
+
     @MainActor
     private func loadReading(for level: TopicCEFRLevel, forceRefresh: Bool = false) async {
         if !forceRefresh, reading?.level == level.rawValue {
@@ -5405,15 +6784,17 @@ private struct TopicsPracticeView: View {
 
         isLoadingReading = true
         readingErrorMessage = nil
-        selectedReadingAnswer = nil
+        selectedReadingAnswers = [:]
 
         do {
             let response = try await LocupomTopicsAPIClient.fetchReading(
                 level: level.rawValue,
-                topic: level.defaultReadingTopic
+                topic: level.defaultReadingTopic,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
             )
             reading = response.reading
-            readingErrorMessage = response.providerError
+            readingErrorMessage = response.providerError ?? response.message
         } catch {
             reading = LocupomLevelledReading.fallback(for: level)
             readingErrorMessage = "Usando lectura offline hasta que el API local este disponible."
@@ -5423,19 +6804,61 @@ private struct TopicsPracticeView: View {
     }
 
     private func chooseReadingAnswer(question: LocupomReadingQuestion, answer: String) {
-        selectedReadingAnswer = answer
+        selectedReadingAnswers[question.id] = answer
         let isCorrect = answer == question.answer
-        learningProgress.recordModule(LearningModule.topics.rawValue, wasCorrect: isCorrect)
+        learningProgress.recordModule(LearningModule.reading.rawValue, wasCorrect: isCorrect)
 
         if isCorrect {
-            learningProgress.recordErrorResolved(module: LearningModule.topics.rawValue, expected: question.answer)
+            learningProgress.recordErrorResolved(module: LearningModule.reading.rawValue, expected: question.answer)
+            markReadingCompletedIfNeeded()
         } else {
             learningProgress.recordError(
-                module: LearningModule.topics.rawValue,
+                module: LearningModule.reading.rawValue,
                 expected: question.answer,
                 actual: answer,
                 context: question.prompt
             )
+        }
+    }
+
+    private func markReadingCompletedIfNeeded() {
+        guard let reading, reading.provider != "offline" else {
+            return
+        }
+        let visibleQuestions = Array(reading.questions.prefix(3))
+        guard !visibleQuestions.isEmpty else {
+            return
+        }
+        let allVisibleQuestionsAreCorrect = visibleQuestions.allSatisfy { question in
+            selectedReadingAnswers[question.id] == question.answer
+        }
+        guard allVisibleQuestionsAreCorrect else {
+            return
+        }
+
+        let completedReading = reading
+        let completedLevel = selectedLevel
+        let learnerId = learningProgress.apiLearnerId
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "reading", itemId: completedReading.id)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "reading",
+                itemId: completedReading.id,
+                level: completedReading.level,
+                title: completedReading.title
+            )
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            let shouldLoadNext = await MainActor.run {
+                selectedLevel == completedLevel
+            }
+            if shouldLoadNext {
+                await loadReading(for: completedLevel, forceRefresh: true)
+            }
         }
     }
 }
@@ -5451,11 +6874,9 @@ private struct TopicsBrowserHeader: View {
             if showsCloseButton {
                 Button(action: closeAction) {
                     Image(systemName: "xmark")
-                        .font(.title3.weight(.bold))
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(TranslateTheme.ink)
-                        .frame(width: 48, height: 48)
-                        .background(.white.opacity(0.92), in: Circle())
-                        .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 14, x: 0, y: 8)
+                        .frame(width: 42, height: 42)
                 }
                 .buttonStyle(.plain)
             }
@@ -5508,7 +6929,7 @@ private struct TopicLevelSelectorCard: View {
                 }
             }
             .padding(14)
-            .background(.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 22))
+            .background(TranslateTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 22))
             .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 18, x: 0, y: 10)
 
             Image("Ajolote_Header")
@@ -5568,7 +6989,7 @@ private struct TopicCEFRLevelChip: View {
             if isSelected {
                 ZStack {
                     Circle()
-                        .fill(.white)
+                        .fill(TranslateTheme.elevatedSurface)
                         .frame(width: 25, height: 25)
                         .shadow(color: TranslateTheme.secondary.opacity(0.18), radius: 6, x: 0, y: 4)
 
@@ -5647,7 +7068,7 @@ private struct TopicLevelTopicListCard: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 15)
-        .background(.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 22))
+        .background(TranslateTheme.surface.opacity(0.92), in: RoundedRectangle(cornerRadius: 22))
         .shadow(color: TranslateTheme.primary.opacity(0.06), radius: 18, x: 0, y: 10)
     }
 
@@ -5661,7 +7082,7 @@ private struct TopicLevelReadingCard: View {
     let isLoading: Bool
     let errorMessage: String?
     let selectedLevel: TopicCEFRLevel
-    let selectedAnswer: String?
+    let selectedAnswers: [String: String]
     let refreshAction: () -> Void
     let chooseAnswer: (LocupomReadingQuestion, String) -> Void
 
@@ -5716,7 +7137,7 @@ private struct TopicLevelReadingCard: View {
             }
         }
         .padding(16)
-        .background(.white.opacity(0.94), in: RoundedRectangle(cornerRadius: 22))
+        .background(TranslateTheme.surface.opacity(0.94), in: RoundedRectangle(cornerRadius: 22))
         .shadow(color: TranslateTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
     }
 
@@ -5738,7 +7159,6 @@ private struct TopicLevelReadingCard: View {
                     .minimumScaleFactor(0.82)
 
                 HStack(spacing: 8) {
-                    ReadingMetaPill(text: reading.level, systemImage: "chart.bar.fill", tint: selectedLevel.accent)
                     ReadingMetaPill(text: "\(reading.estimatedMinutes)m", systemImage: "timer", tint: TranslateTheme.mint)
                     ReadingMetaPill(text: reading.topic, systemImage: "tag.fill", tint: .orange)
                 }
@@ -5752,17 +7172,35 @@ private struct TopicLevelReadingCard: View {
                 .padding(13)
                 .background(TranslateTheme.softSurface, in: RoundedRectangle(cornerRadius: 15))
 
-            if let question = reading.questions.first {
-                readingQuestion(question)
+            let visibleQuestions = Array(reading.questions.prefix(3))
+            if !visibleQuestions.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(Array(visibleQuestions.enumerated()), id: \.element.id) { index, question in
+                        readingQuestion(question, number: index + 1, total: visibleQuestions.count)
+                    }
+                }
             }
         }
     }
 
-    private func readingQuestion(_ question: LocupomReadingQuestion) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("Quick check", systemImage: "checkmark.circle.fill")
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(TranslateTheme.ink)
+    private func readingQuestion(_ question: LocupomReadingQuestion, number: Int, total: Int) -> some View {
+        let selectedAnswer = selectedAnswers[question.id]
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Label("Pregunta \(number)", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(TranslateTheme.ink)
+
+                Spacer()
+
+                Text("\(number)/\(total)")
+                    .font(.caption2.weight(.black))
+                    .foregroundStyle(selectedLevel.accent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(selectedLevel.accent.opacity(0.10), in: Capsule())
+            }
 
             Text(question.prompt)
                 .font(.subheadline.weight(.semibold))
@@ -5783,10 +7221,10 @@ private struct TopicLevelReadingCard: View {
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(TranslateTheme.ink)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .multilineTextAlignment(.leading)
+                            .multilineTextAlignment(.leading)
                         }
                         .padding(11)
-                        .background(optionBackground(option, question: question), in: RoundedRectangle(cornerRadius: 13))
+                        .background(optionBackground(option, question: question, selectedAnswer: selectedAnswer), in: RoundedRectangle(cornerRadius: 13))
                     }
                     .buttonStyle(.plain)
                 }
@@ -5802,14 +7240,14 @@ private struct TopicLevelReadingCard: View {
             }
         }
         .padding(13)
-        .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 16))
+        .background(TranslateTheme.elevatedSurface.opacity(0.72), in: RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(selectedLevel.accent.opacity(0.12), lineWidth: 1)
         )
     }
 
-    private func optionBackground(_ option: String, question: LocupomReadingQuestion) -> Color {
+    private func optionBackground(_ option: String, question: LocupomReadingQuestion, selectedAnswer: String?) -> Color {
         guard let selectedAnswer else {
             return TranslateTheme.softSurface
         }
@@ -5862,12 +7300,22 @@ private struct TopicLevelTopicRow: View {
                     in: RoundedRectangle(cornerRadius: 15)
                 )
 
-            Text(topic.title)
-                .font(.system(size: 16, weight: .black, design: .rounded))
-                .foregroundStyle(TranslateTheme.ink)
-                .lineLimit(nil)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 7) {
+                Text(topic.title)
+                    .font(.system(size: 16, weight: .black, design: .rounded))
+                    .foregroundStyle(TranslateTheme.ink)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 7) {
+                    TopicMetaChip(text: topic.categoryLabel, tint: topic.tint)
+
+                    if let pageRangeText = topic.source?.pageRangeText {
+                        TopicMetaChip(text: pageRangeText, tint: TranslateTheme.mint)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer(minLength: 8)
 
@@ -5878,6 +7326,22 @@ private struct TopicLevelTopicRow: View {
         }
         .padding(.vertical, 12)
         .contentShape(Rectangle())
+    }
+}
+
+private struct TopicMetaChip: View {
+    let text: String
+    let tint: Color
+
+    var body: some View {
+        Text(text)
+            .font(.caption2.weight(.black))
+            .foregroundStyle(tint)
+            .lineLimit(1)
+            .minimumScaleFactor(0.72)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(tint.opacity(0.10), in: Capsule())
     }
 }
 
@@ -5911,15 +7375,20 @@ private struct TopicDetailView: View {
                     )
 
                     TopicHeroCard(topic: topic)
+                    TopicSourceCard(topic: topic)
                     TopicLessonBlocksCard(blocks: topic.lessonBlocks, tint: topic.tint)
                     TopicFormulaCard(topic: topic)
                     TopicObjectivesCard(objectives: topic.objectives, tint: topic.tint)
+                    TopicPracticeIdeasCard(ideas: topic.practiceIdeas, tint: topic.tint)
+                    TopicExternalResourcesCard(resources: topic.externalResources, tint: topic.tint)
                     TopicAuthenticExamplesCard(
-                        query: topic.externalSearchTerm,
+                        query: topic.authenticExamplesQuery,
+                        resource: topic.externalResources.authenticExamples,
                         examples: authenticExamples,
                         isLoading: isLoadingAuthenticExamples
                     )
                     TopicWordBankCard(
+                        resource: topic.externalResources.wordBank,
                         words: wordBank,
                         isLoading: isLoadingWordBank,
                         tint: topic.tint
@@ -5947,6 +7416,7 @@ private struct TopicDetailView: View {
         .navigationTitle(topic.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
+        .locupomFloatingTabBarHidden(true)
         .task(id: topic.id) {
             await loadExternalContext()
         }
@@ -5955,12 +7425,12 @@ private struct TopicDetailView: View {
     @MainActor
     private func loadExternalContext() async {
         isLoadingAuthenticExamples = true
-        let examples = await languageService.fetchSentenceExamples(word: topic.externalSearchTerm, limit: 3)
+        let examples = await languageService.fetchSentenceExamples(word: topic.authenticExamplesQuery, limit: 3)
         authenticExamples = examples
         isLoadingAuthenticExamples = false
 
         isLoadingWordBank = true
-        let words = await languageService.fetchRelatedWords(word: topic.externalSearchTerm)
+        let words = await languageService.fetchRelatedWords(word: topic.wordBankQuery)
         wordBank = Array(words.filter(isUsefulWordBankItem).prefix(8))
         isLoadingWordBank = false
     }
@@ -5972,6 +7442,7 @@ private struct TopicDetailView: View {
 
         if isCorrect {
             learningProgress.recordErrorResolved(module: LearningModule.topics.rawValue, expected: topic.quizAnswer)
+            markTopicCompletedIfNeeded()
         } else {
             learningProgress.recordError(
                 module: LearningModule.topics.rawValue,
@@ -5987,6 +7458,28 @@ private struct TopicDetailView: View {
             score: isCorrect ? 1 : 0,
             isCorrect: isCorrect
         )
+    }
+
+    private func markTopicCompletedIfNeeded() {
+        guard let apiContentId = topic.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "topic", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "topic",
+                itemId: apiContentId,
+                level: selectedLevel.rawValue,
+                title: topic.title
+            )
+        }
     }
 
     private func choosePracticeAnswer(task: GrammarTopicPracticeTask, answer: String) {
@@ -6034,6 +7527,18 @@ private struct TopicDetailHeaderCard: View {
                     .font(.subheadline)
                     .foregroundStyle(TranslateTheme.muted)
                     .lineLimit(2)
+
+                HStack(spacing: 7) {
+                    TopicMetaChip(text: topic.categoryLabel, tint: topic.tint)
+
+                    if let pageRangeText = topic.source?.pageRangeText {
+                        TopicMetaChip(text: pageRangeText, tint: TranslateTheme.mint)
+                    }
+
+                    if let apiOrder = topic.apiOrder {
+                        TopicMetaChip(text: "#\(apiOrder)", tint: TranslateTheme.secondary)
+                    }
+                }
             }
 
             Spacer()
@@ -6075,11 +7580,97 @@ private struct TopicHeroCard: View {
                 .font(.footnote)
                 .lineSpacing(3)
                 .foregroundStyle(TranslateTheme.ink.opacity(0.82))
-                .lineLimit(5)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
         .background(TranslateTheme.surface, in: RoundedRectangle(cornerRadius: 16))
         .shadow(color: TranslateTheme.primary.opacity(0.07), radius: 14, x: 0, y: 8)
+    }
+}
+
+private struct TopicSourceCard: View {
+    let topic: GrammarTopic
+    @State private var isExpanded = false
+
+    var body: some View {
+        if topic.hasSourceContext {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Label("Fuente del contenido", systemImage: "doc.text.magnifyingglass")
+                        .font(.headline)
+                        .foregroundStyle(TranslateTheme.ink)
+
+                    Spacer()
+
+                    if let provider = topic.externalResources.sourcePdf?.provider {
+                        TopicMetaChip(text: provider, tint: topic.tint)
+                    }
+                }
+
+                if let source = topic.source {
+                    VStack(alignment: .leading, spacing: 7) {
+                        Text(source.documentTitle ?? "PDF curriculum")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+
+                        HStack(spacing: 7) {
+                            if let pageRangeText = source.pageRangeText {
+                                TopicMetaChip(text: pageRangeText, tint: TranslateTheme.mint)
+                            }
+
+                            if let outlineText = source.outlineText {
+                                TopicMetaChip(text: outlineText, tint: topic.tint)
+                            }
+                        }
+                    }
+                }
+
+                if !topic.sourceBasis.isEmpty {
+                    VStack(alignment: .leading, spacing: 7) {
+                        ForEach(topic.sourceBasis, id: \.self) { basis in
+                            HStack(alignment: .top, spacing: 9) {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(topic.tint)
+                                    .padding(.top, 1)
+
+                                Text(basis)
+                                    .font(.caption)
+                                    .foregroundStyle(TranslateTheme.muted)
+                                    .lineSpacing(3)
+                            }
+                        }
+                    }
+                }
+
+                if let sourceText = topic.source?.previewText(expanded: isExpanded) {
+                    Text(sourceText)
+                        .font(.caption)
+                        .foregroundStyle(TranslateTheme.ink.opacity(0.78))
+                        .lineSpacing(3)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(TranslateTheme.softSurface, in: RoundedRectangle(cornerRadius: 14))
+
+                    if topic.source?.canExpandText == true {
+                        Button {
+                            withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
+                                isExpanded.toggle()
+                            }
+                        } label: {
+                            Label(isExpanded ? "Ver menos" : "Ver texto del PDF", systemImage: isExpanded ? "chevron.up" : "chevron.down")
+                                .font(.caption.weight(.black))
+                                .foregroundStyle(topic.tint)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(16)
+            .background(TranslateTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+            .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 18, x: 0, y: 10)
+        }
     }
 }
 
@@ -6176,8 +7767,98 @@ private struct TopicObjectivesCard: View {
     }
 }
 
+private struct TopicPracticeIdeasCard: View {
+    let ideas: [String]
+    let tint: Color
+
+    var body: some View {
+        if !ideas.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Practica sugerida", systemImage: "figure.run.circle.fill")
+                    .font(.headline)
+                    .foregroundStyle(TranslateTheme.ink)
+
+                ForEach(Array(ideas.enumerated()), id: \.offset) { index, idea in
+                    HStack(alignment: .top, spacing: 10) {
+                        Text("\(index + 1)")
+                            .font(.caption.bold())
+                            .foregroundStyle(.white)
+                            .frame(width: 22, height: 22)
+                            .background(tint, in: Circle())
+
+                        Text(idea)
+                            .font(.caption)
+                            .foregroundStyle(TranslateTheme.muted)
+                            .lineSpacing(3)
+                    }
+                }
+            }
+            .padding(16)
+            .background(TranslateTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+            .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 18, x: 0, y: 10)
+        }
+    }
+}
+
+private struct TopicExternalResourcesCard: View {
+    let resources: GrammarTopicExternalResources
+    let tint: Color
+
+    var body: some View {
+        let visibleResources = resources.visibleResources
+        if !visibleResources.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Recursos de la API", systemImage: "link.circle.fill")
+                    .font(.headline)
+                    .foregroundStyle(TranslateTheme.ink)
+
+                ForEach(visibleResources) { resource in
+                    TopicExternalResourceRow(resource: resource, tint: tint)
+                }
+            }
+            .padding(16)
+            .background(TranslateTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+            .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 18, x: 0, y: 10)
+        }
+    }
+}
+
+private struct TopicExternalResourceRow: View {
+    let resource: GrammarTopicExternalResource
+    let tint: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(alignment: .center, spacing: 8) {
+                TopicMetaChip(text: resource.provider, tint: tint)
+
+                if let query = resource.query {
+                    Text(query)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(TranslateTheme.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.74)
+                }
+
+                Spacer(minLength: 0)
+            }
+
+            if let detailText = resource.detailText {
+                Text(detailText)
+                    .font(.caption)
+                    .foregroundStyle(TranslateTheme.muted)
+                    .lineSpacing(3)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+    }
+}
+
 private struct TopicAuthenticExamplesCard: View {
     let query: String
+    let resource: GrammarTopicExternalResource?
     let examples: [SentenceExample]
     let isLoading: Bool
 
@@ -6190,12 +7871,14 @@ private struct TopicAuthenticExamplesCard: View {
 
                 Spacer()
 
-                Text("Tatoeba")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(TranslateTheme.primary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(TranslateTheme.primary.opacity(0.10), in: Capsule())
+                TopicMetaChip(text: resource?.provider ?? "Tatoeba", tint: TranslateTheme.primary)
+            }
+
+            if let description = resource?.description {
+                Text(description)
+                    .font(.caption)
+                    .foregroundStyle(TranslateTheme.muted)
+                    .lineSpacing(3)
             }
 
             if isLoading {
@@ -6236,6 +7919,7 @@ private struct TopicAuthenticExamplesCard: View {
 }
 
 private struct TopicWordBankCard: View {
+    let resource: GrammarTopicExternalResource?
     let words: [WordSuggestion]
     let isLoading: Bool
     let tint: Color
@@ -6249,12 +7933,14 @@ private struct TopicWordBankCard: View {
 
                 Spacer()
 
-                Text("Datamuse")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(tint)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(tint.opacity(0.10), in: Capsule())
+                TopicMetaChip(text: resource?.provider ?? "Datamuse", tint: tint)
+            }
+
+            if let description = resource?.description {
+                Text(description)
+                    .font(.caption)
+                    .foregroundStyle(TranslateTheme.muted)
+                    .lineSpacing(3)
             }
 
             if isLoading {
@@ -6325,9 +8011,14 @@ private struct TopicPracticeTaskRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(task.title)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(tint)
+                HStack(spacing: 8) {
+                    Text(task.title)
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(tint)
+
+                    TopicMetaChip(text: task.kindLabel, tint: tint)
+                }
+
                 Text(task.instruction)
                     .font(.caption)
                     .foregroundStyle(TranslateTheme.muted)
@@ -6381,7 +8072,7 @@ private struct TopicPracticeTaskRow: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 16))
+        .background(TranslateTheme.elevatedSurface.opacity(0.72), in: RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(tint.opacity(0.10), lineWidth: 1)
@@ -6532,8 +8223,196 @@ private struct TopicQuizCard: View {
     }
 }
 
+private struct GrammarTopicSource {
+    let documentId: String?
+    let documentTitle: String?
+    let fullText: String?
+    let outlinePath: [String]
+    let pageStart: Int?
+    let pageEnd: Int?
+    let pdfPath: String?
+
+    init(
+        documentId: String? = nil,
+        documentTitle: String? = nil,
+        fullText: String? = nil,
+        outlinePath: [String] = [],
+        pageStart: Int? = nil,
+        pageEnd: Int? = nil,
+        pdfPath: String? = nil
+    ) {
+        self.documentId = documentId
+        self.documentTitle = documentTitle
+        self.fullText = fullText
+        self.outlinePath = outlinePath
+        self.pageStart = pageStart
+        self.pageEnd = pageEnd
+        self.pdfPath = pdfPath
+    }
+
+    init(remote: LocupomRemoteTopicSource) {
+        self.init(
+            documentId: remote.documentId,
+            documentTitle: remote.documentTitle,
+            fullText: remote.fullText,
+            outlinePath: remote.outlinePath ?? [],
+            pageStart: remote.pageStart,
+            pageEnd: remote.pageEnd,
+            pdfPath: remote.pdfPath
+        )
+    }
+
+    var pageRangeText: String? {
+        guard let pageStart else {
+            return nil
+        }
+
+        if let pageEnd, pageEnd != pageStart {
+            return "Pags. \(pageStart)-\(pageEnd)"
+        }
+
+        return "Pag. \(pageStart)"
+    }
+
+    var outlineText: String? {
+        outlinePath.last
+    }
+
+    var canExpandText: Bool {
+        (cleanFullText?.count ?? 0) > 520
+    }
+
+    func previewText(expanded: Bool) -> String? {
+        guard let cleanFullText else {
+            return nil
+        }
+
+        let limit = expanded ? 2200 : 520
+        guard cleanFullText.count > limit else {
+            return cleanFullText
+        }
+
+        return String(cleanFullText.prefix(limit)) + "..."
+    }
+
+    private var cleanFullText: String? {
+        guard let fullText else {
+            return nil
+        }
+
+        let clean = fullText
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
+        return clean.isEmpty ? nil : clean
+    }
+}
+
+private struct GrammarTopicExternalResource: Identifiable {
+    let id: String
+    let provider: String
+    let query: String?
+    let description: String?
+    let documentId: String?
+    let path: String?
+    let pages: [Int]
+
+    init(
+        id: String,
+        provider: String,
+        query: String? = nil,
+        description: String? = nil,
+        documentId: String? = nil,
+        path: String? = nil,
+        pages: [Int] = []
+    ) {
+        self.id = id
+        self.provider = provider
+        self.query = query
+        self.description = description
+        self.documentId = documentId
+        self.path = path
+        self.pages = pages
+    }
+
+    init?(id: String, remote: LocupomRemoteExternalResource?) {
+        guard let remote else {
+            return nil
+        }
+
+        self.init(
+            id: id,
+            provider: remote.provider,
+            query: remote.query,
+            description: remote.description,
+            documentId: remote.documentId,
+            path: remote.path,
+            pages: remote.pages ?? []
+        )
+    }
+
+    var detailText: String? {
+        let details = [
+            description,
+            documentId.map { "Documento: \($0)" },
+            pageRangeText,
+            path
+        ].compactMap { $0 }
+
+        return details.isEmpty ? nil : details.joined(separator: " · ")
+    }
+
+    private var pageRangeText: String? {
+        guard let firstPage = pages.first else {
+            return nil
+        }
+
+        if let lastPage = pages.last, lastPage != firstPage {
+            return "Pags. \(firstPage)-\(lastPage)"
+        }
+
+        return "Pag. \(firstPage)"
+    }
+}
+
+private struct GrammarTopicExternalResources {
+    let sourcePdf: GrammarTopicExternalResource?
+    let authenticExamples: GrammarTopicExternalResource?
+    let wordBank: GrammarTopicExternalResource?
+    let writingCheck: GrammarTopicExternalResource?
+
+    static let empty = GrammarTopicExternalResources()
+
+    init(
+        sourcePdf: GrammarTopicExternalResource? = nil,
+        authenticExamples: GrammarTopicExternalResource? = nil,
+        wordBank: GrammarTopicExternalResource? = nil,
+        writingCheck: GrammarTopicExternalResource? = nil
+    ) {
+        self.sourcePdf = sourcePdf
+        self.authenticExamples = authenticExamples
+        self.wordBank = wordBank
+        self.writingCheck = writingCheck
+    }
+
+    init(remote: LocupomRemoteExternalResources?) {
+        self.init(
+            sourcePdf: GrammarTopicExternalResource(id: "source_pdf", remote: remote?.sourcePdf),
+            authenticExamples: GrammarTopicExternalResource(id: "authentic_examples", remote: remote?.authenticExamples),
+            wordBank: GrammarTopicExternalResource(id: "word_bank", remote: remote?.wordBank),
+            writingCheck: GrammarTopicExternalResource(id: "writing_check", remote: remote?.writingCheck)
+        )
+    }
+
+    var visibleResources: [GrammarTopicExternalResource] {
+        [sourcePdf, authenticExamples, wordBank, writingCheck].compactMap { $0 }
+    }
+}
+
 private struct GrammarTopic: Identifiable {
     let id = UUID()
+    let apiContentId: String?
     let title: String
     let tagline: String
     let summary: String
@@ -6542,8 +8421,15 @@ private struct GrammarTopic: Identifiable {
     let examples: [GrammarTopicExample]
     let commonMistakes: [String]
     let objectives: [String]
+    let category: String
+    let categoryLabel: String
+    let apiOrder: Int?
+    let sourceBasis: [String]
+    let practiceIdeas: [String]
     let lessonBlocks: [GrammarTopicLessonBlock]
     let practiceTasks: [GrammarTopicPracticeTask]
+    let source: GrammarTopicSource?
+    let externalResources: GrammarTopicExternalResources
     let externalSearchTerm: String
     let quizQuestion: String
     let quizOptions: [String]
@@ -6554,6 +8440,7 @@ private struct GrammarTopic: Identifiable {
     let tint: Color
 
     init(
+        apiContentId: String? = nil,
         title: String,
         tagline: String,
         summary: String,
@@ -6562,8 +8449,15 @@ private struct GrammarTopic: Identifiable {
         examples: [GrammarTopicExample],
         commonMistakes: [String],
         objectives: [String] = [],
+        category: String = "grammar",
+        categoryLabel: String? = nil,
+        apiOrder: Int? = nil,
+        sourceBasis: [String] = [],
+        practiceIdeas: [String] = [],
         lessonBlocks: [GrammarTopicLessonBlock] = [],
         practiceTasks: [GrammarTopicPracticeTask] = [],
+        source: GrammarTopicSource? = nil,
+        externalResources: GrammarTopicExternalResources = .empty,
         externalSearchTerm: String? = nil,
         quizQuestion: String,
         quizOptions: [String],
@@ -6573,6 +8467,7 @@ private struct GrammarTopic: Identifiable {
         systemImage: String,
         tint: Color
     ) {
+        self.apiContentId = apiContentId
         self.title = title
         self.tagline = tagline
         self.summary = summary
@@ -6587,13 +8482,23 @@ private struct GrammarTopic: Identifiable {
                 "Produce one sentence and review it."
             ]
             : objectives
+        self.category = category
+        self.categoryLabel = categoryLabel ?? tagline
+        self.apiOrder = apiOrder
+        self.sourceBasis = sourceBasis
+        self.practiceIdeas = practiceIdeas
         self.lessonBlocks = lessonBlocks.isEmpty
             ? GrammarTopicLessonBlock.defaults(title: title, summary: summary, formula: formula)
             : lessonBlocks
         self.practiceTasks = practiceTasks.isEmpty
             ? GrammarTopicPracticeTask.defaults(title: title, formula: formula, example: examples.first?.sentence, mistake: commonMistakes.first)
             : practiceTasks
-        self.externalSearchTerm = externalSearchTerm ?? title
+        self.source = source
+        self.externalResources = externalResources
+        self.externalSearchTerm = externalSearchTerm
+            ?? externalResources.authenticExamples?.query
+            ?? externalResources.wordBank?.query
+            ?? title
         self.quizQuestion = quizQuestion
         self.quizOptions = quizOptions
         self.quizAnswer = quizAnswer
@@ -6601,6 +8506,18 @@ private struct GrammarTopic: Identifiable {
         self.level = level
         self.systemImage = systemImage
         self.tint = tint
+    }
+
+    var authenticExamplesQuery: String {
+        externalResources.authenticExamples?.query ?? externalSearchTerm
+    }
+
+    var wordBankQuery: String {
+        externalResources.wordBank?.query ?? externalSearchTerm
+    }
+
+    var hasSourceContext: Bool {
+        source != nil || !sourceBasis.isEmpty || externalResources.sourcePdf != nil
     }
 
     static func deck(for level: LearningLevel) -> [GrammarTopic] {
@@ -6981,6 +8898,12 @@ private struct GrammarTopicPracticeTask: Identifiable, Hashable {
     let answer: String
     let explanation: String
 
+    var kindLabel: String {
+        kind
+            .replacingOccurrences(of: "_", with: " ")
+            .capitalized
+    }
+
     static func defaults(title: String, formula: String, example: String?, mistake: String?) -> [GrammarTopicPracticeTask] {
         let exampleText = example ?? "Create one clear example with \(title.lowercased())."
         let mistakeText = mistake ?? "Check meaning and form before choosing the answer."
@@ -7041,77 +8964,162 @@ private struct GrammarTopicExample: Identifiable {
 }
 
 private struct GrammarPracticeView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var index = 0
     @State private var selectedOption: String?
     @State private var feedback: LearningFeedback?
+    @State private var remoteQuestions: [GrammarQuestion] = []
+    @State private var loadedRemoteLevel: TopicCEFRLevel?
+    @State private var isLoadingQuestions = false
+
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
 
     private var level: LearningLevel {
-        learningProgress.effectiveLevel(for: LearningModule.grammar.rawValue)
+        selectedCEFRLevel.fallbackLearningLevel
     }
 
     private var questions: [GrammarQuestion] {
-        GrammarQuestion.deck(for: level)
+        remoteQuestions.isEmpty ? GrammarQuestion.deck(for: level) : remoteQuestions
     }
 
     var body: some View {
         let safeIndex = min(index, max(questions.count - 1, 0))
         let question = questions[safeIndex]
 
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                ProgressHeader(currentIndex: safeIndex, total: questions.count)
+        ZStack {
+            TranslatePracticeBackground()
 
+            ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Label(question.level.title, systemImage: "slider.horizontal.3")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tint)
+                    ExerciseSessionTopBar(
+                        title: "Gramática",
+                        closeAction: { dismiss() }
+                    )
 
-                    Text(question.prompt)
-                        .font(.title3.bold())
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Elegí la forma")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
 
-                    ForEach(question.options, id: \.self) { option in
-                        Button {
-                            selectedOption = option
-                            validate(question, option: option)
-                        } label: {
-                            HStack {
-                                Text(option)
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                if selectedOption == option {
-                                    Image(systemName: "checkmark.circle.fill")
+                        Text("Detectá la opción que suena natural.")
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                    }
+
+                    if isLoadingQuestions {
+                        Label("Cargando...", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                    }
+
+                    ProgressHeader(currentIndex: safeIndex, total: questions.count)
+
+                    VStack(alignment: .leading, spacing: 16) {
+                        Label(question.level.title, systemImage: "slider.horizontal.3")
+                            .font(.system(size: 14, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.primary)
+
+                        Text(question.prompt)
+                            .font(.system(size: 25, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        ForEach(question.options, id: \.self) { option in
+                            Button {
+                                selectedOption = option
+                                validate(question, option: option)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: selectedOption == option ? "checkmark.circle.fill" : "circle")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundStyle(selectedOption == option ? TranslateTheme.primary : TranslateTheme.muted.opacity(0.62))
+
+                                    Text(option)
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                        .foregroundStyle(TranslateTheme.ink)
+                                        .fixedSize(horizontal: false, vertical: true)
+
+                                    Spacer()
                                 }
+                                .padding(14)
+                                .background(selectedOption == option ? TranslateTheme.primary.opacity(0.10) : TranslateTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                             }
-                            .padding(12)
-                            .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
-                    }
 
-                    if let feedback {
-                        LearningFeedbackView(feedback: feedback)
-                    }
+                        if let feedback {
+                            LearningFeedbackView(feedback: feedback)
+                        }
 
-                    Button {
-                        moveNext()
-                    } label: {
-                        Label("Siguiente", systemImage: "arrow.right")
-                            .frame(maxWidth: .infinity)
+                        Button {
+                            moveNext()
+                        } label: {
+                            Label("Siguiente", systemImage: "arrow.right")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(TranslateSecondaryButtonStyle())
                     }
-                    .buttonStyle(.bordered)
+                    .padding(22)
+                    .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
                 }
-                .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 40)
             }
-            .padding()
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle("Gramatica")
-        .onChange(of: learningProgress.profile.level) { _, _ in
+        .navigationTitle("")
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .task(id: selectedCEFRLevel) {
+            await loadGrammarQuestions(for: selectedCEFRLevel)
+        }
+        .onChange(of: learningProgress.cefrLevelCode) { _, _ in
             index = 0
+            remoteQuestions = []
+            loadedRemoteLevel = nil
             selectedOption = nil
             feedback = nil
         }
+    }
+
+    @MainActor
+    private func loadGrammarQuestions(for selectedLevel: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, loadedRemoteLevel == selectedLevel, !remoteQuestions.isEmpty {
+            return
+        }
+
+        isLoadingQuestions = true
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchPracticeExercises(
+                skill: "grammar",
+                level: selectedLevel.rawValue,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedQuestions = response.exercises.compactMap {
+                GrammarQuestion(remote: $0, fallbackLevel: selectedLevel.fallbackLearningLevel)
+            }
+
+            loadedRemoteLevel = selectedLevel
+            remoteQuestions = mappedQuestions
+            index = 0
+            selectedOption = nil
+            feedback = nil
+        } catch {
+            remoteQuestions = []
+            loadedRemoteLevel = selectedLevel
+        }
+
+        isLoadingQuestions = false
     }
 
     private func validate(_ question: GrammarQuestion, option: String) {
@@ -7119,6 +9127,7 @@ private struct GrammarPracticeView: View {
         learningProgress.recordModule(LearningModule.grammar.rawValue, wasCorrect: isCorrect)
         if isCorrect {
             learningProgress.recordErrorResolved(module: LearningModule.grammar.rawValue, expected: question.answer)
+            markGrammarCompletedIfNeeded(question)
         } else {
             learningProgress.recordError(
                 module: LearningModule.grammar.rawValue,
@@ -7136,6 +9145,30 @@ private struct GrammarPracticeView: View {
         )
     }
 
+    private func markGrammarCompletedIfNeeded(_ question: GrammarQuestion) {
+        guard let apiContentId = question.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let completedLevel = selectedCEFRLevel.rawValue
+        let completedTitle = question.prompt
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "exercise", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "exercise",
+                itemId: apiContentId,
+                level: completedLevel,
+                title: completedTitle
+            )
+        }
+    }
+
     private func moveNext() {
         index = (index + 1) % questions.count
         selectedOption = nil
@@ -7144,116 +9177,237 @@ private struct GrammarPracticeView: View {
 }
 
 private struct SpeakingPracticeView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @StateObject private var speaker = PromptSpeaker()
     @StateObject private var speechModel = SpeechPracticeModel()
     @State private var index = 0
+    @State private var remotePrompts: [SpeakingPrompt] = []
+    @State private var loadedRemoteLevel: TopicCEFRLevel?
+    @State private var isLoadingPrompts = false
     @State private var feedback: LearningFeedback?
     @State private var lastCheckedTranscript = ""
 
+    private var selectedCEFRLevel: TopicCEFRLevel {
+        TopicCEFRLevel(rawValue: learningProgress.cefrLevelCode) ?? TopicCEFRLevel(profileLevel: learningProgress.profile.level)
+    }
+
     private var level: LearningLevel {
-        learningProgress.effectiveLevel(for: LearningModule.speaking.rawValue)
+        selectedCEFRLevel.fallbackLearningLevel
     }
 
     private var prompts: [SpeakingPrompt] {
-        SpeakingPrompt.deck(for: level)
+        remotePrompts.isEmpty ? SpeakingPrompt.deck(for: level) : remotePrompts
     }
 
     var body: some View {
         let safeIndex = min(index, max(prompts.count - 1, 0))
         let prompt = prompts[safeIndex]
 
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                ProgressHeader(currentIndex: safeIndex, total: prompts.count)
+        ZStack {
+            TranslatePracticeBackground()
 
+            ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text(prompt.phrase)
-                        .font(.title3.bold())
-                    Text(level == .advanced ? "Decilo con ritmo natural." : prompt.translation)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    HStack(spacing: 10) {
-                        Button {
-                            speaker.speak(prompt.phrase, rate: level.speechRate)
-                        } label: {
-                            Label("Escuchar", systemImage: "speaker.wave.2.fill")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-
-                        Button {
-                            speechModel.toggleRecording()
-                        } label: {
-                            Label(speechModel.isRecording ? "Parar" : "Hablar", systemImage: speechModel.isRecording ? "stop.fill" : "mic.fill")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
+                    ExerciseSessionTopBar(
+                        title: "Speaking",
+                        closeAction: { dismiss() }
+                    )
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Reconocido")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(speechModel.transcript.isEmpty ? "..." : speechModel.transcript)
-                            .frame(maxWidth: .infinity, minHeight: 72, alignment: .topLeading)
-                            .padding(12)
-                            .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                        Text("Repetí & compará")
+                            .font(.system(size: 39, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
+
+                        Text("Decí la frase y revisá qué reconoció el sistema.")
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
                     }
 
-                    if let message = speechModel.message {
-                        Label(message, systemImage: "info.circle")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                    if isLoadingPrompts {
+                        Label("Cargando...", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
                     }
 
-                    if let feedback {
-                        LearningFeedbackView(feedback: feedback)
-                        if !feedback.isCorrect {
-                            LearningWordDiffView(answer: lastCheckedTranscript, target: prompt.phrase)
+                    ProgressHeader(currentIndex: safeIndex, total: prompts.count)
+
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Text(prompt.title)
+                                    .font(.system(size: 16, weight: .black, design: .rounded))
+                                    .foregroundStyle(TranslateTheme.ink)
+
+                                Spacer(minLength: 0)
+                            }
+
+                            Text(prompt.instruction.isEmpty ? prompt.translation : prompt.instruction)
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundStyle(TranslateTheme.muted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        if !prompt.targetLanguage.isEmpty {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], alignment: .leading, spacing: 8) {
+                                ForEach(prompt.targetLanguage.prefix(3), id: \.self) { target in
+                                    Text(target)
+                                        .font(.system(size: 12, weight: .black, design: .rounded))
+                                        .foregroundStyle(TranslateTheme.primary)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.72)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(TranslateTheme.primary.opacity(0.10), in: Capsule())
+                                }
+                            }
+                        }
+
+                        Text("Decí esta frase")
+                            .font(.system(size: 13, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+
+                        Text(prompt.phrase)
+                            .font(.system(size: 28, weight: .black, design: .rounded))
+                            .foregroundStyle(TranslateTheme.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text(prompt.source == "Local" && level == .advanced ? "Decilo con ritmo natural." : "Podés usarlo como arranque y completar la idea en voz alta.")
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .foregroundStyle(TranslateTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        HStack(spacing: 10) {
+                            Button {
+                                speaker.speak(prompt.phrase, rate: level.speechRate)
+                            } label: {
+                                Label("Escuchar", systemImage: "speaker.wave.2.fill")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(TranslateSecondaryButtonStyle())
+
+                            Button {
+                                speechModel.toggleRecording()
+                            } label: {
+                                Label(speechModel.isRecording ? "Parar" : "Hablar", systemImage: speechModel.isRecording ? "stop.fill" : "mic.fill")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(TranslatePrimaryButtonStyle())
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Reconocido")
+                                .font(.system(size: 13, weight: .black, design: .rounded))
+                                .foregroundStyle(TranslateTheme.muted)
+
+                            Text(speechModel.transcript.isEmpty ? "..." : speechModel.transcript)
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(TranslateTheme.ink)
+                                .frame(maxWidth: .infinity, minHeight: 86, alignment: .topLeading)
+                                .padding(14)
+                                .background(TranslateTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+
+                        if let message = speechModel.message {
+                            Label(message, systemImage: "info.circle")
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .foregroundStyle(TranslateTheme.muted)
+                        }
+
+                        if let feedback {
+                            LearningFeedbackView(feedback: feedback)
+                            if !feedback.isCorrect {
+                                LearningWordDiffView(answer: lastCheckedTranscript, target: prompt.phrase)
+                            }
+                        }
+
+                        HStack(spacing: 10) {
+                            Button {
+                                validate(prompt)
+                            } label: {
+                                Label("Comprobar", systemImage: "checkmark")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(TranslatePrimaryButtonStyle())
+                            .disabled(speechModel.transcript.trimmed.isEmpty)
+
+                            Button {
+                                moveNext()
+                            } label: {
+                                Label("Siguiente", systemImage: "arrow.right")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(TranslateSecondaryButtonStyle())
                         }
                     }
-
-                    HStack(spacing: 10) {
-                        Button {
-                            validate(prompt)
-                        } label: {
-                            Label("Comprobar", systemImage: "checkmark")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(speechModel.transcript.trimmed.isEmpty)
-
-                        Button {
-                            moveNext()
-                        } label: {
-                            Label("Siguiente", systemImage: "arrow.right")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                    }
+                    .padding(22)
+                    .background(TranslateTheme.surface.opacity(0.97), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .shadow(color: TranslateTheme.primary.opacity(0.08), radius: 24, x: 0, y: 12)
                 }
-                .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 26)
+                .padding(.top, 18)
+                .padding(.bottom, 40)
             }
-            .padding()
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle("Speaking")
-        .onChange(of: learningProgress.profile.level) { _, _ in
+        .navigationTitle("")
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .task(id: selectedCEFRLevel) {
+            await loadSpeakingPrompts(for: selectedCEFRLevel)
+        }
+        .onChange(of: learningProgress.cefrLevelCode) { _, _ in
             index = 0
+            remotePrompts = []
+            loadedRemoteLevel = nil
             speechModel.resetTranscript()
             feedback = nil
         }
     }
 
+    @MainActor
+    private func loadSpeakingPrompts(for selectedLevel: TopicCEFRLevel, forceRefresh: Bool = false) async {
+        if !forceRefresh, loadedRemoteLevel == selectedLevel, !remotePrompts.isEmpty {
+            return
+        }
+
+        isLoadingPrompts = true
+
+        do {
+            let response = try await LocupomTopicsAPIClient.fetchSpeakingPrompts(
+                level: selectedLevel.rawValue,
+                learnerId: learningProgress.apiLearnerId,
+                completedKeys: Array(learningProgress.completedRemoteContentKeys)
+            )
+            let mappedPrompts = response.speakingPrompts.compactMap {
+                SpeakingPrompt(remote: $0, fallbackLevel: selectedLevel.fallbackLearningLevel)
+            }
+
+            loadedRemoteLevel = selectedLevel
+            remotePrompts = mappedPrompts
+            index = 0
+            speechModel.resetTranscript()
+            feedback = nil
+            lastCheckedTranscript = ""
+        } catch {
+            remotePrompts = []
+            loadedRemoteLevel = selectedLevel
+        }
+
+        isLoadingPrompts = false
+    }
+
     private func validate(_ prompt: SpeakingPrompt) {
         lastCheckedTranscript = speechModel.transcript
         let result = TextMatcher.evaluate(answer: speechModel.transcript, target: prompt.phrase)
-        let isCorrect = level == .advanced ? result.isCorrect : result.isClose
+        let isCorrect = level.acceptsCloseAnswers ? result.isClose : result.isCorrect
         learningProgress.recordModule(LearningModule.speaking.rawValue, wasCorrect: isCorrect)
         if isCorrect {
             learningProgress.recordErrorResolved(module: LearningModule.speaking.rawValue, expected: prompt.phrase)
+            markSpeakingCompletedIfNeeded(prompt)
         } else {
             learningProgress.recordError(
                 module: LearningModule.speaking.rawValue,
@@ -7271,6 +9425,30 @@ private struct SpeakingPracticeView: View {
         )
     }
 
+    private func markSpeakingCompletedIfNeeded(_ prompt: SpeakingPrompt) {
+        guard let apiContentId = prompt.apiContentId else {
+            return
+        }
+
+        let learnerId = learningProgress.apiLearnerId
+        let completedLevel = selectedCEFRLevel.rawValue
+        let completedTitle = prompt.title
+        let didInsert = learningProgress.markRemoteContentCompleted(kind: "speaking", itemId: apiContentId)
+        guard didInsert else {
+            return
+        }
+
+        Task {
+            try? await LocupomTopicsAPIClient.markCompleted(
+                learnerId: learnerId,
+                kind: "speaking",
+                itemId: apiContentId,
+                level: completedLevel,
+                title: completedTitle
+            )
+        }
+    }
+
     private func moveNext() {
         index = (index + 1) % prompts.count
         speechModel.resetTranscript()
@@ -7284,19 +9462,7 @@ private struct ProgressHeader: View {
     let total: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("\(currentIndex + 1) de \(total)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text("\(Int((Double(currentIndex + 1) / Double(total)) * 100))%")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
-
-            ProgressView(value: Double(currentIndex + 1), total: Double(total))
-        }
+        EmptyView()
     }
 }
 
@@ -7335,7 +9501,7 @@ private struct WordSummaryView: View {
             }
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -7361,7 +9527,7 @@ private struct LearningAPISection<Content: View>: View {
             content
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -7398,7 +9564,7 @@ private struct LearningNoticeView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(20)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -7433,7 +9599,7 @@ private struct WritingCorrectionRow: View {
                 .font(.callout)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
-                .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
             if !correction.replacements.isEmpty {
                 HStack(alignment: .center, spacing: 8) {
@@ -7452,7 +9618,7 @@ private struct WritingCorrectionRow: View {
             }
         }
         .padding(12)
-        .background(Color(.tertiarySystemBackground).opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.softSurface.opacity(0.72), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -7470,7 +9636,7 @@ private struct ExampleBox: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -7500,7 +9666,7 @@ private struct TokenArea: View {
             }
             .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
             .padding(10)
-            .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+            .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
 }
@@ -7694,6 +9860,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
     case writing
     case vocabulary
     case listening
+    case reading
     case speaking
     case sentences
     case grammar
@@ -7701,7 +9868,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
     var id: Self { self }
 
     static var practiceStatsModules: [LearningModule] {
-        [.songs, .topics, .vocabulary, .listening, .sentences, .grammar, .speaking, .translate, .writing]
+        [.songs, .topics, .reading, .vocabulary, .listening, .sentences, .grammar, .speaking, .translate, .writing]
     }
 
     var title: String {
@@ -7715,6 +9882,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
         case .writing: "Escribir"
         case .vocabulary: "Vocabulario"
         case .listening: "Escuchar"
+        case .reading: "Leer"
         case .speaking: "Hablar"
         case .sentences: "Frases"
         case .grammar: "Gramatica"
@@ -7732,6 +9900,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
         case .writing: "Escribir"
         case .vocabulary: "Vocabulario"
         case .listening: "Escuchar"
+        case .reading: "Leer"
         case .speaking: "Hablar"
         case .sentences: "Frases"
         case .grammar: "Gramatica"
@@ -7749,6 +9918,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
         case .writing: "Escritura guiada"
         case .vocabulary: "Palabras utiles"
         case .listening: "Escucha y escribe"
+        case .reading: "Comprension lectora"
         case .speaking: "Repite y compara"
         case .sentences: "Arma oraciones"
         case .grammar: "Elegi la opcion natural"
@@ -7766,6 +9936,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
         case .writing: "6m"
         case .vocabulary: "5m"
         case .listening: "7m"
+        case .reading: "5m"
         case .speaking: "6m"
         case .sentences: "5m"
         case .grammar: "5m"
@@ -7783,6 +9954,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
         case .writing: "Coach"
         case .vocabulary: "Suave"
         case .listening: "Oido"
+        case .reading: "Texto"
         case .speaking: "Voz"
         case .sentences: "Orden"
         case .grammar: "Uso"
@@ -7800,6 +9972,7 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
         case .writing: "square.and.pencil"
         case .vocabulary: "character.book.closed"
         case .listening: "ear"
+        case .reading: "book.pages.fill"
         case .speaking: "mic"
         case .sentences: "text.word.spacing"
         case .grammar: "checklist.checked"
@@ -7817,9 +9990,73 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
         case .writing: .indigo
         case .vocabulary: .indigo
         case .listening: .orange
+        case .reading: .blue
         case .speaking: .pink
         case .sentences: .green
         case .grammar: .blue
+        }
+    }
+
+    var practiceListTitle: String {
+        switch self {
+        case .grammar: "Gramática"
+        default: title
+        }
+    }
+
+    var practiceListSubtitle: String {
+        switch self {
+        case .translate: "Traducción libre"
+        case .writing: "Respuesta guiada"
+        case .listening: "Escucha y escribe"
+        case .reading: "Comprensión guiada"
+        case .speaking: "Repite y compara"
+        case .sentences: "Armá oraciones"
+        case .grammar: "La opción natural"
+        default: subtitle
+        }
+    }
+
+    var practiceListDuration: String {
+        duration.replacingOccurrences(of: "m", with: " min")
+    }
+
+    var practiceListSystemImage: String {
+        switch self {
+        case .translate: "globe.americas"
+        case .writing: "square.and.pencil"
+        case .listening: "headphones"
+        case .reading: "book.pages.fill"
+        case .speaking: "mic.fill"
+        case .sentences: "list.bullet"
+        case .grammar: "list.bullet.rectangle"
+        default: systemImage
+        }
+    }
+
+    var practiceAccent: Color {
+        switch self {
+        case .translate: Color(red: 0.08, green: 0.72, blue: 0.82)
+        case .writing: Color(red: 0.45, green: 0.31, blue: 0.96)
+        case .listening: Color(red: 1.0, green: 0.57, blue: 0.0)
+        case .reading: Color(red: 0.18, green: 0.59, blue: 0.98)
+        case .speaking: Color(red: 0.96, green: 0.31, blue: 0.50)
+        case .sentences: Color(red: 0.12, green: 0.76, blue: 0.39)
+        case .grammar: Color(red: 0.04, green: 0.57, blue: 0.89)
+        default: tint
+        }
+    }
+
+    var practiceIconBackground: Color {
+        switch self {
+        case .translate: Color(red: 0.84, green: 0.96, blue: 0.97)
+        case .writing: Color(red: 0.91, green: 0.84, blue: 1.0)
+        case .listening: Color(red: 1.0, green: 0.92, blue: 0.80)
+        case .reading: Color(red: 0.84, green: 0.91, blue: 1.0)
+        case .speaking: Color(red: 1.0, green: 0.85, blue: 0.90)
+        case .sentences: Color(red: 0.84, green: 0.96, blue: 0.89)
+        case .grammar: Color(red: 0.84, green: 0.94, blue: 0.99)
+        default: tint.opacity(0.13)
         }
     }
 
@@ -7836,20 +10073,31 @@ private enum LearningModule: String, CaseIterable, Identifiable, Hashable {
             WordExplorerView()
         case .topics:
             TopicsPracticeView()
+                .locupomFloatingTabBarHidden(true)
         case .translate:
             TranslatePracticeView()
+                .locupomFloatingTabBarHidden(true)
         case .writing:
             WritingCoachView()
+                .locupomFloatingTabBarHidden(true)
         case .vocabulary:
             VocabularyPracticeView()
+                .locupomFloatingTabBarHidden(true)
         case .listening:
             ListeningPracticeView()
+                .locupomFloatingTabBarHidden(true)
+        case .reading:
+            ReadingPracticeView()
+                .locupomFloatingTabBarHidden(true)
         case .speaking:
             SpeakingPracticeView()
+                .locupomFloatingTabBarHidden(true)
         case .sentences:
             SentenceBuilderPracticeView()
+                .locupomFloatingTabBarHidden(true)
         case .grammar:
             GrammarPracticeView()
+                .locupomFloatingTabBarHidden(true)
         }
     }
 }
@@ -7885,7 +10133,7 @@ private enum LearningGoal: String, CaseIterable, Identifiable {
         case .balanced:
             return true
         case .words:
-            return [.daily, .review, .explorer, .topics, .vocabulary, .sentences, .grammar, .translate, .writing].contains(module)
+            return [.daily, .review, .explorer, .topics, .reading, .vocabulary, .sentences, .grammar, .translate, .writing].contains(module)
         case .ear:
             return [.daily, .review, .listening, .songs, .explorer, .vocabulary].contains(module)
         case .voice:
@@ -7952,12 +10200,44 @@ private enum LearningSource: CaseIterable, Identifiable {
 }
 
 private struct VocabularyCard: Identifiable {
-    let id = UUID()
+    let id: UUID
+    let apiContentId: String?
     let word: String
     let translation: String
     let definition: String
     let example: String
     let level: LearningLevel
+
+    init(
+        apiContentId: String? = nil,
+        word: String,
+        translation: String,
+        definition: String,
+        example: String,
+        level: LearningLevel
+    ) {
+        self.id = UUID()
+        self.apiContentId = apiContentId
+        self.word = word
+        self.translation = translation
+        self.definition = definition
+        self.example = example
+        self.level = level
+    }
+
+    init?(remote: LocupomRemoteVocabularyItem, fallbackLevel: LearningLevel) {
+        let word = remote.word.trimmed
+        guard !word.isEmpty else { return nil }
+
+        self.init(
+            apiContentId: remote.id,
+            word: word,
+            translation: remote.translation ?? remote.meaning ?? "Useful word",
+            definition: remote.meaning ?? remote.usageNote ?? "Practice this word in context.",
+            example: remote.example ?? remote.usageNote ?? "Make your own sentence with \(word).",
+            level: remote.level.map(LearningLevel.fromCEFRCode) ?? fallbackLevel
+        )
+    }
 
     static func deck(for level: LearningLevel) -> [VocabularyCard] {
         Array(sampleDeck.filter { $0.level == level }.prefix(level.practiceLimit))
@@ -7987,10 +10267,46 @@ private struct VocabularyCard: Identifiable {
 }
 
 private struct ListeningItem: Identifiable {
-    let id = UUID()
+    let id: UUID
+    let apiContentId: String?
     let phrase: String
     let translation: String
     let level: LearningLevel
+    let trackTitle: String
+    let artistName: String
+
+    init(
+        apiContentId: String? = nil,
+        phrase: String,
+        translation: String,
+        level: LearningLevel,
+        trackTitle: String = "Locupom Voice",
+        artistName: String = "Locupom"
+    ) {
+        self.id = UUID()
+        self.apiContentId = apiContentId
+        self.phrase = phrase
+        self.translation = translation
+        self.level = level
+        self.trackTitle = trackTitle
+        self.artistName = artistName
+    }
+
+    init?(remote: LocupomRemotePracticeExercise, fallbackLevel: LearningLevel) {
+        let phrase = remote.phrase?.trimmed ?? remote.answer?.firstString?.trimmed ?? remote.prompt?.trimmed
+        guard let phrase, !phrase.isEmpty else {
+            return nil
+        }
+
+        self.init(
+            apiContentId: remote.id,
+            phrase: phrase,
+            translation: remote.translation ?? remote.instruction,
+            level: remote.level.trimmed.isEmpty ? fallbackLevel : LearningLevel.fromCEFRCode(remote.level),
+            trackTitle: remote.trackTitle ?? remote.title,
+            artistName: remote.artistName ?? "Locupom Voice"
+        )
+    }
 
     static func deck(for level: LearningLevel) -> [ListeningItem] {
         Array(sampleDeck.filter { $0.level == level }.prefix(level.practiceLimit))
@@ -8014,13 +10330,16 @@ private struct ListeningItem: Identifiable {
 }
 
 private struct SentencePuzzle: Identifiable {
-    let id = UUID()
+    let id: UUID
+    let apiContentId: String?
     let answer: String
     let translation: String
     let source: String
     let level: LearningLevel
 
-    init(answer: String, translation: String, source: String = "Local", level: LearningLevel) {
+    init(apiContentId: String? = nil, answer: String, translation: String, source: String = "Local", level: LearningLevel) {
+        self.id = UUID()
+        self.apiContentId = apiContentId
         self.answer = answer
         self.translation = translation
         self.source = source
@@ -8035,10 +10354,27 @@ private struct SentencePuzzle: Identifiable {
             return nil
         }
 
-        self.answer = answer
-        self.translation = translation
-        self.source = "Tatoeba"
-        self.level = SentencePuzzle.level(for: answer)
+        self.init(
+            answer: answer,
+            translation: translation,
+            source: "Tatoeba",
+            level: SentencePuzzle.level(for: answer)
+        )
+    }
+
+    init?(remote: LocupomRemotePracticeExercise, fallbackLevel: LearningLevel) {
+        let answer = remote.answer?.firstString?.trimmed ?? remote.phrase?.trimmed ?? remote.prompt?.trimmed
+        guard let answer, !answer.isEmpty else {
+            return nil
+        }
+
+        self.init(
+            apiContentId: remote.id,
+            answer: answer,
+            translation: remote.translation ?? remote.instruction,
+            source: remote.source ?? "Locupom API",
+            level: remote.level.trimmed.isEmpty ? fallbackLevel : LearningLevel.fromCEFRCode(remote.level)
+        )
     }
 
     static let sampleDeck = [
@@ -8107,12 +10443,52 @@ private struct SentencePuzzle: Identifiable {
 }
 
 private struct GrammarQuestion: Identifiable {
-    let id = UUID()
+    let id: UUID
+    let apiContentId: String?
     let prompt: String
     let options: [String]
     let answer: String
     let explanation: String
     let level: LearningLevel
+
+    init(
+        apiContentId: String? = nil,
+        prompt: String,
+        options: [String],
+        answer: String,
+        explanation: String,
+        level: LearningLevel
+    ) {
+        self.id = UUID()
+        self.apiContentId = apiContentId
+        self.prompt = prompt
+        self.options = options
+        self.answer = answer
+        self.explanation = explanation
+        self.level = level
+    }
+
+    init?(remote: LocupomRemotePracticeExercise, fallbackLevel: LearningLevel) {
+        let prompt = remote.prompt?.trimmed ?? remote.instruction.trimmed
+        let answer = remote.answer?.firstString?.trimmed
+        guard let answer, !prompt.isEmpty, !answer.isEmpty else {
+            return nil
+        }
+
+        let options = remote.options?.filter { !$0.trimmed.isEmpty } ?? []
+        guard !options.isEmpty else {
+            return nil
+        }
+
+        self.init(
+            apiContentId: remote.id,
+            prompt: prompt,
+            options: options,
+            answer: answer,
+            explanation: remote.explanation ?? remote.instruction,
+            level: remote.level.trimmed.isEmpty ? fallbackLevel : LearningLevel.fromCEFRCode(remote.level)
+        )
+    }
 
     static func deck(for level: LearningLevel) -> [GrammarQuestion] {
         Array(sampleDeck.filter { $0.level == level }.prefix(level.practiceLimit))
@@ -8200,13 +10576,100 @@ private struct GrammarQuestion: Identifiable {
 }
 
 private struct SpeakingPrompt: Identifiable {
-    let id = UUID()
+    let id: UUID
+    let apiContentId: String?
     let phrase: String
     let translation: String
     let level: LearningLevel
+    let title: String
+    let instruction: String
+    let support: [String]
+    let targetLanguage: [String]
+    let source: String
+
+    init(
+        apiContentId: String? = nil,
+        phrase: String,
+        translation: String,
+        level: LearningLevel,
+        title: String = "Frase objetivo",
+        instruction: String = "",
+        support: [String] = [],
+        targetLanguage: [String] = [],
+        source: String = "Local"
+    ) {
+        self.id = UUID()
+        self.apiContentId = apiContentId
+        self.phrase = phrase
+        self.translation = translation
+        self.level = level
+        self.title = title
+        self.instruction = instruction
+        self.support = support
+        self.targetLanguage = targetLanguage
+        self.source = source
+    }
+
+    init?(remote: LocupomRemoteSpeakingPrompt, fallbackLevel: LearningLevel) {
+        let support = (remote.support ?? [])
+            .map { $0.trimmed }
+            .filter { !$0.isEmpty }
+        let targetLanguage = (remote.targetLanguage ?? [])
+            .map { $0.trimmed }
+            .filter { !$0.isEmpty }
+        let explicitPhrase = [remote.targetPhrase]
+            .compactMap { $0 }
+            .map(Self.cleanSupportPhrase)
+            .first { !$0.isEmpty }
+        let supportPhrase = support
+            .map(Self.cleanSupportPhrase)
+            .first { !$0.isEmpty }
+        let phrase = explicitPhrase ?? supportPhrase ?? Self.cleanSupportPhrase(remote.prompt)
+        let remoteTargetPhrases = (remote.targetPhrases ?? [])
+            .map(Self.cleanSupportPhrase)
+            .filter { !$0.isEmpty }
+        let level = remote.level.trimmed.isEmpty ? fallbackLevel : LearningLevel.fromCEFRCode(remote.level)
+
+        guard !phrase.isEmpty else {
+            return nil
+        }
+
+        self.init(
+            apiContentId: remote.id,
+            phrase: phrase,
+            translation: remote.prompt,
+            level: level,
+            title: remote.title,
+            instruction: remote.prompt,
+            support: remoteTargetPhrases.isEmpty ? support : remoteTargetPhrases,
+            targetLanguage: targetLanguage,
+            source: "Locupom API"
+        )
+    }
 
     static func deck(for level: LearningLevel) -> [SpeakingPrompt] {
         Array(sampleDeck.filter { $0.level == level }.prefix(level.practiceLimit))
+    }
+
+    private static func cleanSupportPhrase(_ rawValue: String) -> String {
+        var text = rawValue.trimmed
+        if let rewriteRange = text.range(of: "->") {
+            text = String(text[rewriteRange.upperBound...]).trimmed
+        }
+        text = text
+            .replacingOccurrences(of: "...", with: "")
+            .replacingOccurrences(of: "___", with: "")
+            .replacingOccurrences(of: "__", with: "")
+            .trimmed
+
+        guard !text.isEmpty else {
+            return ""
+        }
+
+        if let last = text.last, !".?!".contains(last) {
+            text += "."
+        }
+        return text
     }
 
     static let sampleDeck = [
@@ -8296,7 +10759,7 @@ private struct LearningFeedbackView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -8327,7 +10790,7 @@ private struct LearningWordDiffView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(.tertiarySystemBackground).opacity(0.65), in: RoundedRectangle(cornerRadius: 8))
+        .background(LocupomTheme.softSurface.opacity(0.72), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func label(for token: TextComparisonToken) -> String {

@@ -33,149 +33,159 @@ struct SongEditorView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    GroupBox("Datos") {
-                        VStack(spacing: 12) {
-                            TextField("Titulo", text: $title)
-                                .textInputAutocapitalization(.words)
-                            TextField("Artista", text: $artist)
-                                .textInputAutocapitalization(.words)
-                            TextField("Idioma", text: $language)
-                                .textInputAutocapitalization(.words)
+            ZStack {
+                LocupomLearningBackground()
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        editorHeader
+
+                        EditorCard(title: "Datos", systemImage: "music.mic") {
+                            VStack(spacing: 12) {
+                                editorTextField("Título", text: $title, autocapitalization: .words)
+                                editorTextField("Artista", text: $artist, autocapitalization: .words)
+                                editorTextField("Idioma", text: $language, autocapitalization: .words)
+                            }
                         }
-                    }
 
-                    GroupBox("Video") {
-                        VStack(alignment: .leading, spacing: 12) {
-                            TextField("URL o ID de YouTube", text: $youtubeInput)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                                .keyboardType(.URL)
+                        EditorCard(title: "Video", systemImage: "play.rectangle.fill") {
+                            VStack(alignment: .leading, spacing: 14) {
+                                editorTextField("URL o ID de YouTube", text: $youtubeInput, autocapitalization: .never)
+                                    .autocorrectionDisabled()
+                                    .keyboardType(.URL)
 
-                            if let videoID {
-                                YouTubePlayerView(videoID: videoID, command: $command, onEvent: handlePlayerEvent)
-                                    .aspectRatio(16 / 9, contentMode: .fit)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                if let videoID {
+                                    YouTubePlayerView(videoID: videoID, command: $command, onEvent: handlePlayerEvent)
+                                        .aspectRatio(16 / 9, contentMode: .fit)
+                                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                                .stroke(LocupomTheme.ink.opacity(0.08), lineWidth: 1)
+                                        }
 
-                                HStack {
-                                    Label(formatTime(currentTime), systemImage: "timer")
-                                        .font(.subheadline.monospacedDigit())
-                                        .foregroundStyle(.secondary)
+                                    HStack {
+                                        Label(formatTime(currentTime), systemImage: "timer")
+                                            .font(.system(size: 15, weight: .black, design: .rounded).monospacedDigit())
+                                            .foregroundStyle(LocupomTheme.muted)
 
-                                    Spacer()
+                                        Spacer()
+
+                                        Button {
+                                            command = .play()
+                                        } label: {
+                                            Image(systemName: "play.fill")
+                                        }
+                                        .buttonStyle(EditorIconButtonStyle(isPrimary: true))
+
+                                        Button {
+                                            command = .pause()
+                                        } label: {
+                                            Image(systemName: "pause.fill")
+                                        }
+                                        .buttonStyle(EditorIconButtonStyle(isPrimary: false))
+                                    }
+                                } else {
+                                    Label("Pegá un link válido de YouTube para ver el reproductor.", systemImage: "link")
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(LocupomTheme.muted)
+                                        .padding(14)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                }
+                            }
+                        }
+
+                        EditorCard(title: "Letra", systemImage: "text.quote") {
+                            VStack(alignment: .leading, spacing: 14) {
+                                TextEditor(text: $lyricsText)
+                                    .frame(minHeight: 170)
+                                    .scrollContentBackground(.hidden)
+                                    .padding(8)
+                                    .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                            .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+                                    }
+
+                                HStack(spacing: 10) {
+                                    Button {
+                                        Task { await importLyrics() }
+                                    } label: {
+                                        Label(isImportingLyrics ? "Buscando..." : "Importar", systemImage: "text.magnifyingglass")
+                                            .frame(maxWidth: .infinity)
+                                    }
+                                    .buttonStyle(EditorPrimaryButtonStyle())
+                                    .disabled(isImportingLyrics || title.trimmed.isEmpty)
 
                                     Button {
-                                        command = .play()
+                                        generateLinesFromLyrics()
                                     } label: {
-                                        Image(systemName: "play.fill")
+                                        Label("Generar", systemImage: "text.badge.plus")
+                                            .frame(maxWidth: .infinity)
                                     }
-                                    .buttonStyle(.bordered)
+                                    .buttonStyle(EditorSecondaryButtonStyle())
+                                    .disabled(lyricsText.trimmed.isEmpty)
+                                }
 
-                                    Button {
-                                        command = .pause()
-                                    } label: {
-                                        Image(systemName: "pause.fill")
+                                if isImportingLyrics {
+                                    ProgressView()
+                                        .tint(LocupomTheme.primary)
+                                }
+
+                                if let lyricsImportMessage {
+                                    Label(lyricsImportMessage, systemImage: "info.circle")
+                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(LocupomTheme.muted)
+                                }
+                            }
+                        }
+
+                        EditorCard(title: "Tiempos", systemImage: "timer") {
+                            VStack(alignment: .leading, spacing: 12) {
+                                if draftLines.isEmpty {
+                                    Text("Generá líneas desde la letra y después marcá inicio/fin mientras escuchás.")
+                                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(LocupomTheme.muted)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                } else {
+                                    ForEach($draftLines) { $line in
+                                        LineTimingRow(
+                                            line: $line,
+                                            currentTime: currentTime,
+                                            seek: { command = .seek(to: line.startTime) }
+                                        )
                                     }
-                                    .buttonStyle(.bordered)
-                                }
-                            } else {
-                                Label("Pega un link valido de YouTube para ver el reproductor.", systemImage: "link")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-
-                    GroupBox("Letra") {
-                        VStack(alignment: .leading, spacing: 12) {
-                            TextEditor(text: $lyricsText)
-                                .frame(minHeight: 160)
-                                .scrollContentBackground(.hidden)
-                                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-
-                            HStack(spacing: 10) {
-                                Button {
-                                    Task { await importLyrics() }
-                                } label: {
-                                    Label(isImportingLyrics ? "Buscando..." : "Importar letra", systemImage: "text.magnifyingglass")
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .disabled(isImportingLyrics || title.trimmed.isEmpty)
-
-                                Button {
-                                    generateLinesFromLyrics()
-                                } label: {
-                                    Label("Generar lineas", systemImage: "text.badge.plus")
-                                }
-                                .buttonStyle(.bordered)
-                                .disabled(lyricsText.trimmed.isEmpty)
-                            }
-
-                            if isImportingLyrics {
-                                ProgressView()
-                            }
-
-                            if let lyricsImportMessage {
-                                Label(lyricsImportMessage, systemImage: "info.circle")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-
-                    GroupBox("Tiempos") {
-                        VStack(alignment: .leading, spacing: 14) {
-                            if draftLines.isEmpty {
-                                Text("Genera lineas desde la letra y despues marca inicio/fin mientras escuchas.")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                ForEach($draftLines) { $line in
-                                    LineTimingRow(
-                                        line: $line,
-                                        currentTime: currentTime,
-                                        seek: { command = .seek(to: line.startTime) }
-                                    )
-                                    Divider()
                                 }
                             }
                         }
-                    }
 
-                    if let validationMessage {
-                        Label(validationMessage, systemImage: "exclamationmark.triangle")
-                            .font(.footnote)
-                            .foregroundStyle(.orange)
-                    }
+                        if let validationMessage {
+                            Label(validationMessage, systemImage: "exclamationmark.triangle.fill")
+                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                .foregroundStyle(.orange)
+                                .padding(14)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        }
 
-                    Button {
-                        saveAndPractice()
-                    } label: {
-                        Label("Guardar y practicar", systemImage: "gamecontroller")
-                            .frame(maxWidth: .infinity)
+                        Button {
+                            saveAndPractice()
+                        } label: {
+                            Label("Guardar y practicar", systemImage: "gamecontroller.fill")
+                                .font(.system(size: 20, weight: .black, design: .rounded))
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(EditorPrimaryButtonStyle())
+                        .disabled(videoID == nil)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(videoID == nil)
+                    .padding(.horizontal, 22)
+                    .padding(.top, 18)
+                    .padding(.bottom, 34)
                 }
-                .padding()
+                .scrollIndicators(.hidden)
             }
-            .navigationTitle(song == nil ? "Nueva cancion" : "Editar cancion")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") {
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Guardar") {
-                        save()
-                    }
-                    .disabled(videoID == nil)
-                }
-            }
+            .navigationTitle("")
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $isShowingPractice) {
                 if let practiceSongID {
                     PracticeView(songID: practiceSongID)
@@ -185,6 +195,54 @@ struct SongEditorView: View {
                 await importLyricsAutomaticallyIfNeeded()
             }
         }
+    }
+
+    private var editorHeader: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Button("Cancelar") {
+                    dismiss()
+                }
+                .font(.system(size: 16, weight: .black, design: .rounded))
+                .foregroundStyle(LocupomTheme.muted)
+
+                Spacer()
+
+                Button("Guardar") {
+                    save()
+                }
+                .font(.system(size: 16, weight: .black, design: .rounded))
+                .foregroundStyle(videoID == nil ? LocupomTheme.muted.opacity(0.60) : LocupomTheme.primary)
+                .disabled(videoID == nil)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(song == nil ? "Nueva canción" : "Editar canción")
+                    .font(.system(size: 36, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.78)
+
+                Text("Prepará la letra y los tiempos para practicar con música.")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink.opacity(0.56))
+            }
+        }
+    }
+
+    private func editorTextField(
+        _ placeholder: String,
+        text: Binding<String>,
+        autocapitalization: TextInputAutocapitalization
+    ) -> some View {
+        TextField(placeholder, text: text)
+            .textInputAutocapitalization(autocapitalization)
+            .padding(14)
+            .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+            }
     }
 
     private var videoID: String? {
@@ -333,15 +391,87 @@ struct SongEditorView: View {
     }
 }
 
+private struct EditorCard<Content: View>: View {
+    let title: String
+    let systemImage: String
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label(title, systemImage: systemImage)
+                .font(.system(size: 19, weight: .black, design: .rounded))
+                .foregroundStyle(LocupomTheme.ink)
+
+            content()
+        }
+        .padding(18)
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+        }
+        .shadow(color: LocupomTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
+    }
+}
+
+private struct EditorPrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 16, weight: .black, design: .rounded))
+            .foregroundStyle(.white)
+            .padding(.vertical, 15)
+            .background(
+                LinearGradient(
+                    colors: isEnabled
+                        ? [LocupomTheme.primary, LocupomTheme.secondary]
+                        : [Color.gray.opacity(0.45), Color.gray.opacity(0.36)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                ),
+                in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+            )
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+    }
+}
+
+private struct EditorSecondaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 16, weight: .black, design: .rounded))
+            .foregroundStyle(isEnabled ? LocupomTheme.primary : LocupomTheme.muted.opacity(0.65))
+            .padding(.vertical, 15)
+            .background(LocupomTheme.primary.opacity(isEnabled ? 0.10 : 0.05), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+    }
+}
+
+private struct EditorIconButtonStyle: ButtonStyle {
+    let isPrimary: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 17, weight: .black))
+            .foregroundStyle(isPrimary ? .white : LocupomTheme.primary)
+            .frame(width: 44, height: 44)
+            .background(isPrimary ? LocupomTheme.primary : LocupomTheme.primary.opacity(0.10), in: Circle())
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+    }
+}
+
 private struct LineTimingRow: View {
     @Binding var line: DraftLine
     let currentTime: TimeInterval
     let seek: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Text(line.text)
-                .font(.subheadline)
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundStyle(LocupomTheme.ink)
                 .lineLimit(3)
 
             HStack(spacing: 8) {
@@ -354,7 +484,7 @@ private struct LineTimingRow: View {
                 } label: {
                     Image(systemName: "flag")
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(EditorIconButtonStyle(isPrimary: false))
 
                 TimeField(title: "Fin", value: $line.endTime)
                 Button {
@@ -362,15 +492,16 @@ private struct LineTimingRow: View {
                 } label: {
                     Image(systemName: "flag.checkered")
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(EditorIconButtonStyle(isPrimary: false))
 
                 Button(action: seek) {
                     Image(systemName: "gobackward")
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(EditorIconButtonStyle(isPrimary: true))
             }
         }
-        .padding(.vertical, 4)
+        .padding(14)
+        .background(LocupomTheme.softSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 
@@ -381,13 +512,18 @@ private struct TimeField: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 11, weight: .black, design: .rounded))
+                .foregroundStyle(LocupomTheme.muted)
 
             TextField(title, value: $value, format: .number.precision(.fractionLength(1)))
                 .keyboardType(.decimalPad)
-                .textFieldStyle(.roundedBorder)
-                .frame(minWidth: 64)
+                .textFieldStyle(.plain)
+                .font(.system(size: 14, weight: .black, design: .rounded).monospacedDigit())
+                .foregroundStyle(LocupomTheme.ink)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 9)
+                .background(LocupomTheme.elevatedSurface.opacity(0.86), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(minWidth: 58)
         }
     }
 }

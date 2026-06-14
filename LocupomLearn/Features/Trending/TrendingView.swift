@@ -11,65 +11,88 @@ struct TrendingView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if settings.apiKey.trimmed.isEmpty {
-                    ContentUnavailableView {
-                        Label("Falta API key", systemImage: "key")
-                    } description: {
-                        Text("Agrega una API key de YouTube Data API para cargar videos populares de musica.")
-                    } actions: {
-                        Button {
-                            isShowingSettings = true
-                        } label: {
-                            Label("Configurar YouTube", systemImage: "gearshape")
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                } else if isLoading && videos.isEmpty {
-                    ProgressView("Cargando tendencias...")
-                } else if videos.isEmpty {
-                    ContentUnavailableView {
-                        Label("Sin tendencias", systemImage: "music.note")
-                    } description: {
-                        Text(errorMessage ?? "Toca actualizar para consultar YouTube.")
-                    } actions: {
-                        Button {
-                            Task { await loadTrending() }
-                        } label: {
-                            Label("Actualizar", systemImage: "arrow.clockwise")
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                } else {
-                    List(videos) { video in
-                        TrendingVideoRow(video: video) {
-                            selectedVideo = video
-                        }
-                    }
-                    .refreshable {
-                        await loadTrending()
-                    }
-                }
-            }
-            .navigationTitle("Tendencias")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        isShowingSettings = true
-                    } label: {
-                        Label("YouTube", systemImage: "gearshape")
-                    }
-                }
+            ZStack {
+                LocupomLearningBackground()
 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        Task { await loadTrending() }
-                    } label: {
-                        Label("Actualizar", systemImage: "arrow.clockwise")
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        HStack(spacing: 12) {
+                            LocupomLogoMark(size: 42)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Tendencias")
+                                    .font(.system(size: 30, weight: .black, design: .rounded))
+                                    .foregroundStyle(LocupomTheme.ink)
+
+                                Text(settings.regionCode)
+                                    .font(.system(size: 13, weight: .black, design: .rounded))
+                                    .foregroundStyle(LocupomTheme.primary)
+                            }
+
+                            Spacer()
+
+                            Button {
+                                isShowingSettings = true
+                            } label: {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.system(size: 20, weight: .black))
+                                    .foregroundStyle(LocupomTheme.ink)
+                                    .frame(width: 44, height: 44)
+                                    .background(LocupomTheme.surface.opacity(0.92), in: Circle())
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                Task { await loadTrending() }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 20, weight: .black))
+                                    .foregroundStyle(LocupomTheme.primary)
+                                    .frame(width: 44, height: 44)
+                                    .background(LocupomTheme.surface.opacity(0.92), in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(settings.apiKey.trimmed.isEmpty || isLoading)
+                        }
+
+                        if settings.apiKey.trimmed.isEmpty {
+                            TrendingStateCard(
+                                systemImage: "key.fill",
+                                title: "Falta API key",
+                                detail: "Agregá una API key de YouTube Data API para cargar videos populares de música.",
+                                actionTitle: "Configurar YouTube",
+                                actionImage: "gearshape.fill",
+                                action: { isShowingSettings = true }
+                            )
+                        } else if isLoading && videos.isEmpty {
+                            TrendingLoadingCard()
+                        } else if videos.isEmpty {
+                            TrendingStateCard(
+                                systemImage: "music.note",
+                                title: "Sin tendencias",
+                                detail: errorMessage ?? "Tocá actualizar para consultar YouTube.",
+                                actionTitle: "Actualizar",
+                                actionImage: "arrow.clockwise",
+                                action: { Task { await loadTrending() } }
+                            )
+                        } else {
+                            VStack(spacing: 12) {
+                                ForEach(videos) { video in
+                                    TrendingVideoRow(video: video) {
+                                        selectedVideo = video
+                                    }
+                                }
+                            }
+                        }
                     }
-                    .disabled(settings.apiKey.trimmed.isEmpty || isLoading)
+                    .padding(.horizontal, 22)
+                    .padding(.top, 18)
+                    .padding(.bottom, 34)
                 }
+                .scrollIndicators(.hidden)
             }
+            .navigationTitle("")
+            .toolbar(.hidden, for: .navigationBar)
             .task {
                 if !settings.apiKey.trimmed.isEmpty && videos.isEmpty {
                     await loadTrending()
@@ -106,12 +129,84 @@ struct TrendingView: View {
     }
 }
 
+private struct TrendingStateCard: View {
+    let systemImage: String
+    let title: String
+    let detail: String
+    let actionTitle: String
+    let actionImage: String
+    let action: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Image(systemName: systemImage)
+                .font(.system(size: 34, weight: .black))
+                .foregroundStyle(LocupomTheme.primary)
+                .frame(width: 66, height: 66)
+                .background(LocupomTheme.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
+
+                Text(detail)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink.opacity(0.58))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Button(action: action) {
+                Label(actionTitle, systemImage: actionImage)
+                    .font(.system(size: 17, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .background(
+                        LinearGradient(
+                            colors: [LocupomTheme.primary, LocupomTheme.secondary],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(20)
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+        }
+        .shadow(color: LocupomTheme.primary.opacity(0.08), radius: 20, x: 0, y: 11)
+    }
+}
+
+private struct TrendingLoadingCard: View {
+    var body: some View {
+        HStack(spacing: 14) {
+            ProgressView()
+                .tint(LocupomTheme.primary)
+
+            Text("Cargando tendencias...")
+                .font(.system(size: 17, weight: .black, design: .rounded))
+                .foregroundStyle(LocupomTheme.ink)
+
+            Spacer()
+        }
+        .padding(20)
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: LocupomTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
+    }
+}
+
 private struct TrendingVideoRow: View {
     let video: TrendingVideo
     let addAction: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 14) {
             AsyncImage(url: video.thumbnailURL) { phase in
                 switch phase {
                 case let .success(image):
@@ -128,28 +223,38 @@ private struct TrendingVideoRow: View {
                     EmptyView()
                 }
             }
-            .frame(width: 96, height: 54)
-            .background(Color(.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .frame(width: 104, height: 72)
+            .background(LocupomTheme.softSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(video.title)
-                    .font(.headline)
+                    .font(.system(size: 17, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
                     .lineLimit(2)
 
                 Text(video.channelTitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink.opacity(0.55))
                     .lineLimit(1)
 
                 Button(action: addAction) {
                     Label("Usar", systemImage: "plus")
+                        .font(.system(size: 14, weight: .black, design: .rounded))
+                        .foregroundStyle(LocupomTheme.primary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(LocupomTheme.primary.opacity(0.10), in: Capsule())
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
+                .buttonStyle(.plain)
             }
         }
-        .padding(.vertical, 4)
+        .padding(14)
+        .background(LocupomTheme.surface.opacity(0.98), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+        }
     }
 }
 

@@ -4,6 +4,14 @@ const path = require("path");
 const DATA_PATH = path.join(__dirname, "..", "data", "morning-brief-content.json");
 const MIN_PARAGRAPHS = 30;
 
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/can't/g, "cant")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 const readingSpecs = [
   {
     id: "weekday-2026-06-12-1906-ar-pre-a1-yellow-key",
@@ -493,6 +501,381 @@ function buildQuestions(spec) {
   ];
 }
 
+function wordBankFrom(text) {
+  return Array.from(
+    new Set(
+      String(text)
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 2)
+    )
+  ).slice(0, 8);
+}
+
+const speakingTargetByLevel = {
+  "Pre-A1": "This is a blue pen.",
+  A1: "Go straight and turn left at the park.",
+  A2: "The plan changed because it started to rain.",
+  B1: "Peter said that the garden needed small actions.",
+  B2: "Although the guide is accurate, visitors may need clearer context.",
+  C1: "This may suggest a change in tone, but it does not prove the whole story.",
+  C2: "We failed to act on the warnings and need to explain the repair."
+};
+
+function cleanTargetPhrase(value, level) {
+  let text = String(value || "").trim();
+  if (text.includes("->")) text = text.split("->").pop().trim();
+  text = text.replace(/_{2,}/g, "").replace(/\.\.\./g, "").replace(/\s+/g, " ").trim();
+  if (!text || /\b(to|because|but|by|of|that)$/i.test(text)) {
+    text = speakingTargetByLevel[level] || speakingTargetByLevel.B1;
+  }
+  if (!/[.!?]$/.test(text)) text += ".";
+  return text;
+}
+
+function enrichSpeakingPrompt(prompt) {
+  const targetPhrase = cleanTargetPhrase(prompt.targetPhrase || prompt.support?.[0] || prompt.prompt, prompt.level);
+  const targetPhrases = Array.from(new Set([
+    targetPhrase,
+    ...(prompt.targetPhrases || []),
+    ...(prompt.support || []).map((item) => cleanTargetPhrase(item, prompt.level))
+  ])).filter(Boolean).slice(0, 4);
+
+  return {
+    ...prompt,
+    targetPhrase,
+    targetPhrases,
+    expectedResponseType: prompt.expectedResponseType || "spoken_sentence",
+    assessmentFocus: prompt.assessmentFocus || ["pronunciation", "fluency", "target language"]
+  };
+}
+
+const practiceByLevel = {
+  "Pre-A1": {
+    translation: {
+      sourceText: "This is a blue pen.",
+      expectedTranslation: "Este es un lapiz azul.",
+      hint: "Use este es for this is, then the object and colour.",
+      wordBank: ["este", "es", "un", "lapiz", "azul"]
+    },
+    writing: {
+      title: "My classroom",
+      instruction: "Write three very short sentences about objects in a classroom.",
+      wordRange: [15, 30],
+      vocabularyHelp: "Useful words: pen, book, bag, blue, red, teacher.",
+      grammarTip: "Use This is... and It is...",
+      sampleAnswer: "This is my book. It is blue. My teacher has a red pen.",
+      vocabularyTargets: ["book", "blue", "teacher", "pen"]
+    },
+    listening: {
+      phrase: "This is my blue pen.",
+      translation: "Este es mi lapiz azul.",
+      trackTitle: "Blue Pen",
+      artistName: "Locupom Voice"
+    },
+    grammar: {
+      prompt: "This ___ my bag.",
+      options: ["is", "are", "am"],
+      answer: "is",
+      explanation: "This is uses is."
+    },
+    sentence: {
+      answer: "This is my blue pen",
+      translation: "Este es mi lapiz azul."
+    }
+  },
+  A1: {
+    translation: {
+      sourceText: "Go straight and turn left.",
+      expectedTranslation: "Segui derecho y dobla a la izquierda.",
+      hint: "Use two short directions joined with y.",
+      wordBank: ["segui", "derecho", "dobla", "izquierda"]
+    },
+    writing: {
+      title: "Give simple directions",
+      instruction: "Write directions from a cafe to a library.",
+      wordRange: [35, 55],
+      vocabularyHelp: "Useful words: straight, left, right, near, cafe, library.",
+      grammarTip: "Use imperatives: Go, turn, look for.",
+      sampleAnswer: "Go straight for two minutes. Turn left at the park. The library is next to the cafe.",
+      vocabularyTargets: ["straight", "turn", "left", "library", "cafe"]
+    },
+    listening: {
+      phrase: "Turn left at the park.",
+      translation: "Dobla a la izquierda en el parque.",
+      trackTitle: "Morning Map",
+      artistName: "Locupom Voice"
+    },
+    grammar: {
+      prompt: "The library is ___ the cafe.",
+      options: ["next to", "many", "yesterday"],
+      answer: "next to",
+      explanation: "Next to gives a place relationship."
+    },
+    sentence: {
+      answer: "Turn left at the park",
+      translation: "Dobla a la izquierda en el parque."
+    }
+  },
+  A2: {
+    translation: {
+      sourceText: "It started to rain, so we went inside.",
+      expectedTranslation: "Empezo a llover, asi que entramos.",
+      hint: "Keep the cause and result with asi que.",
+      wordBank: ["empezo", "llover", "asi", "entramos"]
+    },
+    writing: {
+      title: "A changed plan",
+      instruction: "Describe a plan that changed because of the weather.",
+      wordRange: [55, 85],
+      vocabularyHelp: "Useful words: rain, plan, decided, instead, because, later.",
+      grammarTip: "Use past simple for completed events.",
+      sampleAnswer: "We wanted to eat outside, but it started to rain. We decided to go inside instead. The plan changed, but we still had a good afternoon.",
+      vocabularyTargets: ["wanted", "started", "decided", "instead", "plan"]
+    },
+    listening: {
+      phrase: "The plan changed because it started to rain.",
+      translation: "El plan cambio porque empezo a llover.",
+      trackTitle: "Rain Plan",
+      artistName: "Locupom Voice"
+    },
+    grammar: {
+      prompt: "It started to rain, ___ we went inside.",
+      options: ["so", "although", "while"],
+      answer: "so",
+      explanation: "So introduces the result."
+    },
+    sentence: {
+      answer: "The plan changed because it started to rain",
+      translation: "El plan cambio porque empezo a llover."
+    }
+  },
+  B1: {
+    translation: {
+      sourceText: "Peter said that the garden needed small actions every week.",
+      expectedTranslation: "Peter dijo que el jardin necesitaba pequenas acciones cada semana.",
+      hint: "Reported speech often shifts needs to necesitaba.",
+      wordBank: ["dijo", "jardin", "necesitaba", "pequenas", "acciones", "semana"]
+    },
+    writing: {
+      title: "Invite neighbours",
+      instruction: "Write a short invitation asking neighbours to help with a community garden.",
+      wordRange: [80, 120],
+      vocabularyHelp: "Useful words: neighbours, repair, volunteer, weekly, tools, community.",
+      grammarTip: "Use reported speech and polite requests.",
+      sampleAnswer: "The garden needs help because some repairs have been ignored. Peter said that small actions every week would make a difference. Could you volunteer for one hour on Saturday?",
+      vocabularyTargets: ["garden", "neighbours", "volunteer", "repairs", "weekly"]
+    },
+    listening: {
+      phrase: "Peter said that the garden needed small actions.",
+      translation: "Peter dijo que el jardin necesitaba pequenas acciones.",
+      trackTitle: "Garden Message",
+      artistName: "Locupom Voice"
+    },
+    grammar: {
+      prompt: "Peter said, \"The garden needs help.\" -> Peter said that the garden ___ help.",
+      options: ["needed", "needs", "need"],
+      answer: "needed",
+      explanation: "Reported speech can shift present simple to past simple."
+    },
+    sentence: {
+      answer: "Peter said that the garden needed small actions",
+      translation: "Peter dijo que el jardin necesitaba pequenas acciones."
+    }
+  },
+  B2: {
+    translation: {
+      sourceText: "Although the guide is accurate, visitors may need clearer context.",
+      expectedTranslation: "Aunque la guia es precisa, los visitantes pueden necesitar un contexto mas claro.",
+      hint: "Use aunque for contrast and pueden necesitar for may need.",
+      wordBank: ["aunque", "guia", "precisa", "visitantes", "contexto", "claro"]
+    },
+    writing: {
+      title: "Make culture accessible",
+      instruction: "Recommend two improvements to a museum audio guide in a balanced tone.",
+      wordRange: [95, 140],
+      vocabularyHelp: "Useful words: accurate, context, accessible, visitors, improve, while.",
+      grammarTip: "Use concession: although, while, however.",
+      sampleAnswer: "Although the guide is accurate, it would be easier to follow with clearer context. I would keep the historical facts while adding short stories and simpler route instructions for visitors.",
+      vocabularyTargets: ["although", "accurate", "context", "visitors", "while"]
+    },
+    listening: {
+      phrase: "Although the guide is accurate, visitors may need clearer context.",
+      translation: "Aunque la guia es precisa, los visitantes pueden necesitar mas contexto.",
+      trackTitle: "Museum Guide",
+      artistName: "Locupom Voice"
+    },
+    grammar: {
+      prompt: "Choose the most balanced sentence.",
+      options: [
+        "The guide is useless and must be replaced.",
+        "Although the guide is accurate, it would be easier to follow with clearer context.",
+        "The guide is perfect because it sounds serious."
+      ],
+      answer: "Although the guide is accurate, it would be easier to follow with clearer context.",
+      explanation: "The correct option balances praise with a specific improvement."
+    },
+    sentence: {
+      answer: "Although the guide is accurate visitors may need clearer context",
+      translation: "Aunque la guia es precisa, los visitantes pueden necesitar un contexto mas claro."
+    }
+  },
+  C1: {
+    translation: {
+      sourceText: "This may suggest a change in tone, but it does not prove the whole story.",
+      expectedTranslation: "Esto puede sugerir un cambio de tono, pero no prueba toda la historia.",
+      hint: "Use puede sugerir to hedge the interpretation.",
+      wordBank: ["puede", "sugerir", "cambio", "tono", "prueba", "historia"]
+    },
+    writing: {
+      title: "Cautious interpretation",
+      instruction: "Explain what a piece of evidence suggests and what it does not prove.",
+      wordRange: [120, 170],
+      vocabularyHelp: "Useful words: suggests, evidence, interpretation, prove, however, verify.",
+      grammarTip: "Use hedging: may, might, seems to, does not necessarily prove.",
+      sampleAnswer: "The evidence may suggest that the writer changed tone deliberately. However, it does not prove the whole intention. To verify this, I would compare the phrase with other documents.",
+      vocabularyTargets: ["suggests", "evidence", "prove", "however", "verify"]
+    },
+    listening: {
+      phrase: "This may suggest a change in tone, but it does not prove the whole story.",
+      translation: "Esto puede sugerir un cambio de tono, pero no prueba toda la historia.",
+      trackTitle: "Archive Note",
+      artistName: "Locupom Voice"
+    },
+    grammar: {
+      prompt: "Rewrite with caution: The letters prove everyone was angry.",
+      options: [
+        "The letters may suggest that some workers were angry.",
+        "The letters prove everything.",
+        "Everyone angry letters prove."
+      ],
+      answer: "The letters may suggest that some workers were angry.",
+      explanation: "May suggest avoids overclaiming."
+    },
+    sentence: {
+      answer: "This may suggest a change in tone",
+      translation: "Esto puede sugerir un cambio de tono."
+    }
+  },
+  C2: {
+    translation: {
+      sourceText: "We failed to act on the warnings and need to explain the repair.",
+      expectedTranslation: "No actuamos frente a las advertencias y necesitamos explicar la reparacion.",
+      hint: "Name the agent directly; avoid evasive abstract language.",
+      wordBank: ["actuamos", "advertencias", "necesitamos", "explicar", "reparacion"]
+    },
+    writing: {
+      title: "Accountable wording",
+      instruction: "Rewrite a vague public apology so it names action, responsibility and limits.",
+      wordRange: [140, 190],
+      vocabularyHelp: "Useful words: responsibility, failed to, repair, specific, accountable, limitation.",
+      grammarTip: "Prefer visible subjects and concrete verbs over abstract nouns.",
+      sampleAnswer: "We failed to act on the inspection warnings sent in March. This delayed the repair and left residents without clear information. We cannot undo that delay, but we can publish the timeline and fund the immediate work.",
+      vocabularyTargets: ["failed", "responsibility", "repair", "specific", "timeline"]
+    },
+    listening: {
+      phrase: "We failed to act on the warnings and need to explain the repair.",
+      translation: "No actuamos frente a las advertencias y necesitamos explicar la reparacion.",
+      trackTitle: "Public Statement",
+      artistName: "Locupom Voice"
+    },
+    grammar: {
+      prompt: "Which sentence is the least evasive?",
+      options: [
+        "Mistakes were made during implementation.",
+        "We failed to act on the inspection reports sent in March.",
+        "There was an unfortunate process issue."
+      ],
+      answer: "We failed to act on the inspection reports sent in March.",
+      explanation: "The sentence names the subject, action and evidence."
+    },
+    sentence: {
+      answer: "We failed to act on the warnings",
+      translation: "No actuamos frente a las advertencias."
+    }
+  }
+};
+
+function buildPracticeExercises(runId) {
+  return Object.entries(practiceByLevel).flatMap(([level, spec]) => {
+    const slugLevel = level.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    return [
+      {
+        id: `${runId}-${slugLevel}-translation`,
+        level,
+        skill: "translation",
+        type: "translation",
+        title: "Translate the idea",
+        instruction: "Translate the sentence into natural Spanish.",
+        ...spec.translation,
+        wordBank: spec.translation.wordBank || wordBankFrom(spec.translation.expectedTranslation)
+      },
+      {
+        id: `${runId}-${slugLevel}-writing`,
+        level,
+        skill: "writing",
+        type: "writing_prompt",
+        ...spec.writing
+      },
+      {
+        id: `${runId}-${slugLevel}-listening`,
+        level,
+        skill: "listening",
+        type: "cloze_listening",
+        title: spec.listening.trackTitle,
+        instruction: "Listen and complete the missing words.",
+        ...spec.listening
+      },
+      {
+        id: `${runId}-${slugLevel}-grammar`,
+        level,
+        skill: "grammar",
+        type: "multiple_choice",
+        title: "Choose the best option",
+        instruction: "Choose the option that completes the sentence naturally.",
+        ...spec.grammar
+      },
+      {
+        id: `${runId}-${slugLevel}-sentence-builder`,
+        level,
+        skill: "sentence_builder",
+        type: "sentence_builder",
+        title: "Build the sentence",
+        instruction: "Put the words in a natural order.",
+        source: "Locupom morning brief",
+        ...spec.sentence
+      }
+    ];
+  });
+}
+
+const vocabularyByLevel = [
+  { level: "Pre-A1", word: "pen", translation: "lapiz / birome", meaning: "A small object used for writing.", usageNote: "Use a pen to write your name.", example: "This is my blue pen." },
+  { level: "Pre-A1", word: "bag", translation: "bolso / mochila", meaning: "Something you carry books or objects in.", usageNote: "School bag is a common phrase.", example: "My bag is red." },
+  { level: "A1", word: "straight", translation: "derecho / recto", meaning: "In one direction without turning.", usageNote: "Use it in directions: go straight.", example: "Go straight for two minutes." },
+  { level: "A1", word: "near", translation: "cerca de", meaning: "Close to a place or person.", usageNote: "Near does not need to after it.", example: "The library is near the cafe." },
+  { level: "A2", word: "instead", translation: "en lugar de / en cambio", meaning: "Used when one thing replaces another.", usageNote: "It often comes at the end of a sentence.", example: "It rained, so we went inside instead." },
+  { level: "A2", word: "delay", translation: "demora / retrasar", meaning: "A wait or something happening later than planned.", usageNote: "Delay can be a noun or verb.", example: "The train had a short delay." },
+  { level: "B1", word: "neighbour", translation: "vecino / vecina", meaning: "A person who lives near you.", usageNote: "British spelling has ghbour; American is neighbor.", example: "The neighbours helped with the garden." },
+  { level: "B1", word: "repair", translation: "reparacion / reparar", meaning: "To fix something damaged or broken.", usageNote: "Repair can be a noun or verb.", example: "The garden needed a small repair." },
+  { level: "B2", word: "accurate", translation: "preciso / correcto", meaning: "Correct and exact.", usageNote: "Information can be accurate but still hard to follow.", example: "The guide was accurate but too dense." },
+  { level: "B2", word: "context", translation: "contexto", meaning: "The situation or information around something.", usageNote: "Context helps meaning become clearer.", example: "Visitors needed clearer context." },
+  { level: "C1", word: "suggest", translation: "sugerir", meaning: "To make an idea seem possible without proving it.", usageNote: "Useful for cautious interpretation.", example: "The evidence may suggest a change in tone." },
+  { level: "C1", word: "verify", translation: "verificar", meaning: "To check whether something is true or accurate.", usageNote: "Verify is stronger than check in academic contexts.", example: "I would verify the claim with another source." },
+  { level: "C2", word: "accountable", translation: "responsable / que rinde cuentas", meaning: "Expected to explain decisions and accept responsibility.", usageNote: "Common in public, legal and institutional language.", example: "The revision made the apology more accountable." },
+  { level: "C2", word: "evasive", translation: "evasivo", meaning: "Avoiding a direct answer or responsibility.", usageNote: "Use it for wording that hides agency.", example: "The first apology sounded evasive." }
+];
+
+function buildVocabulary(runId) {
+  return vocabularyByLevel.map((item) => ({
+    id: `${runId}-${item.level.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-vocab-${slugify(item.word)}`,
+    ...item
+  }));
+}
+
 const data = JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
 const specsById = new Map(readingSpecs.map((spec) => [spec.id, spec]));
 const missing = [];
@@ -527,17 +910,23 @@ if (missing.length > 0) {
 }
 
 data.generatedAt = new Date().toISOString();
+data.speakingPrompts = (data.speakingPrompts || []).map(enrichSpeakingPrompt);
+data.exercises = buildPracticeExercises(data.runId || "morning-brief");
+data.vocabulary = buildVocabulary(data.runId || "morning-brief");
 data.metadata = {
   ...(data.metadata || {}),
-  focus: "Long natural readings, speaking prompts, levelled exercises, and tricky vocabulary for the weekday automation.",
-  dedupeNote: "Replaced all stored reading texts with original long readings of at least 30 paragraphs.",
+  focus: "Long natural readings, API-shaped speaking prompts, skill-specific exercises, and levelled vocabulary for the weekday automation.",
+  dedupeNote: "Replaced all stored reading texts with original long readings of at least 30 paragraphs and refreshed practice payloads.",
   readingRequirement: `All stored readings contain at least ${MIN_PARAGRAPHS} paragraphs.`,
   latestRunAdds: {
     ...((data.metadata || {}).latestRunAdds || {}),
-    readings: data.readings.length
+    readings: data.readings.length,
+    speakingPrompts: data.speakingPrompts.length,
+    exercises: data.exercises.length,
+    vocabulary: data.vocabulary.length
   }
 };
 
 fs.writeFileSync(DATA_PATH, `${JSON.stringify(data, null, 2)}\n`);
 
-console.log(`Updated ${data.readings.length} readings in ${DATA_PATH}`);
+console.log(`Updated ${data.readings.length} readings, ${data.speakingPrompts.length} speaking prompts, ${data.exercises.length} exercises, and ${data.vocabulary.length} vocabulary items in ${DATA_PATH}`);

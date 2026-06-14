@@ -12,10 +12,10 @@ private enum LocupomRootTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .today: "Hoy"
-        case .music: "Musica"
+        case .music: "Música"
         case .topics: "Temas"
-        case .practice: "Practica"
-        case .progress: "Avance"
+        case .practice: "Práctica"
+        case .progress: "Avances"
         }
     }
 
@@ -43,6 +43,7 @@ private enum LocupomRootTab: String, CaseIterable, Identifiable {
 struct RootView: View {
     @EnvironmentObject private var learningProgress: LearningProgressStore
     @State private var selectedTab: LocupomRootTab = .today
+    @State private var hidesFloatingTabBar = false
 
     var body: some View {
         Group {
@@ -74,11 +75,33 @@ struct RootView: View {
             }
             .toolbar(.hidden, for: .tabBar)
 
-            LocupomFloatingTabBar(selectedTab: $selectedTab)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
+            if !hidesFloatingTabBar {
+                LocupomFloatingTabBar(selectedTab: $selectedTab)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 0)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onPreferenceChange(LocupomFloatingTabBarHiddenPreferenceKey.self) { isHidden in
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
+                hidesFloatingTabBar = isHidden
+            }
+        }
+    }
+}
+
+private struct LocupomFloatingTabBarHiddenPreferenceKey: PreferenceKey {
+    static let defaultValue = false
+
+    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+        value = value || nextValue()
+    }
+}
+
+extension View {
+    func locupomFloatingTabBarHidden(_ hidden: Bool) -> some View {
+        preference(key: LocupomFloatingTabBarHiddenPreferenceKey.self, value: hidden)
     }
 }
 
@@ -103,8 +126,6 @@ private struct LocupomFloatingTabBar: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
         .frame(height: 86)
-        .background(.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 34, style: .continuous))
-        .shadow(color: Color(red: 0.11, green: 0.16, blue: 0.30).opacity(0.13), radius: 24, x: 0, y: 12)
     }
 }
 
@@ -140,7 +161,7 @@ private struct LocupomTabBarItem: View {
         .background {
             if isSelected {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(.white)
+                    .fill(tab == .practice ? tab.color.opacity(0.18) : Color(.tertiarySystemBackground))
                     .shadow(color: tab.color.opacity(0.18), radius: 14, x: 0, y: 8)
             }
         }
@@ -156,16 +177,24 @@ private struct OnboardingView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                onboardingContent
-                .padding()
+            ZStack {
+                LocupomLearningBackground()
+
+                ScrollView {
+                    onboardingContent
+                        .padding(.horizontal, 22)
+                        .padding(.top, 28)
+                        .padding(.bottom, 38)
+                }
+                .scrollIndicators(.hidden)
             }
-            .navigationTitle("Locupom")
+            .navigationTitle("")
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 
     private var onboardingContent: some View {
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: 24) {
             OnboardingHeaderView()
             levelSection
             focusSection
@@ -175,9 +204,10 @@ private struct OnboardingView: View {
     }
 
     private var levelSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             Text("Nivel")
-                .font(.headline)
+                .font(.system(size: 24, weight: .black, design: .rounded))
+                .foregroundStyle(LocupomTheme.ink)
 
             ForEach(LearningLevel.allCases) { level in
                 LevelOptionRow(
@@ -192,9 +222,10 @@ private struct OnboardingView: View {
     }
 
     private var focusSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Foco")
-                .font(.headline)
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .foregroundStyle(LocupomTheme.ink)
 
             Picker("Foco", selection: $selectedFocus) {
                 ForEach(LearningFocus.allCases) { focus in
@@ -203,23 +234,37 @@ private struct OnboardingView: View {
             }
             .pickerStyle(.segmented)
         }
+        .padding(18)
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+        }
+        .shadow(color: LocupomTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
     }
 
     private var goalSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("Meta diaria")
-                    .font(.headline)
+                    .font(.system(size: 20, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
                 Spacer()
                 Text("\(Int(dailyGoal)) min")
-                    .font(.headline.monospacedDigit())
-                    .foregroundStyle(.tint)
+                    .font(.system(size: 18, weight: .black, design: .rounded).monospacedDigit())
+                    .foregroundStyle(LocupomTheme.primary)
             }
 
             Slider(value: $dailyGoal, in: 5...30, step: 5)
+                .tint(LocupomTheme.primary)
         }
-        .padding(14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .padding(18)
+        .background(LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+        }
+        .shadow(color: LocupomTheme.primary.opacity(0.07), radius: 18, x: 0, y: 10)
     }
 
     private var startButton: some View {
@@ -230,26 +275,50 @@ private struct OnboardingView: View {
                 dailyGoalMinutes: Int(dailyGoal)
             )
         } label: {
-            Label("Empezar", systemImage: "arrow.right.circle.fill")
+            Label("Empezar", systemImage: "play.fill")
+                .font(.system(size: 24, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .background(
+                    LinearGradient(
+                        colors: [LocupomTheme.primary, LocupomTheme.secondary],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+                )
+                .shadow(color: LocupomTheme.primary.opacity(0.20), radius: 16, x: 0, y: 9)
         }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
+        .buttonStyle(.plain)
     }
 }
 
 private struct OnboardingHeaderView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: "graduationcap.fill")
-                .font(.largeTitle)
-                .foregroundStyle(.tint)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 14) {
+                LocupomLogoMark(size: 56)
 
-            Text("Locupom")
-                .font(.largeTitle.bold())
-            Text("Learn with music, context and short daily practice.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                Text("Locupom")
+                    .font(.system(size: 36, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.82)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Armá tu práctica")
+                    .font(.system(size: 40, weight: .black, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.80)
+
+                Text("Elegí un nivel, un foco y una meta diaria para arrancar sin ruido.")
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundStyle(LocupomTheme.ink.opacity(0.58))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 }
@@ -261,23 +330,29 @@ private struct LevelOptionRow: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+                    .font(.system(size: 24, weight: .black))
+                    .foregroundStyle(isSelected ? LocupomTheme.primary : LocupomTheme.muted.opacity(0.70))
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(level.title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
+                        .font(.system(size: 18, weight: .black, design: .rounded))
+                        .foregroundStyle(LocupomTheme.ink)
                     Text(level.detail)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(LocupomTheme.ink.opacity(0.54))
                 }
 
                 Spacer()
             }
-            .padding(12)
-            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+            .padding(16)
+            .background(isSelected ? LocupomTheme.primary.opacity(0.10) : LocupomTheme.surface.opacity(0.96), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(isSelected ? LocupomTheme.primary.opacity(0.38) : LocupomTheme.ink.opacity(0.07), lineWidth: 1)
+            }
+            .shadow(color: LocupomTheme.primary.opacity(isSelected ? 0.10 : 0.06), radius: 16, x: 0, y: 9)
         }
         .buttonStyle(.plain)
     }

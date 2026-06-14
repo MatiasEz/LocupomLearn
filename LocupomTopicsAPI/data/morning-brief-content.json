@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T13:31:40.640Z",
+  "generatedAt": "2026-06-14T15:20:36.799Z",
   "runId": "weekday-2026-06-12-1906-ar",
   "metadata": {
     "levelsCovered": [
@@ -11,13 +11,13 @@
       "C1",
       "C2"
     ],
-    "focus": "Long natural readings, speaking prompts, levelled exercises, and tricky vocabulary for the weekday automation.",
-    "dedupeNote": "Replaced all stored reading texts with original long readings of at least 30 paragraphs.",
+    "focus": "Long natural readings, API-shaped speaking prompts, skill-specific exercises, and levelled vocabulary for the weekday automation.",
+    "dedupeNote": "Replaced all stored reading texts with original long readings of at least 30 paragraphs and refreshed practice payloads.",
     "latestRunAdds": {
       "readings": 21,
-      "speakingPrompts": 7,
-      "exercises": 7,
-      "vocabulary": 10
+      "speakingPrompts": 21,
+      "exercises": 35,
+      "vocabulary": 14
     },
     "retainedPreviousItems": true,
     "latestRunId": "weekday-2026-06-12-1906-ar",
@@ -1678,6 +1678,18 @@
         "colours",
         "classroom objects",
         "your"
+      ],
+      "targetPhrase": "a yellow key.",
+      "targetPhrases": [
+        "a yellow key.",
+        "a blue pen.",
+        "Is this your bag?"
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1694,6 +1706,18 @@
         "go straight",
         "turn left",
         "near"
+      ],
+      "targetPhrase": "Go straight.",
+      "targetPhrases": [
+        "Go straight.",
+        "Turn left at the park.",
+        "It is near the cafe."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1710,6 +1734,17 @@
         "past simple",
         "weather phrases",
         "but / so"
+      ],
+      "targetPhrase": "It started to rain.",
+      "targetPhrases": [
+        "It started to rain.",
+        "The plan changed because it started to rain."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1726,6 +1761,17 @@
         "invitations",
         "reported speech",
         "community actions"
+      ],
+      "targetPhrase": "The garden has been closed.",
+      "targetPhrases": [
+        "The garden has been closed.",
+        "Peter said that the garden needed small actions."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1742,6 +1788,18 @@
         "balanced contrast",
         "recommendations",
         "accessibility vocabulary"
+      ],
+      "targetPhrase": "Although the guide is accurate, visitors may need clearer context.",
+      "targetPhrases": [
+        "Although the guide is accurate, visitors may need clearer context.",
+        "Visitors may need.",
+        "I would keep, while changing."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1758,6 +1816,18 @@
         "nuance",
         "stance",
         "evaluative language"
+      ],
+      "targetPhrase": "The simpler verb preserves.",
+      "targetPhrases": [
+        "The simpler verb preserves.",
+        "The abstract noun weakens.",
+        "This may suggest a change in tone, but it does not prove the whole story."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1774,6 +1844,17 @@
         "accountability",
         "register control",
         "rhetorical precision"
+      ],
+      "targetPhrase": "We failed to act on the warnings and need to explain the repair.",
+      "targetPhrases": [
+        "We failed to act on the warnings and need to explain the repair.",
+        "This wording names."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1790,6 +1871,18 @@
         "colours",
         "this is",
         "your"
+      ],
+      "targetPhrase": "a red cup.",
+      "targetPhrases": [
+        "a red cup.",
+        "a blue bag.",
+        "Is this your pen?"
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1806,6 +1899,18 @@
         "how much",
         "I have",
         "shop nouns"
+      ],
+      "targetPhrase": "How much is it?",
+      "targetPhrases": [
+        "How much is it?",
+        "I have three pounds.",
+        "Do you have a smaller one?"
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1822,6 +1927,18 @@
         "past simple",
         "while",
         "because"
+      ],
+      "targetPhrase": "My train was delayed.",
+      "targetPhrases": [
+        "My train was delayed.",
+        "The plan changed because it started to rain.",
+        "While I waited, I."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1838,6 +1955,16 @@
         "reported speech",
         "used to",
         "memory vocabulary"
+      ],
+      "targetPhrase": "Peter said that the garden needed small actions.",
+      "targetPhrases": [
+        "Peter said that the garden needed small actions."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1854,6 +1981,18 @@
         "balanced argument",
         "concession",
         "proposal language"
+      ],
+      "targetPhrase": "The evidence suggests.",
+      "targetPhrases": [
+        "The evidence suggests.",
+        "Although this will not solve.",
+        "We are asking for."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1870,6 +2009,18 @@
         "hedging",
         "inference",
         "evidence limits"
+      ],
+      "targetPhrase": "This may suggest.",
+      "targetPhrases": [
+        "This may suggest.",
+        "It does not necessarily prove.",
+        "To verify this, I would need."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1886,6 +2037,18 @@
         "register control",
         "rhetorical implication",
         "translation judgement"
+      ],
+      "targetPhrase": "The first version foregrounds.",
+      "targetPhrases": [
+        "The first version foregrounds.",
+        "The second version risks implying.",
+        "We failed to act on the warnings and need to explain the repair."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1902,6 +2065,18 @@
         "this is",
         "colours",
         "spelling"
+      ],
+      "targetPhrase": "This is a pen.",
+      "targetPhrases": [
+        "This is a pen.",
+        "It is blue.",
+        "P-E-N."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1918,6 +2093,18 @@
         "where is",
         "go straight",
         "next to"
+      ],
+      "targetPhrase": "Where is the library?",
+      "targetPhrases": [
+        "Where is the library?",
+        "Go straight.",
+        "It is next to the cafe."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1934,6 +2121,17 @@
         "past simple",
         "instead",
         "because"
+      ],
+      "targetPhrase": "The plan changed because it started to rain.",
+      "targetPhrases": [
+        "The plan changed because it started to rain.",
+        "Instead, we."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1950,6 +2148,18 @@
         "giving reasons",
         "context clues",
         "uncertainty"
+      ],
+      "targetPhrase": "I think the word is.",
+      "targetPhrases": [
+        "I think the word is.",
+        "The clue is.",
+        "Peter said that the garden needed small actions."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1966,6 +2176,18 @@
         "concession",
         "persuasion",
         "evidence"
+      ],
+      "targetPhrase": "Although.",
+      "targetPhrases": [
+        "Although.",
+        "The strongest reason is.",
+        "Although the guide is accurate, visitors may need clearer context."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1982,6 +2204,18 @@
         "hedging",
         "interpretation",
         "academic caution"
+      ],
+      "targetPhrase": "The evidence states.",
+      "targetPhrases": [
+        "The evidence states.",
+        "One possible interpretation is.",
+        "However, this does not prove."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     },
     {
@@ -1998,446 +2232,702 @@
         "rhetorical precision",
         "register control",
         "accountability"
+      ],
+      "targetPhrase": "The original wording obscures.",
+      "targetPhrases": [
+        "The original wording obscures.",
+        "A clearer version would be.",
+        "We failed to act on the warnings and need to explain the repair."
+      ],
+      "expectedResponseType": "spoken_sentence",
+      "assessmentFocus": [
+        "pronunciation",
+        "fluency",
+        "target language"
       ]
     }
   ],
   "exercises": [
     {
-      "id": "weekday-2026-06-12-1906-ar-pre-a1-exercise-key",
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-translation",
       "level": "Pre-A1",
-      "type": "matching",
-      "title": "School Object Match",
-      "instruction": "Match each English word to the Spanish meaning.",
-      "items": [
-        {
-          "prompt": "key",
-          "answer": "llave"
-        },
-        {
-          "prompt": "floor",
-          "answer": "piso/suelo"
-        },
-        {
-          "prompt": "yellow",
-          "answer": "amarillo"
-        },
-        {
-          "prompt": "teacher",
-          "answer": "docente/profesor"
-        }
+      "skill": "translation",
+      "type": "translation",
+      "title": "Translate the idea",
+      "instruction": "Translate the sentence into natural Spanish.",
+      "sourceText": "This is a blue pen.",
+      "expectedTranslation": "Este es un lapiz azul.",
+      "hint": "Use este es for this is, then the object and colour.",
+      "wordBank": [
+        "este",
+        "es",
+        "un",
+        "lapiz",
+        "azul"
       ]
     },
     {
-      "id": "weekday-2026-06-12-1906-ar-a1-exercise-map",
-      "level": "A1",
-      "type": "ordering",
-      "title": "Put the Directions in Order",
-      "instruction": "Order the directions from the cafe to the library.",
-      "items": [
-        "Walk straight for two minutes.",
-        "Turn left at the park.",
-        "Look for the brown building."
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-writing",
+      "level": "Pre-A1",
+      "skill": "writing",
+      "type": "writing_prompt",
+      "title": "My classroom",
+      "instruction": "Write three very short sentences about objects in a classroom.",
+      "wordRange": [
+        15,
+        30
       ],
-      "answer": [
-        "Walk straight for two minutes.",
-        "Turn left at the park.",
-        "Look for the brown building."
+      "vocabularyHelp": "Useful words: pen, book, bag, blue, red, teacher.",
+      "grammarTip": "Use This is... and It is...",
+      "sampleAnswer": "This is my book. It is blue. My teacher has a red pen.",
+      "vocabularyTargets": [
+        "book",
+        "blue",
+        "teacher",
+        "pen"
       ]
     },
     {
-      "id": "weekday-2026-06-12-1906-ar-a2-exercise-market",
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-listening",
+      "level": "Pre-A1",
+      "skill": "listening",
+      "type": "cloze_listening",
+      "title": "Blue Pen",
+      "instruction": "Listen and complete the missing words.",
+      "phrase": "This is my blue pen.",
+      "translation": "Este es mi lapiz azul.",
+      "trackTitle": "Blue Pen",
+      "artistName": "Locupom Voice"
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-grammar",
+      "level": "Pre-A1",
+      "skill": "grammar",
+      "type": "multiple_choice",
+      "title": "Choose the best option",
+      "instruction": "Choose the option that completes the sentence naturally.",
+      "prompt": "This ___ my bag.",
+      "options": [
+        "is",
+        "are",
+        "am"
+      ],
+      "answer": "is",
+      "explanation": "This is uses is."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-sentence-builder",
+      "level": "Pre-A1",
+      "skill": "sentence_builder",
+      "type": "sentence_builder",
+      "title": "Build the sentence",
+      "instruction": "Put the words in a natural order.",
+      "source": "Locupom morning brief",
+      "answer": "This is my blue pen",
+      "translation": "Este es mi lapiz azul."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-translation",
+      "level": "A1",
+      "skill": "translation",
+      "type": "translation",
+      "title": "Translate the idea",
+      "instruction": "Translate the sentence into natural Spanish.",
+      "sourceText": "Go straight and turn left.",
+      "expectedTranslation": "Segui derecho y dobla a la izquierda.",
+      "hint": "Use two short directions joined with y.",
+      "wordBank": [
+        "segui",
+        "derecho",
+        "dobla",
+        "izquierda"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-writing",
+      "level": "A1",
+      "skill": "writing",
+      "type": "writing_prompt",
+      "title": "Give simple directions",
+      "instruction": "Write directions from a cafe to a library.",
+      "wordRange": [
+        35,
+        55
+      ],
+      "vocabularyHelp": "Useful words: straight, left, right, near, cafe, library.",
+      "grammarTip": "Use imperatives: Go, turn, look for.",
+      "sampleAnswer": "Go straight for two minutes. Turn left at the park. The library is next to the cafe.",
+      "vocabularyTargets": [
+        "straight",
+        "turn",
+        "left",
+        "library",
+        "cafe"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-listening",
+      "level": "A1",
+      "skill": "listening",
+      "type": "cloze_listening",
+      "title": "Morning Map",
+      "instruction": "Listen and complete the missing words.",
+      "phrase": "Turn left at the park.",
+      "translation": "Dobla a la izquierda en el parque.",
+      "trackTitle": "Morning Map",
+      "artistName": "Locupom Voice"
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-grammar",
+      "level": "A1",
+      "skill": "grammar",
+      "type": "multiple_choice",
+      "title": "Choose the best option",
+      "instruction": "Choose the option that completes the sentence naturally.",
+      "prompt": "The library is ___ the cafe.",
+      "options": [
+        "next to",
+        "many",
+        "yesterday"
+      ],
+      "answer": "next to",
+      "explanation": "Next to gives a place relationship."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a1-sentence-builder",
+      "level": "A1",
+      "skill": "sentence_builder",
+      "type": "sentence_builder",
+      "title": "Build the sentence",
+      "instruction": "Put the words in a natural order.",
+      "source": "Locupom morning brief",
+      "answer": "Turn left at the park",
+      "translation": "Dobla a la izquierda en el parque."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a2-translation",
       "level": "A2",
-      "type": "gap_fill",
-      "title": "Weather Changed the Plan",
-      "instruction": "Complete the sentence with the best option: It started to rain, ____ we went inside.",
+      "skill": "translation",
+      "type": "translation",
+      "title": "Translate the idea",
+      "instruction": "Translate the sentence into natural Spanish.",
+      "sourceText": "It started to rain, so we went inside.",
+      "expectedTranslation": "Empezo a llover, asi que entramos.",
+      "hint": "Keep the cause and result with asi que.",
+      "wordBank": [
+        "empezo",
+        "llover",
+        "asi",
+        "entramos"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a2-writing",
+      "level": "A2",
+      "skill": "writing",
+      "type": "writing_prompt",
+      "title": "A changed plan",
+      "instruction": "Describe a plan that changed because of the weather.",
+      "wordRange": [
+        55,
+        85
+      ],
+      "vocabularyHelp": "Useful words: rain, plan, decided, instead, because, later.",
+      "grammarTip": "Use past simple for completed events.",
+      "sampleAnswer": "We wanted to eat outside, but it started to rain. We decided to go inside instead. The plan changed, but we still had a good afternoon.",
+      "vocabularyTargets": [
+        "wanted",
+        "started",
+        "decided",
+        "instead",
+        "plan"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a2-listening",
+      "level": "A2",
+      "skill": "listening",
+      "type": "cloze_listening",
+      "title": "Rain Plan",
+      "instruction": "Listen and complete the missing words.",
+      "phrase": "The plan changed because it started to rain.",
+      "translation": "El plan cambio porque empezo a llover.",
+      "trackTitle": "Rain Plan",
+      "artistName": "Locupom Voice"
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-a2-grammar",
+      "level": "A2",
+      "skill": "grammar",
+      "type": "multiple_choice",
+      "title": "Choose the best option",
+      "instruction": "Choose the option that completes the sentence naturally.",
+      "prompt": "It started to rain, ___ we went inside.",
       "options": [
         "so",
-        "because",
-        "although"
+        "although",
+        "while"
       ],
-      "answer": "so"
+      "answer": "so",
+      "explanation": "So introduces the result."
     },
     {
-      "id": "weekday-2026-06-12-1906-ar-b1-exercise-garden",
+      "id": "weekday-2026-06-12-1906-ar-a2-sentence-builder",
+      "level": "A2",
+      "skill": "sentence_builder",
+      "type": "sentence_builder",
+      "title": "Build the sentence",
+      "instruction": "Put the words in a natural order.",
+      "source": "Locupom morning brief",
+      "answer": "The plan changed because it started to rain",
+      "translation": "El plan cambio porque empezo a llover."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-translation",
       "level": "B1",
-      "type": "sentence_transformation",
-      "title": "Report the Garden Idea",
-      "instruction": "Rewrite in reported speech: Peter said, \"The garden needs small actions every week.\"",
-      "answer": "Peter said that the garden needed small actions every week.",
-      "hint": "Backshift needs to needed after said."
+      "skill": "translation",
+      "type": "translation",
+      "title": "Translate the idea",
+      "instruction": "Translate the sentence into natural Spanish.",
+      "sourceText": "Peter said that the garden needed small actions every week.",
+      "expectedTranslation": "Peter dijo que el jardin necesitaba pequenas acciones cada semana.",
+      "hint": "Reported speech often shifts needs to necesitaba.",
+      "wordBank": [
+        "dijo",
+        "jardin",
+        "necesitaba",
+        "pequenas",
+        "acciones",
+        "semana"
+      ]
     },
     {
-      "id": "weekday-2026-06-12-1906-ar-b2-exercise-museum",
-      "level": "B2",
+      "id": "weekday-2026-06-12-1906-ar-b1-writing",
+      "level": "B1",
+      "skill": "writing",
+      "type": "writing_prompt",
+      "title": "Invite neighbours",
+      "instruction": "Write a short invitation asking neighbours to help with a community garden.",
+      "wordRange": [
+        80,
+        120
+      ],
+      "vocabularyHelp": "Useful words: neighbours, repair, volunteer, weekly, tools, community.",
+      "grammarTip": "Use reported speech and polite requests.",
+      "sampleAnswer": "The garden needs help because some repairs have been ignored. Peter said that small actions every week would make a difference. Could you volunteer for one hour on Saturday?",
+      "vocabularyTargets": [
+        "garden",
+        "neighbours",
+        "volunteer",
+        "repairs",
+        "weekly"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-listening",
+      "level": "B1",
+      "skill": "listening",
+      "type": "cloze_listening",
+      "title": "Garden Message",
+      "instruction": "Listen and complete the missing words.",
+      "phrase": "Peter said that the garden needed small actions.",
+      "translation": "Peter dijo que el jardin necesitaba pequenas acciones.",
+      "trackTitle": "Garden Message",
+      "artistName": "Locupom Voice"
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-grammar",
+      "level": "B1",
+      "skill": "grammar",
       "type": "multiple_choice",
-      "title": "Balanced Recommendation",
-      "instruction": "Choose the most balanced sentence.",
+      "title": "Choose the best option",
+      "instruction": "Choose the option that completes the sentence naturally.",
+      "prompt": "Peter said, \"The garden needs help.\" -> Peter said that the garden ___ help.",
+      "options": [
+        "needed",
+        "needs",
+        "need"
+      ],
+      "answer": "needed",
+      "explanation": "Reported speech can shift present simple to past simple."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-sentence-builder",
+      "level": "B1",
+      "skill": "sentence_builder",
+      "type": "sentence_builder",
+      "title": "Build the sentence",
+      "instruction": "Put the words in a natural order.",
+      "source": "Locupom morning brief",
+      "answer": "Peter said that the garden needed small actions",
+      "translation": "Peter dijo que el jardin necesitaba pequenas acciones."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-translation",
+      "level": "B2",
+      "skill": "translation",
+      "type": "translation",
+      "title": "Translate the idea",
+      "instruction": "Translate the sentence into natural Spanish.",
+      "sourceText": "Although the guide is accurate, visitors may need clearer context.",
+      "expectedTranslation": "Aunque la guia es precisa, los visitantes pueden necesitar un contexto mas claro.",
+      "hint": "Use aunque for contrast and pueden necesitar for may need.",
+      "wordBank": [
+        "aunque",
+        "guia",
+        "precisa",
+        "visitantes",
+        "contexto",
+        "claro"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-writing",
+      "level": "B2",
+      "skill": "writing",
+      "type": "writing_prompt",
+      "title": "Make culture accessible",
+      "instruction": "Recommend two improvements to a museum audio guide in a balanced tone.",
+      "wordRange": [
+        95,
+        140
+      ],
+      "vocabularyHelp": "Useful words: accurate, context, accessible, visitors, improve, while.",
+      "grammarTip": "Use concession: although, while, however.",
+      "sampleAnswer": "Although the guide is accurate, it would be easier to follow with clearer context. I would keep the historical facts while adding short stories and simpler route instructions for visitors.",
+      "vocabularyTargets": [
+        "although",
+        "accurate",
+        "context",
+        "visitors",
+        "while"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-listening",
+      "level": "B2",
+      "skill": "listening",
+      "type": "cloze_listening",
+      "title": "Museum Guide",
+      "instruction": "Listen and complete the missing words.",
+      "phrase": "Although the guide is accurate, visitors may need clearer context.",
+      "translation": "Aunque la guia es precisa, los visitantes pueden necesitar mas contexto.",
+      "trackTitle": "Museum Guide",
+      "artistName": "Locupom Voice"
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-grammar",
+      "level": "B2",
+      "skill": "grammar",
+      "type": "multiple_choice",
+      "title": "Choose the best option",
+      "instruction": "Choose the option that completes the sentence naturally.",
+      "prompt": "Choose the most balanced sentence.",
       "options": [
         "The guide is useless and must be replaced.",
         "Although the guide is accurate, it would be easier to follow with clearer context.",
         "The guide is perfect because it sounds serious."
       ],
-      "answer": "Although the guide is accurate, it would be easier to follow with clearer context."
+      "answer": "Although the guide is accurate, it would be easier to follow with clearer context.",
+      "explanation": "The correct option balances praise with a specific improvement."
     },
     {
-      "id": "weekday-2026-06-12-1906-ar-c1-exercise-translation",
+      "id": "weekday-2026-06-12-1906-ar-b2-sentence-builder",
+      "level": "B2",
+      "skill": "sentence_builder",
+      "type": "sentence_builder",
+      "title": "Build the sentence",
+      "instruction": "Put the words in a natural order.",
+      "source": "Locupom morning brief",
+      "answer": "Although the guide is accurate visitors may need clearer context",
+      "translation": "Aunque la guia es precisa, los visitantes pueden necesitar un contexto mas claro."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c1-translation",
       "level": "C1",
-      "type": "analysis",
-      "title": "Refinement or Avoidance?",
-      "instruction": "Explain why an abstract noun can weaken an emotional translation. Use one example sentence.",
-      "answerGuide": "A strong answer explains that abstraction can hide physical effort, agency, or emotional force, then contrasts it with a plainer verb."
-    },
-    {
-      "id": "weekday-2026-06-12-1906-ar-c2-exercise-apology",
-      "level": "C2",
-      "type": "rewrite",
-      "title": "Remove Evasion",
-      "instruction": "Rewrite: Mistakes were made during implementation. Make the sentence accountable and specific.",
-      "answer": "We failed to act on the inspection reports sent in March.",
-      "hint": "Name the agent, action, and evidence."
-    },
-    {
-      "id": "weekday-2026-06-12-pre-a1-exercise-cup",
-      "level": "Pre-A1",
-      "type": "matching",
-      "title": "Colour and Object Match",
-      "instruction": "Match each word to the correct meaning.",
-      "items": [
-        {
-          "prompt": "cup",
-          "answer": "taza/vaso"
-        },
-        {
-          "prompt": "bus",
-          "answer": "colectivo/bus"
-        },
-        {
-          "prompt": "red",
-          "answer": "rojo"
-        },
-        {
-          "prompt": "seat",
-          "answer": "asiento"
-        }
+      "skill": "translation",
+      "type": "translation",
+      "title": "Translate the idea",
+      "instruction": "Translate the sentence into natural Spanish.",
+      "sourceText": "This may suggest a change in tone, but it does not prove the whole story.",
+      "expectedTranslation": "Esto puede sugerir un cambio de tono, pero no prueba toda la historia.",
+      "hint": "Use puede sugerir to hedge the interpretation.",
+      "wordBank": [
+        "puede",
+        "sugerir",
+        "cambio",
+        "tono",
+        "prueba",
+        "historia"
       ]
     },
     {
-      "id": "weekday-2026-06-12-a1-exercise-shop",
-      "level": "A1",
-      "type": "gap_fill",
-      "title": "Shop Question",
-      "instruction": "Complete: How ____ is the notebook?",
-      "options": [
-        "much",
-        "many",
-        "old"
-      ],
-      "answer": "much"
-    },
-    {
-      "id": "weekday-2026-06-12-a2-exercise-delay",
-      "level": "A2",
-      "type": "sentence_order",
-      "title": "Delayed Sentence",
-      "instruction": "Order the words: was / train / delayed / my / minutes / thirty / by.",
-      "answer": "My train was delayed by thirty minutes."
-    },
-    {
-      "id": "weekday-2026-06-12-b1-exercise-radio",
-      "level": "B1",
-      "type": "rewrite",
-      "title": "Report the Memory",
-      "instruction": "Rewrite as reported speech: Mrs Allen said, \"This song reminds me of my first job interview.\"",
-      "sampleAnswer": "Mrs Allen said that the song reminded her of her first job interview."
-    },
-    {
-      "id": "weekday-2026-06-12-b2-exercise-campaign",
-      "level": "B2",
-      "type": "argument_improvement",
-      "title": "Make It Evidence-Based",
-      "instruction": "Improve this claim: \"The study room is terrible and everyone hates it.\"",
-      "sampleAnswer": "Noise records suggest that scraping chairs are the main problem, so felt pads and clearer group-work areas would make the study room calmer."
-    },
-    {
-      "id": "weekday-2026-06-12-c1-exercise-map",
+      "id": "weekday-2026-06-12-1906-ar-c1-writing",
       "level": "C1",
-      "type": "hedging",
-      "title": "Avoid Overclaiming",
-      "instruction": "Rewrite with caution: \"The pencil streets prove residents had a complete alternative plan.\"",
-      "sampleAnswer": "The pencil streets suggest that residents may have discussed alternative routes, although they do not prove the existence of a complete plan."
-    },
-    {
-      "id": "weekday-2026-06-12-c2-exercise-margin",
-      "level": "C2",
-      "type": "style_analysis",
-      "title": "Ambiguity With Purpose",
-      "instruction": "Explain why \"those whose actions enabled the transition\" may be better than naming a group directly.",
-      "sampleAnswer": "It preserves the source text's deliberate ambiguity while keeping a formal register and avoiding an unsupported political interpretation."
-    },
-    {
-      "id": "weekday-2026-06-11-pre-a1-exercise-key",
-      "level": "Pre-A1",
-      "type": "matching",
-      "title": "Classroom Object Match",
-      "instruction": "Match each word to the correct meaning.",
-      "items": [
-        {
-          "prompt": "key",
-          "answer": "llave"
-        },
-        {
-          "prompt": "book",
-          "answer": "libro"
-        },
-        {
-          "prompt": "desk",
-          "answer": "escritorio"
-        },
-        {
-          "prompt": "teacher",
-          "answer": "profesor/a"
-        }
-      ]
-    },
-    {
-      "id": "weekday-2026-06-11-a1-exercise-map",
-      "level": "A1",
-      "type": "sentence_order",
-      "title": "Put the Direction in Order",
-      "instruction": "Order the words: straight / go / and / left / turn.",
-      "answer": "Go straight and turn left."
-    },
-    {
-      "id": "weekday-2026-06-11-a2-exercise-market",
-      "level": "A2",
-      "type": "gap_fill",
-      "title": "Instead or Because",
-      "instruction": "Complete: There was no chicken, so Sofia chose beans ____.",
-      "options": [
-        "instead",
-        "because",
-        "already"
+      "skill": "writing",
+      "type": "writing_prompt",
+      "title": "Cautious interpretation",
+      "instruction": "Explain what a piece of evidence suggests and what it does not prove.",
+      "wordRange": [
+        120,
+        170
       ],
-      "answer": "instead"
-    },
-    {
-      "id": "weekday-2026-06-11-b1-exercise-chorus",
-      "level": "B1",
-      "type": "short_answer",
-      "title": "Use the Clue",
-      "instruction": "Explain why context can be more useful than one unclear sound in listening.",
-      "sampleAnswer": "Context shows how the missing word fits the whole message, so it helps us choose the most likely meaning."
-    },
-    {
-      "id": "weekday-2026-06-11-b2-exercise-seat",
-      "level": "B2",
-      "type": "argument_sort",
-      "title": "Preference, Evidence, or Need",
-      "instruction": "Classify: 'I get nervous when I cannot see outside.'",
-      "options": [
-        "preference",
+      "vocabularyHelp": "Useful words: suggests, evidence, interpretation, prove, however, verify.",
+      "grammarTip": "Use hedging: may, might, seems to, does not necessarily prove.",
+      "sampleAnswer": "The evidence may suggest that the writer changed tone deliberately. However, it does not prove the whole intention. To verify this, I would compare the phrase with other documents.",
+      "vocabularyTargets": [
+        "suggests",
         "evidence",
-        "need"
-      ],
-      "answer": "need"
+        "prove",
+        "however",
+        "verify"
+      ]
     },
     {
-      "id": "weekday-2026-06-11-c1-exercise-archive",
+      "id": "weekday-2026-06-12-1906-ar-c1-listening",
       "level": "C1",
-      "type": "rewrite",
-      "title": "Hedge the Claim",
-      "instruction": "Rewrite with academic caution: 'The letters prove all workers were angry.'",
-      "sampleAnswer": "The letters suggest that anger was present among some workers, although the collection also shows humour and uncertainty."
+      "skill": "listening",
+      "type": "cloze_listening",
+      "title": "Archive Note",
+      "instruction": "Listen and complete the missing words.",
+      "phrase": "This may suggest a change in tone, but it does not prove the whole story.",
+      "translation": "Esto puede sugerir un cambio de tono, pero no prueba toda la historia.",
+      "trackTitle": "Archive Note",
+      "artistName": "Locupom Voice"
     },
     {
-      "id": "weekday-2026-06-11-c2-exercise-glass",
+      "id": "weekday-2026-06-12-1906-ar-c1-grammar",
+      "level": "C1",
+      "skill": "grammar",
+      "type": "multiple_choice",
+      "title": "Choose the best option",
+      "instruction": "Choose the option that completes the sentence naturally.",
+      "prompt": "Rewrite with caution: The letters prove everyone was angry.",
+      "options": [
+        "The letters may suggest that some workers were angry.",
+        "The letters prove everything.",
+        "Everyone angry letters prove."
+      ],
+      "answer": "The letters may suggest that some workers were angry.",
+      "explanation": "May suggest avoids overclaiming."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c1-sentence-builder",
+      "level": "C1",
+      "skill": "sentence_builder",
+      "type": "sentence_builder",
+      "title": "Build the sentence",
+      "instruction": "Put the words in a natural order.",
+      "source": "Locupom morning brief",
+      "answer": "This may suggest a change in tone",
+      "translation": "Esto puede sugerir un cambio de tono."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-translation",
       "level": "C2",
-      "type": "style_edit",
-      "title": "Remove the Hiding Place",
-      "instruction": "Rewrite: 'Mistakes were made during the planning process.'",
-      "sampleAnswer": "We underestimated the planning costs and did not explain the delay early enough."
+      "skill": "translation",
+      "type": "translation",
+      "title": "Translate the idea",
+      "instruction": "Translate the sentence into natural Spanish.",
+      "sourceText": "We failed to act on the warnings and need to explain the repair.",
+      "expectedTranslation": "No actuamos frente a las advertencias y necesitamos explicar la reparacion.",
+      "hint": "Name the agent directly; avoid evasive abstract language.",
+      "wordBank": [
+        "actuamos",
+        "advertencias",
+        "necesitamos",
+        "explicar",
+        "reparacion"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-writing",
+      "level": "C2",
+      "skill": "writing",
+      "type": "writing_prompt",
+      "title": "Accountable wording",
+      "instruction": "Rewrite a vague public apology so it names action, responsibility and limits.",
+      "wordRange": [
+        140,
+        190
+      ],
+      "vocabularyHelp": "Useful words: responsibility, failed to, repair, specific, accountable, limitation.",
+      "grammarTip": "Prefer visible subjects and concrete verbs over abstract nouns.",
+      "sampleAnswer": "We failed to act on the inspection warnings sent in March. This delayed the repair and left residents without clear information. We cannot undo that delay, but we can publish the timeline and fund the immediate work.",
+      "vocabularyTargets": [
+        "failed",
+        "responsibility",
+        "repair",
+        "specific",
+        "timeline"
+      ]
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-listening",
+      "level": "C2",
+      "skill": "listening",
+      "type": "cloze_listening",
+      "title": "Public Statement",
+      "instruction": "Listen and complete the missing words.",
+      "phrase": "We failed to act on the warnings and need to explain the repair.",
+      "translation": "No actuamos frente a las advertencias y necesitamos explicar la reparacion.",
+      "trackTitle": "Public Statement",
+      "artistName": "Locupom Voice"
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-grammar",
+      "level": "C2",
+      "skill": "grammar",
+      "type": "multiple_choice",
+      "title": "Choose the best option",
+      "instruction": "Choose the option that completes the sentence naturally.",
+      "prompt": "Which sentence is the least evasive?",
+      "options": [
+        "Mistakes were made during implementation.",
+        "We failed to act on the inspection reports sent in March.",
+        "There was an unfortunate process issue."
+      ],
+      "answer": "We failed to act on the inspection reports sent in March.",
+      "explanation": "The sentence names the subject, action and evidence."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-sentence-builder",
+      "level": "C2",
+      "skill": "sentence_builder",
+      "type": "sentence_builder",
+      "title": "Build the sentence",
+      "instruction": "Put the words in a natural order.",
+      "source": "Locupom morning brief",
+      "answer": "We failed to act on the warnings",
+      "translation": "No actuamos frente a las advertencias."
     }
   ],
   "vocabulary": [
     {
-      "word": "principal",
-      "meaning": "main or most important; also the head of a school in American English",
-      "usageNote": "Do not confuse with principle, which is a rule or belief.",
-      "example": "The principal reason for rewriting the guide was that visitors needed clearer context."
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-vocab-pen",
+      "level": "Pre-A1",
+      "word": "pen",
+      "translation": "lapiz / birome",
+      "meaning": "A small object used for writing.",
+      "usageNote": "Use a pen to write your name.",
+      "example": "This is my blue pen."
     },
     {
-      "word": "principle",
-      "meaning": "a basic rule, standard, or belief that guides behaviour",
-      "usageNote": "Think of principle as an idea; principal often means main.",
-      "example": "The club followed the principle that first drafts should be heard before they are defended."
+      "id": "weekday-2026-06-12-1906-ar-pre-a1-vocab-bag",
+      "level": "Pre-A1",
+      "word": "bag",
+      "translation": "bolso / mochila",
+      "meaning": "Something you carry books or objects in.",
+      "usageNote": "School bag is a common phrase.",
+      "example": "My bag is red."
     },
     {
-      "word": "compliment",
-      "meaning": "a polite expression of praise",
-      "usageNote": "Compliment with i means praise; complement with e means complete or go well with.",
-      "example": "The teacher gave Mara a compliment for inviting neighbours in clear English."
+      "id": "weekday-2026-06-12-1906-ar-a1-vocab-straight",
+      "level": "A1",
+      "word": "straight",
+      "translation": "derecho / recto",
+      "meaning": "In one direction without turning.",
+      "usageNote": "Use it in directions: go straight.",
+      "example": "Go straight for two minutes."
     },
     {
-      "word": "complement",
-      "meaning": "to complete something or combine well with it",
-      "usageNote": "A bilingual poster can complement a spoken invitation.",
-      "example": "The short audio scenes complemented the museum facts by giving visitors a reason to care."
+      "id": "weekday-2026-06-12-1906-ar-a1-vocab-near",
+      "level": "A1",
+      "word": "near",
+      "translation": "cerca de",
+      "meaning": "Close to a place or person.",
+      "usageNote": "Near does not need to after it.",
+      "example": "The library is near the cafe."
     },
     {
-      "word": "stationary",
-      "meaning": "not moving",
-      "usageNote": "Stationary with a means still; stationery with e means paper and office supplies.",
-      "example": "The train remained stationary while Mateo wrote six sentences in his diary."
+      "id": "weekday-2026-06-12-1906-ar-a2-vocab-instead",
+      "level": "A2",
+      "word": "instead",
+      "translation": "en lugar de / en cambio",
+      "meaning": "Used when one thing replaces another.",
+      "usageNote": "It often comes at the end of a sentence.",
+      "example": "It rained, so we went inside instead."
     },
     {
-      "word": "stationery",
-      "meaning": "paper, envelopes, notebooks, and other writing materials",
-      "usageNote": "Use stationery for things you write on or with.",
-      "example": "Emma bought cheap stationery so she could collect new English words every day."
-    },
-    {
-      "word": "elicit",
-      "meaning": "to draw out a response, answer, or reaction",
-      "usageNote": "Often used in teaching, interviews, and research.",
-      "example": "The teacher used pictures to elicit weather vocabulary before the market story."
-    },
-    {
-      "word": "illicit",
-      "meaning": "illegal or not allowed by rules",
-      "usageNote": "Illicit sounds like elicit but means forbidden.",
-      "example": "The article discussed illicit recordings, so the class reviewed the difference carefully."
-    },
-    {
-      "word": "allude",
-      "meaning": "to refer to something indirectly",
-      "usageNote": "Allude takes to: The speaker alluded to a previous mistake.",
-      "example": "The mayor alluded to the warnings at first, but the revised apology named them directly."
-    },
-    {
-      "word": "elude",
-      "meaning": "to escape from or avoid someone or something; also to be hard to understand",
-      "usageNote": "A meaning can elude you when you cannot grasp it.",
-      "example": "The emotional force of the sentence eluded Amira until she replaced the abstract noun with a plain verb."
-    },
-    {
-      "word": "raise",
-      "meaning": "to lift something or increase an amount; also to mention an issue",
-      "usageNote": "Use raise a question, raise prices, raise awareness. Do not confuse with rise, which is usually intransitive.",
-      "example": "Maya raised the issue after collecting evidence from the study room."
-    },
-    {
-      "word": "rise",
-      "meaning": "to go up or increase without a direct object",
-      "usageNote": "Prices rise; someone raises prices.",
-      "example": "Noise levels rose after lunch when students moved the chairs."
-    },
-    {
-      "word": "borrow",
-      "meaning": "to take something from someone for a limited time and return it",
-      "usageNote": "The receiver borrows; the giver lends.",
-      "example": "Julia borrowed her grandfather's radio for the school project."
-    },
-    {
-      "word": "lend",
-      "meaning": "to give something to someone temporarily",
-      "usageNote": "Lend someone something; borrow something from someone.",
-      "example": "Her grandfather lent her the radio because he trusted her with it."
-    },
-    {
-      "word": "remember",
-      "meaning": "to keep or bring something back to mind",
-      "usageNote": "Remember doing something = memory of past action; remember to do something = not forget a future action.",
-      "example": "Mrs Allen remembered hearing the song before her first job interview."
-    },
-    {
-      "word": "remind",
-      "meaning": "to make someone remember something",
-      "usageNote": "Use remind someone of something, or remind someone to do something.",
-      "example": "The song reminded Omar of Sundays at home."
-    },
-    {
-      "word": "avoid",
-      "meaning": "to stay away from something or prevent it from happening",
-      "usageNote": "Avoid is followed by a noun or -ing form, not to + verb.",
-      "example": "Leila avoided overstating what the unfinished map could prove."
-    },
-    {
-      "word": "prevent",
-      "meaning": "to stop something from happening",
-      "usageNote": "Common pattern: prevent someone/something from doing something.",
-      "example": "Better signs could prevent students from using the quiet room for group calls."
-    },
-    {
-      "word": "affect",
-      "meaning": "to influence or change something",
-      "usageNote": "Usually a verb. Do not confuse with effect, usually a noun.",
-      "example": "The translator knew that one word could affect the political tone of the sentence."
-    },
-    {
-      "word": "effect",
-      "meaning": "a result or consequence",
-      "usageNote": "Usually a noun. In formal English, effect can be a verb meaning bring about, but learners should master the noun first.",
-      "example": "The felt pads had an immediate effect on the noise in the study room."
-    },
-    {
-      "word": "beside",
-      "meaning": "next to; at the side of",
-      "usageNote": "Do not confuse with besides, which often means 'in addition'.",
-      "example": "The school is beside the library."
-    },
-    {
-      "word": "besides",
-      "meaning": "in addition to; also",
-      "usageNote": "Use besides when adding another point.",
-      "example": "Besides the reading, we practised three speaking prompts."
-    },
-    {
-      "word": "actually",
-      "meaning": "in fact; really",
-      "usageNote": "A common false friend for Spanish speakers; it does not mean actualmente.",
-      "example": "I thought the word was problem, but it was actually promise."
-    },
-    {
-      "word": "currently",
-      "meaning": "at the present time",
-      "usageNote": "Use currently for actualmente.",
-      "example": "The app is currently serving fresh B1 readings."
-    },
-    {
-      "word": "sensible",
-      "meaning": "practical and reasonable",
-      "usageNote": "It does not usually mean sensitive.",
-      "example": "Choosing beans instead of chicken was a sensible decision."
-    },
-    {
-      "word": "sensitive",
-      "meaning": "easily affected emotionally or able to notice small changes",
-      "usageNote": "Use sensitive for people, topics, data, or subtle perception.",
-      "example": "The C2 speaker was sensitive to the political tone of the statement."
-    },
-    {
-      "word": "evidence",
-      "meaning": "facts or information that support a claim",
-      "usageNote": "Usually uncountable in English: some evidence, not an evidence.",
-      "example": "Ravi had evidence that he arrived early, but it did not prove he needed the seat."
-    },
-    {
-      "word": "proof",
-      "meaning": "information that shows something is definitely true",
-      "usageNote": "Proof is stronger than evidence.",
-      "example": "The letters were evidence of disagreement, not proof that everyone felt the same."
-    },
-    {
+      "id": "weekday-2026-06-12-1906-ar-a2-vocab-delay",
+      "level": "A2",
       "word": "delay",
-      "meaning": "to make something happen later; a period of waiting",
-      "usageNote": "Can be a verb or a noun.",
-      "example": "The council delayed the vote and failed to explain the delay."
+      "translation": "demora / retrasar",
+      "meaning": "A wait or something happening later than planned.",
+      "usageNote": "Delay can be a noun or verb.",
+      "example": "The train had a short delay."
     },
     {
-      "word": "postpone",
-      "meaning": "to arrange for something to happen at a later time",
-      "usageNote": "Often used for meetings, events, votes, and plans.",
-      "example": "They postponed the housing project until the new estimate was ready."
+      "id": "weekday-2026-06-12-1906-ar-b1-vocab-neighbour",
+      "level": "B1",
+      "word": "neighbour",
+      "translation": "vecino / vecina",
+      "meaning": "A person who lives near you.",
+      "usageNote": "British spelling has ghbour; American is neighbor.",
+      "example": "The neighbours helped with the garden."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b1-vocab-repair",
+      "level": "B1",
+      "word": "repair",
+      "translation": "reparacion / reparar",
+      "meaning": "To fix something damaged or broken.",
+      "usageNote": "Repair can be a noun or verb.",
+      "example": "The garden needed a small repair."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-vocab-accurate",
+      "level": "B2",
+      "word": "accurate",
+      "translation": "preciso / correcto",
+      "meaning": "Correct and exact.",
+      "usageNote": "Information can be accurate but still hard to follow.",
+      "example": "The guide was accurate but too dense."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-b2-vocab-context",
+      "level": "B2",
+      "word": "context",
+      "translation": "contexto",
+      "meaning": "The situation or information around something.",
+      "usageNote": "Context helps meaning become clearer.",
+      "example": "Visitors needed clearer context."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c1-vocab-suggest",
+      "level": "C1",
+      "word": "suggest",
+      "translation": "sugerir",
+      "meaning": "To make an idea seem possible without proving it.",
+      "usageNote": "Useful for cautious interpretation.",
+      "example": "The evidence may suggest a change in tone."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c1-vocab-verify",
+      "level": "C1",
+      "word": "verify",
+      "translation": "verificar",
+      "meaning": "To check whether something is true or accurate.",
+      "usageNote": "Verify is stronger than check in academic contexts.",
+      "example": "I would verify the claim with another source."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-vocab-accountable",
+      "level": "C2",
+      "word": "accountable",
+      "translation": "responsable / que rinde cuentas",
+      "meaning": "Expected to explain decisions and accept responsibility.",
+      "usageNote": "Common in public, legal and institutional language.",
+      "example": "The revision made the apology more accountable."
+    },
+    {
+      "id": "weekday-2026-06-12-1906-ar-c2-vocab-evasive",
+      "level": "C2",
+      "word": "evasive",
+      "translation": "evasivo",
+      "meaning": "Avoiding a direct answer or responsibility.",
+      "usageNote": "Use it for wording that hides agency.",
+      "example": "The first apology sounded evasive."
     }
   ]
 }

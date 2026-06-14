@@ -81,6 +81,17 @@ GET /topics/passive_voice
 GET /topics/:id/source
 GET /readings?level=B1
 GET /readings?level=B2&topic=technology
+GET /readings?level=B1&learnerId=device-123
+GET /exercises?level=B1&learnerId=device-123
+GET /exercises?level=B1&skill=translation
+GET /exercises?level=B1&skill=writing
+GET /exercises?level=B1&skill=listening
+GET /exercises?level=B1&skill=grammar
+GET /exercises?level=B1&skill=sentence_builder
+GET /vocabulary?level=B1
+GET /progress?learnerId=device-123
+POST /progress/completed
+DELETE /progress/completed?learnerId=device-123&kind=reading&itemId=b1-music-standard-long-32
 GET /roadmap?level=C1
 GET /search?q=reported
 ```
@@ -126,6 +137,84 @@ Response shape:
   }
 }
 ```
+
+## Morning Brief Automation
+
+The daily content script now refreshes the API-backed practice catalog used by
+the iOS app:
+
+```bash
+cd LocupomTopicsAPI
+npm run build:brief
+```
+
+It writes `data/morning-brief-content.json` with readings, speaking prompts,
+skill-specific exercises and vocabulary. The app requests exercises by `level`
+and `skill`, then falls back to local iOS decks only when the API is unavailable
+or empty.
+
+Practice exercise skills:
+
+- `translation`
+- `writing`
+- `listening`
+- `grammar`
+- `sentence_builder`
+
+Vocabulary items are also levelled and available through `GET /vocabulary`.
+
+## Completion Progress
+
+Use `learnerId` to keep completed content out of the app feed. The API stores
+completed items as `kind:itemId`, so the same flow works for `reading`,
+`exercise`, `speaking`, `vocabulary`, and `topic`.
+
+Mark an item as completed:
+
+```bash
+curl -X POST https://locupom-topics-api.vercel.app/progress/completed \
+  -H "Content-Type: application/json" \
+  -d '{
+    "learnerId": "device-123",
+    "kind": "reading",
+    "itemId": "b1-music-standard-long-32",
+    "level": "B1",
+    "title": "Music: The Notice on the Gate"
+  }'
+```
+
+List completed items:
+
+```txt
+GET /progress?learnerId=device-123
+```
+
+Fetch content without completed items:
+
+```txt
+GET /readings?level=B1&learnerId=device-123
+GET /exercises?level=B1&learnerId=device-123
+GET /speaking?level=B1&learnerId=device-123
+GET /topics?level=B1&learnerId=device-123
+GET /morning-brief?learnerId=device-123
+```
+
+You can also keep progress locally in the app and pass IDs statelessly:
+
+```txt
+GET /exercises?level=B1&completed=exercise:weekday-2026-06-12-1906-ar-b1-exercise-gate
+```
+
+Undo a completion:
+
+```txt
+DELETE /progress/completed?learnerId=device-123&kind=reading&itemId=b1-music-standard-long-32
+```
+
+Progress is file-backed. Set `LOCUPOM_PROGRESS_FILE` for a durable JSON path in
+local or self-hosted runs. Without it, the API writes to the system temp
+directory, which can reset on serverless hosts; for permanent multi-device
+sync, swap this storage layer for KV or a database.
 
 ## Topic Shape
 

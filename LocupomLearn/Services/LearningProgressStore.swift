@@ -102,6 +102,38 @@ enum LearningLevel: String, CaseIterable, Identifiable, Codable {
         case .advanced: .intermediate
         }
     }
+
+    static func fromCEFRCode(_ code: String) -> LearningLevel {
+        switch LearningLevel.normalizedCEFRCode(code) {
+        case "Pre-A1", "A1", "A2":
+            return .beginner
+        case "B1", "B2":
+            return .intermediate
+        default:
+            return .advanced
+        }
+    }
+
+    static func normalizedCEFRCode(_ code: String) -> String {
+        switch code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() {
+        case "PRE-A1", "PRE A1", "PREA1":
+            return "Pre-A1"
+        case "A1":
+            return "A1"
+        case "A2":
+            return "A2"
+        case "B1":
+            return "B1"
+        case "B2":
+            return "B2"
+        case "C1":
+            return "C1"
+        case "C2":
+            return "C2"
+        default:
+            return "A1"
+        }
+    }
 }
 
 enum LearningFocus: String, CaseIterable, Identifiable, Codable {
@@ -123,6 +155,7 @@ enum LearningFocus: String, CaseIterable, Identifiable, Codable {
 struct LearningProfile: Codable, Equatable {
     var onboardingCompleted = false
     var level: LearningLevel = .beginner
+    var cefrLevel: String?
     var focus: LearningFocus = .songs
     var dailyGoalMinutes = 15
     var streak = 0
@@ -235,6 +268,8 @@ final class LearningProgressStore: ObservableObject {
     @Published private(set) var moduleStats: [LearningModuleStat] = []
     @Published private(set) var cachedSentences: [CachedSentence] = []
     @Published private(set) var errorPatterns: [LearningErrorPattern] = []
+    @Published private(set) var apiLearnerId = "ios-\(UUID().uuidString)"
+    @Published private(set) var completedRemoteContentKeys = Set<String>()
 
     private let fileManager: FileManager
     private let decoder: JSONDecoder
@@ -252,6 +287,7 @@ final class LearningProgressStore: ObservableObject {
 
     func completeOnboarding(level: LearningLevel, focus: LearningFocus, dailyGoalMinutes: Int) {
         profile.level = level
+        profile.cefrLevel = level.shortCode
         profile.focus = focus
         profile.dailyGoalMinutes = dailyGoalMinutes
         profile.onboardingCompleted = true
@@ -260,7 +296,19 @@ final class LearningProgressStore: ObservableObject {
 
     func updateLevel(_ level: LearningLevel) {
         profile.level = level
+        profile.cefrLevel = level.shortCode
         save()
+    }
+
+    func updateCEFRLevel(_ levelCode: String) {
+        let normalizedCode = LearningLevel.normalizedCEFRCode(levelCode)
+        profile.cefrLevel = normalizedCode
+        profile.level = LearningLevel.fromCEFRCode(normalizedCode)
+        save()
+    }
+
+    var cefrLevelCode: String {
+        LearningLevel.normalizedCEFRCode(profile.cefrLevel ?? profile.level.shortCode)
     }
 
     func updateFocus(_ focus: LearningFocus) {
@@ -409,6 +457,24 @@ final class LearningProgressStore: ObservableObject {
         }
     }
 
+    func isRemoteContentCompleted(kind: String, itemId: String?) -> Bool {
+        guard let itemId else { return false }
+        return completedRemoteContentKeys.contains(remoteContentKey(kind: kind, itemId: itemId))
+    }
+
+    @discardableResult
+    func markRemoteContentCompleted(kind: String, itemId: String?) -> Bool {
+        guard let itemId, !itemId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return false
+        }
+
+        let inserted = completedRemoteContentKeys.insert(remoteContentKey(kind: kind, itemId: itemId)).inserted
+        if inserted {
+            save()
+        }
+        return inserted
+    }
+
     func topErrors(limit: Int = 6) -> [LearningErrorPattern] {
         Array(errorPatterns.sorted(by: errorSort).prefix(limit))
     }
@@ -539,12 +605,17 @@ final class LearningProgressStore: ObservableObject {
             moduleStats = state.moduleStats
             cachedSentences = state.cachedSentences
             errorPatterns = state.errorPatterns
+            apiLearnerId = state.apiLearnerId
+            completedRemoteContentKeys = Set(state.completedRemoteContentKeys)
         } catch {
             profile = LearningProfile()
             savedWords = []
             moduleStats = []
             cachedSentences = []
             errorPatterns = []
+            apiLearnerId = "ios-\(UUID().uuidString)"
+            completedRemoteContentKeys = []
+            save()
         }
     }
 
@@ -557,7 +628,9 @@ final class LearningProgressStore: ObservableObject {
                 savedWords: savedWords,
                 moduleStats: moduleStats,
                 cachedSentences: cachedSentences,
-                errorPatterns: errorPatterns
+                errorPatterns: errorPatterns,
+                apiLearnerId: apiLearnerId,
+                completedRemoteContentKeys: Array(completedRemoteContentKeys).sorted()
             )
             let data = try encoder.encode(state)
             try data.write(to: progressURL, options: [.atomic])
@@ -582,6 +655,10 @@ final class LearningProgressStore: ObservableObject {
 
         return firstScore > secondScore
     }
+
+    private func remoteContentKey(kind: String, itemId: String) -> String {
+        "\(kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()):\(itemId.trimmingCharacters(in: .whitespacesAndNewlines))"
+    }
 }
 
 private struct LearningProgressState: Codable {
@@ -590,19 +667,25 @@ private struct LearningProgressState: Codable {
     var moduleStats: [LearningModuleStat]
     var cachedSentences: [CachedSentence]
     var errorPatterns: [LearningErrorPattern]
+    var apiLearnerId: String
+    var completedRemoteContentKeys: [String]
 
     init(
         profile: LearningProfile,
         savedWords: [SavedVocabularyItem],
         moduleStats: [LearningModuleStat],
         cachedSentences: [CachedSentence],
-        errorPatterns: [LearningErrorPattern] = []
+        errorPatterns: [LearningErrorPattern] = [],
+        apiLearnerId: String = "ios-\(UUID().uuidString)",
+        completedRemoteContentKeys: [String] = []
     ) {
         self.profile = profile
         self.savedWords = savedWords
         self.moduleStats = moduleStats
         self.cachedSentences = cachedSentences
         self.errorPatterns = errorPatterns
+        self.apiLearnerId = apiLearnerId
+        self.completedRemoteContentKeys = completedRemoteContentKeys
     }
 
     init(from decoder: Decoder) throws {
@@ -612,6 +695,8 @@ private struct LearningProgressState: Codable {
         moduleStats = try container.decode([LearningModuleStat].self, forKey: .moduleStats)
         cachedSentences = try container.decode([CachedSentence].self, forKey: .cachedSentences)
         errorPatterns = try container.decodeIfPresent([LearningErrorPattern].self, forKey: .errorPatterns) ?? []
+        apiLearnerId = try container.decodeIfPresent(String.self, forKey: .apiLearnerId) ?? "ios-\(UUID().uuidString)"
+        completedRemoteContentKeys = try container.decodeIfPresent([String].self, forKey: .completedRemoteContentKeys) ?? []
     }
 }
 

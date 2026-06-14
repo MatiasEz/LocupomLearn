@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "build:data": "python3 scripts/build_pdf_curriculum.py",
+    "build:brief": "node scripts/replace_morning_readings_long.js",
     "start": "node server.js"
   },
   "engines": {
